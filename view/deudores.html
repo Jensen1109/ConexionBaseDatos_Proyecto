@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/css/deudores.css">
+    <link rel="stylesheet" href="/css/deudores-mediaqueries.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <title>Deudores</title>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <!-- Checkbox oculto que controla el menú hamburguesa -->
+        <input type="checkbox" id="hamburger-toggle" class="hamburger-checkbox">
+
+        <!-- Overlay oscuro cuando el menú está abierto -->
+        <label for="hamburger-toggle" class="hamburger-overlay"></label>
+
+        <!-- Menú de navegación móvil -->
+        <nav class="hamburger-nav">
+            <label for="hamburger-toggle" class="hamburger-close">
+                <i class="fa-solid fa-xmark"></i>
+            </label>
+            <h2 class="hamburger-titulo">Tienda Don Pedro</h2>
+            <a href="historialventa.html" class="hamburger-link">Historial</a>
+            <a href="registrarventa.html" class="hamburger-link">Registrar Venta</a>
+            <a href="deudores.html" class="hamburger-link hamburger-link--activo">Deudores</a>
+            <a href="editarusuario.html" class="hamburger-link">Usuarios</a>
+        </nav>
+
+        <div class="contenedor__sidebar">
+            <a href="productos.html" class="sidebar__back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h2 class="sidebar__titulo-principal">Tienda Don Pedro</h2>
+            <a href="historialventa.html" class="sidebar__link">Historial</a>
+            <a href="registrarventa.html" class="sidebar__link">Registrar Venta</a>
+            <a href="deudores.html" class="sidebar__link sidebar__link--activo">Deudores</a>
+            <a href="editarusuario.html" class="sidebar__link">Usuarios</a>
+
+            <!-- Botón hamburguesa (solo visible en móvil) -->
+            <label for="hamburger-toggle" class="hamburger-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="deudores">
+            <h1 class="deudores__titulo">Deudores</h1>
+
+            <table class="contenedor-tabla">
+                <thead class="deudores__tabla-head">
+                    <tr>
+                        <th class="deudores__columna">Nombre</th>
+                        <th class="deudores__columna">Monto</th>
+                        <th class="deudores__columna">Fecha</th>
+                        <th class="deudores__columna">Abono</th>
+                        <th class="deudores__columna">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody class="deudores__tabla-body">
+                    <tr class="deudores__item">
+                        <td class="deudores__valor" data-label="Nombre">Juan Perez</td>
+                        <td class="deudores__valor deudores__monto" data-label="Monto">$150,000</td>
+                        <td class="deudores__valor" data-label="Fecha">12/03/2024</td>
+                        <td class="deudores__valor deudores__abono-celda" data-label="Abono">
+                            <input type="number" class="deudores__input-abono" placeholder="$0" min="0">
+                            <button class="deudores__btn-abonar">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </td>
+                        <td class="deudores__valor deudores__acciones">
+                            <button class="deudores__btn-eliminar">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr class="deudores__item">
+                        <td class="deudores__valor" data-label="Nombre">Maria Rodriguez</td>
+                        <td class="deudores__valor deudores__monto" data-label="Monto">$200,000</td>
+                        <td class="deudores__valor" data-label="Fecha">15/03/2024</td>
+                        <td class="deudores__valor deudores__abono-celda" data-label="Abono">
+                            <input type="number" class="deudores__input-abono" placeholder="$0" min="0">
+                            <button class="deudores__btn-abonar">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </td>
+                        <td class="deudores__valor deudores__acciones">
+                            <button class="deudores__btn-eliminar">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr class="deudores__item">
+                        <td class="deudores__valor" data-label="Nombre">Luis Gomez</td>
+                        <td class="deudores__valor deudores__monto" data-label="Monto">$50,000</td>
+                        <td class="deudores__valor" data-label="Fecha">18/03/2024</td>
+                        <td class="deudores__valor deudores__abono-celda" data-label="Abono">
+                            <input type="number" class="deudores__input-abono" placeholder="$0" min="0">
+                            <button class="deudores__btn-abonar">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </td>
+                        <td class="deudores__valor deudores__acciones">
+                            <button class="deudores__btn-eliminar">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr class="deudores__item">
+                        <td class="deudores__valor" data-label="Nombre">Carlos Martinez</td>
+                        <td class="deudores__valor deudores__monto" data-label="Monto">$75,000</td>
+                        <td class="deudores__valor" data-label="Fecha">20/03/2024</td>
+                        <td class="deudores__valor deudores__abono-celda" data-label="Abono">
+                            <input type="number" class="deudores__input-abono" placeholder="$0" min="0">
+                            <button class="deudores__btn-abonar">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </td>
+                        <td class="deudores__valor deudores__acciones">
+                            <button class="deudores__btn-eliminar">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr class="deudores__item">
+                        <td class="deudores__valor" data-label="Nombre">Ana López</td>
+                        <td class="deudores__valor deudores__monto" data-label="Monto">$120,000</td>
+                        <td class="deudores__valor" data-label="Fecha">22/03/2024</td>
+                        <td class="deudores__valor deudores__abono-celda" data-label="Abono">
+                            <input type="number" class="deudores__input-abono" placeholder="$0" min="0">
+                            <button class="deudores__btn-abonar">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </td>
+                        <td class="deudores__valor deudores__acciones">
+                            <button class="deudores__btn-eliminar">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+            <div class="deudores__footer">
+                <button class="deudores__btn-agregar">Agregar</button>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

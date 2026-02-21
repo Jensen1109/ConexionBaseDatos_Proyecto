@@ -1,0 +1,245 @@
+/* ==================== RESPONSIVE - PÁGINA DE INICIO (INDEX) ==================== */
+/* Este archivo contiene los media queries para la página de inicio */
+/* Los estilos adaptan los botones y logo a diferentes tamaños de pantalla */
+
+/* Breakpoints utilizados:
+   - Desktop Grande: > 1440px (pantallas muy grandes)
+   - Laptop L: <= 1440px (laptops grandes)
+   - Laptop: <= 1024px (laptops estándar)
+   - Tablet: <= 768px (tablets)
+   - Mobile L: <= 425px (móviles grandes como iPhone Plus)
+   - Mobile M: <= 375px (móviles medianos como iPhone X)
+   - Mobile S: <= 320px (móviles pequeños como iPhone 5)
+*/
+
+/* ==================== DESKTOP GRANDE (> 1440px) ==================== */
+/* Para monitores grandes y pantallas 2K/4K */
+@media screen and (min-width: 1441px) {
+
+    /* Botones de registro e inicio de sesión más grandes */
+    .contenedor-enlaces__registro,
+    .boton {
+        width: 700px;
+        /* Ancho amplio */
+        height: 85px;
+        /* Altura grande */
+        font-size: 24px;
+        /* Texto grande para mejor legibilidad */
+    }
+
+    /* Logo más grande para pantallas amplias */
+    .main__logo {
+        width: 400px;
+        /* Ancho del logo */
+        height: 170px;
+        /* Altura del logo */
+    }
+}
+
+/* ==================== LAPTOP L (max-width: 1440px) ==================== */
+/* Para laptops con pantallas de alta resolución */
+@media screen and (max-width: 1440px) {
+
+    /* Botones de tamaño estándar */
+    .contenedor-enlaces__registro,
+    .boton {
+        width: 600px;
+        /* Ancho ligeramente menor */
+        height: 78px;
+        /* Altura ligeramente menor */
+        font-size: 22px;
+        /* Tamaño de fuente reducido */
+    }
+}
+
+/* ==================== LAPTOP (max-width: 1024px) ==================== */
+/* Para laptops estándar y tablets en horizontal */
+@media screen and (max-width: 1024px) {
+
+    /* Botones más compactos */
+    .contenedor-enlaces__registro,
+    .boton {
+        width: 500px;
+        /* Ancho reducido */
+        height: 70px;
+        /* Altura reducida */
+        font-size: 20px;
+        /* Fuente más pequeña */
+    }
+
+    /* Logo más pequeño */
+    .main__logo {
+        width: 320px;
+        /* Ancho reducido */
+        height: 130px;
+        /* Altura reducida */
+    }
+
+    /* Menos espacio entre los enlaces */
+    .contenedor-enlaces {
+        gap: 60px;
+        /* Espacio entre elementos */
+    }
+
+    /* Menos espacio entre los botones */
+    .contenedor-botones {
+        gap: 60px;
+        /* Espacio entre botones */
+    }
+}
+
+/* ==================== TABLET (max-width: 768px) ==================== */
+/* Para tablets en vertical e iPads */
+@media screen and (max-width: 768px) {
+
+    /* Botones adaptados a tablet */
+    .contenedor-enlaces__registro,
+    .boton {
+        width: 400px;
+        /* Ancho para tablet */
+        height: 65px;
+        /* Altura reducida */
+        font-size: 18px;
+        /* Fuente más pequeña */
+    }
+
+    /* Logo más pequeño */
+    .main__logo {
+        width: 280px;
+        /* Ancho para tablet */
+        height: 120px;
+        /* Altura para tablet */
+    }
+
+    /* Menos espacio entre elementos */
+    .contenedor-enlaces {
+        gap: 50px;
+        /* Espacio reducido */
+    }
+
+    /* Menos espacio entre botones */
+    .contenedor-botones {
+        gap: 50px;
+        /* Espacio reducido */
+    }
+}
+
+/* ==================== MOBILE L (max-width: 425px) ==================== */
+/* Para móviles grandes como iPhone Plus, Samsung Galaxy grandes */
+@media screen and (max-width: 425px) {
+
+    /* Botones de ancho fluido (porcentaje) */
+    .contenedor-enlaces__registro,
+    .boton {
+        width: 90%;
+        /* 90% del ancho del contenedor */
+        max-width: 380px;
+        /* Máximo de 380px */
+        height: 60px;
+        /* Altura reducida */
+        font-size: 16px;
+        /* Fuente más pequeña */
+    }
+
+    /* Logo adaptado a móvil */
+    .main__logo {
+        width: 250px;
+        /* Ancho para móvil */
+        height: 100px;
+        /* Altura para móvil */
+    }
+
+    /* Contenedor de enlaces ocupa todo el ancho */
+    .contenedor-enlaces {
+        gap: 40px;
+        /* Menos espacio */
+        width: 100%;
+        /* Ancho completo */
+        padding: 0 15px;
+        /* Padding lateral */
+    }
+
+    /* Menos espacio entre botones */
+    .contenedor-botones {
+        gap: 40px;
+        /* Espacio reducido */
+    }
+}
+
+/* ==================== MOBILE M (max-width: 375px) ==================== */
+/* Para móviles medianos como iPhone X, iPhone 11/12/13 */
+@media screen and (max-width: 375px) {
+
+    /* Botones aún más compactos */
+    .contenedor-enlaces__registro,
+    .boton {
+        width: 90%;
+        /* 90% del ancho */
+        max-width: 340px;
+        /* Máximo más pequeño */
+        height: 55px;
+        /* Altura reducida */
+        font-size: 15px;
+        /* Fuente más pequeña */
+    }
+
+    /* Logo más pequeño */
+    .main__logo {
+        width: 220px;
+        /* Ancho reducido */
+        height: 90px;
+        /* Altura reducida */
+    }
+
+    /* Menos espacio entre elementos */
+    .contenedor-enlaces {
+        gap: 35px;
+        /* Espacio mínimo */
+    }
+
+    /* Menos espacio entre botones */
+    .contenedor-botones {
+        gap: 35px;
+        /* Espacio mínimo */
+    }
+}
+
+/* ==================== MOBILE S (max-width: 320px) ==================== */
+/* Para móviles muy pequeños como iPhone 5/SE primera generación */
+@media screen and (max-width: 320px) {
+
+    /* Botones muy compactos */
+    .contenedor-enlaces__registro,
+    .boton {
+        width: 95%;
+        /* Casi todo el ancho */
+        max-width: 290px;
+        /* Máximo muy pequeño */
+        height: 50px;
+        /* Altura mínima */
+        font-size: 14px;
+        /* Fuente mínima pero legible */
+        border-radius: 12px;
+        /* Bordes más redondeados */
+    }
+
+    /* Logo muy pequeño */
+    .main__logo {
+        width: 180px;
+        /* Ancho mínimo */
+        height: 75px;
+        /* Altura mínima */
+    }
+
+    /* Espacio mínimo entre elementos */
+    .contenedor-enlaces {
+        gap: 30px;
+        /* Espacio mínimo */
+    }
+
+    /* Espacio mínimo entre botones */
+    .contenedor-botones {
+        gap: 30px;
+        /* Espacio mínimo */
+    }
+}

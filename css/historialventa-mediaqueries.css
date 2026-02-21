@@ -1,0 +1,422 @@
+/* ==================== MEDIA QUERIES - HISTORIAL DE VENTAS ==================== */
+/* Este archivo contiene los estilos responsive para la página de historial de ventas */
+/* Las tablas se transforman en tarjetas (cards) en pantallas pequeñas */
+
+/* ========== TABLET (menos de 991px) ========== */
+/* Se aplica cuando el ancho de pantalla es menor o igual a 991 pixeles */
+@media screen and (max-width: 991px) {
+
+    /* Cambia el body de fila a columna para apilar elementos verticalmente */
+    body {
+        flex-direction: column;
+        /* Sidebar arriba, contenido abajo */
+    }
+
+    /* El sidebar se convierte en barra horizontal */
+    .sidebar {
+        width: 100%;
+        /* Ocupa todo el ancho */
+        min-height: auto;
+        /* Altura según contenido */
+        padding: 10px 0;
+        /* Espaciado vertical */
+    }
+
+    /* Los elementos del sidebar se muestran en fila */
+    .contenedor__sidebar {
+        flex-direction: row;
+        /* Elementos en horizontal */
+        flex-wrap: wrap;
+        /* Pueden saltar de línea */
+        align-items: center;
+        /* Centrado vertical */
+        padding: 0 15px;
+        /* Espaciado horizontal */
+        gap: 5px;
+        /* Espacio entre elementos */
+    }
+
+    /* Título más pequeño para tablet */
+    .sidebar__titulo-principal {
+        font-size: 1.2rem;
+        /* Fuente reducida */
+        padding: 10px;
+        /* Espaciado interno */
+        margin-bottom: 0;
+        /* Sin margen inferior */
+    }
+
+    /* Botón de retroceso más compacto */
+    .sidebar__back {
+        padding: 10px;
+        /* Espaciado uniforme */
+    }
+
+    /* Enlaces del sidebar compactos */
+    .sidebar__link {
+        padding: 10px 15px;
+        /* Espaciado reducido */
+    }
+
+    /* Área principal con menos espaciado */
+    main {
+        padding: 20px;
+        /* Espaciado de 20px */
+    }
+
+    /* El contenedor de historial ocupa todo el ancho */
+    .historial-venta {
+        width: 100%;
+        /* Ancho completo */
+        max-width: 100%;
+        /* Sin límite */
+        height: auto;
+        /* Altura automática */
+        min-height: auto;
+        /* Sin mínimo */
+        padding: 20px;
+        /* Espaciado interno */
+    }
+}
+
+/* ========== CELULAR (menos de 768px) ========== */
+/* Se aplica cuando el ancho es menor a 768px - aquí las tablas se convierten en cards */
+@media screen and (max-width: 768px) {
+
+    /* Sidebar más compacto */
+    .sidebar {
+        padding: 8px 0;
+        /* Menos espaciado */
+    }
+
+    /* Sidebar con scroll horizontal */
+    .contenedor__sidebar {
+        flex-direction: row;
+        /* Mantiene fila */
+        flex-wrap: nowrap;
+        /* No salta de línea */
+        align-items: center;
+        /* Centrado vertical */
+        justify-content: flex-start;
+        /* Alineado al inicio */
+        padding: 0 10px;
+        /* Espaciado horizontal */
+        gap: 0;
+        /* Sin espacio entre elementos */
+        overflow-x: auto;
+        /* Scroll horizontal si es necesario */
+    }
+
+    /* Botón de retroceso en móvil */
+    .sidebar__back {
+        padding: 8px 10px;
+        /* Espaciado compacto */
+        font-size: 1rem;
+        /* Fuente estándar */
+        flex-shrink: 0;
+        /* No se encoge */
+    }
+
+    /* Título en móvil - en una sola línea */
+    .sidebar__titulo-principal {
+        font-size: 1rem;
+        /* Fuente reducida */
+        padding: 8px 10px;
+        /* Espaciado compacto */
+        margin-bottom: 0;
+        /* Sin margen */
+        flex-shrink: 0;
+        /* No se encoge */
+        white-space: nowrap;
+        /* No salta de línea */
+    }
+
+    /* Oculta el salto de línea del título */
+    .sidebar__titulo-principal br {
+        display: none;
+        /* El <br> no se renderiza */
+    }
+
+    /* Enlaces del sidebar en móvil */
+    .sidebar__link {
+        padding: 8px 12px;
+        /* Espaciado compacto */
+        font-size: 0.9rem;
+        /* Fuente ligeramente menor */
+        flex-shrink: 0;
+        /* No se encoge */
+        white-space: nowrap;
+        /* Texto en una línea */
+    }
+
+    /* Área principal ajustada */
+    main {
+        padding: 15px;
+        /* Menos espaciado */
+    }
+
+    /* Contenedor de historial adaptado */
+    .historial-venta {
+        width: 100%;
+        /* Ancho completo */
+        padding: 15px;
+        /* Espaciado reducido */
+        gap: 15px;
+        /* Espacio entre elementos */
+    }
+
+    /* Barra de búsqueda más compacta */
+    .historial-venta__busqueda {
+        padding: 10px 12px;
+        /* Espaciado reducido */
+    }
+
+    /* Input de búsqueda más pequeño */
+    .historial-venta__input-busqueda {
+        font-size: 14px;
+        /* Fuente reducida */
+    }
+
+    /* ===== TRANSFORMACIÓN DE TABLA A CARDS ===== */
+
+    /* El contenedor de la tabla ahora muestra cards */
+    .contenedor-tabla {
+        overflow: visible;
+        /* Permite que las cards se vean completas */
+        max-height: none;
+        /* Sin límite de altura */
+        border: none;
+        /* Elimina el borde de la tabla */
+    }
+
+    /* Oculta el encabezado de la tabla (thead) */
+    .historial-venta__tabla-head {
+        display: none;
+        /* Los encabezados no se muestran en modo card */
+    }
+
+    /* El tbody se convierte en contenedor de cards */
+    .historial-venta__tabla-body {
+        display: flex;
+        /* Flexbox para las cards */
+        flex-direction: column;
+        /* Cards apiladas verticalmente */
+        gap: 12px;
+        /* Espacio de 12px entre cada card */
+    }
+
+    /* Cada fila (tr) se convierte en una card */
+    .historial-venta__item {
+        display: grid !important;
+        /* Fuerza grid layout */
+        grid-template-columns: 1fr 1fr;
+        /* 2 columnas iguales */
+        gap: 10px;
+        /* Espacio entre elementos */
+        padding: 15px;
+        /* Espaciado interno de la card */
+        border: 1px solid #eee;
+        /* Borde sutil */
+        border-radius: 12px;
+        /* Esquinas redondeadas */
+        background-color: #fff;
+        /* Fondo blanco */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        /* Sombra suave */
+    }
+
+    /* Cada celda (td) muestra su etiqueta encima del valor */
+    .historial-venta__valor {
+        display: flex;
+        /* Flexbox para organizar label y valor */
+        flex-direction: column;
+        /* Label arriba, valor abajo */
+        align-items: flex-start;
+        /* Alineado a la izquierda */
+        padding: 5px 0;
+        /* Espaciado vertical */
+        text-align: left;
+        /* Texto alineado a la izquierda */
+    }
+
+    /* Genera la etiqueta (label) usando el atributo data-label */
+    .historial-venta__valor::before {
+        content: attr(data-label);
+        /* Toma el valor del atributo data-label del HTML */
+        font-weight: 600;
+        /* Texto en negrita */
+        font-size: 0.75rem;
+        /* Fuente pequeña */
+        color: #888;
+        /* Color gris para la etiqueta */
+        margin-bottom: 4px;
+        /* Espacio entre label y valor */
+        text-transform: uppercase;
+        /* Texto en mayúsculas */
+    }
+
+    /* ===== ESTILOS ESPECIALES PARA LOS ESTADOS ===== */
+
+    /* Los estados (Completado/Pendiente) ocupan toda la fila */
+    .historial-venta__estado--completado,
+    .historial-venta__estado--pendiente {
+        grid-column: 1 / -1;
+        /* Ocupa desde la primera hasta la última columna */
+        text-align: center;
+        /* Texto centrado */
+        padding: 8px;
+        /* Espaciado interno */
+        border-radius: 6px;
+        /* Esquinas redondeadas */
+        margin-top: 5px;
+        /* Margen superior */
+    }
+
+    /* Estado completado con fondo verde claro */
+    .historial-venta__estado--completado {
+        background-color: rgba(39, 174, 96, 0.1);
+        /* Verde semi-transparente */
+    }
+
+    /* Estado pendiente con fondo naranja claro */
+    .historial-venta__estado--pendiente {
+        background-color: rgba(230, 126, 34, 0.1);
+        /* Naranja semi-transparente */
+    }
+}
+
+/* ========== CELULAR PEQUEÑO (menos de 425px) ========== */
+/* Para móviles pequeños como iPhone SE, Galaxy S pequeños */
+@media screen and (max-width: 425px) {
+
+    /* Sidebar con envoltura de línea */
+    .contenedor__sidebar {
+        flex-wrap: wrap;
+        /* Permite salto de línea */
+        justify-content: center;
+        /* Centra los elementos */
+        gap: 5px;
+        /* Pequeño espacio entre elementos */
+    }
+
+    /* Botón de retroceso al inicio */
+    .sidebar__back {
+        order: -1;
+        /* Lo posiciona primero visualmente */
+        width: auto;
+        /* Ancho según contenido */
+    }
+
+    /* Título al inicio y expandido */
+    .sidebar__titulo-principal {
+        order: -1;
+        /* Después del botón back */
+        flex-grow: 1;
+        /* Ocupa espacio disponible */
+        text-align: left;
+        /* Alineado a la izquierda */
+    }
+
+    /* Enlaces muy compactos */
+    .sidebar__link {
+        padding: 6px 10px;
+        /* Espaciado mínimo */
+        font-size: 0.85rem;
+        /* Fuente pequeña */
+    }
+
+    /* Área principal con espaciado mínimo */
+    main {
+        padding: 10px;
+        /* Espaciado reducido */
+    }
+
+    /* Historial más compacto */
+    .historial-venta {
+        padding: 12px;
+        /* Espaciado reducido */
+        border-radius: 12px;
+        /* Bordes redondeados */
+        gap: 12px;
+        /* Menos espacio entre elementos */
+    }
+
+    /* Búsqueda más compacta */
+    .historial-venta__busqueda {
+        padding: 8px 10px;
+        /* Espaciado reducido */
+    }
+
+    /* Input de búsqueda más pequeño */
+    .historial-venta__input-busqueda {
+        font-size: 13px;
+        /* Fuente más pequeña */
+    }
+
+    /* Cards más compactas */
+    .historial-venta__item {
+        padding: 12px;
+        /* Menos espaciado interno */
+        gap: 8px;
+        /* Menos espacio entre elementos */
+    }
+
+    /* Valores más pequeños */
+    .historial-venta__valor {
+        font-size: 0.9rem;
+        /* Fuente reducida */
+    }
+}
+
+/* ========== CELULAR MUY PEQUEÑO (menos de 375px) ========== */
+/* Para dispositivos muy pequeños como iPhone 5/SE primera generación */
+@media screen and (max-width: 375px) {
+
+    /* Sidebar con espaciado mínimo */
+    .contenedor__sidebar {
+        padding: 0 8px;
+        /* Espaciado horizontal mínimo */
+    }
+
+    /* Título muy compacto */
+    .sidebar__titulo-principal {
+        font-size: 0.9rem;
+        /* Fuente muy pequeña */
+        padding: 6px 8px;
+        /* Espaciado mínimo */
+    }
+
+    /* Enlaces muy pequeños */
+    .sidebar__link {
+        padding: 5px 8px;
+        /* Espaciado mínimo */
+        font-size: 0.8rem;
+        /* Fuente mínima pero legible */
+    }
+
+    /* Área principal muy compacta */
+    main {
+        padding: 8px;
+        /* Espaciado mínimo */
+    }
+
+    /* Historial muy compacto */
+    .historial-venta {
+        padding: 10px 8px;
+        /* Espaciado mínimo */
+    }
+
+    /* Cards en una sola columna */
+    .historial-venta__item {
+        grid-template-columns: 1fr;
+        /* Solo 1 columna en vez de 2 */
+        padding: 10px;
+        /* Espaciado mínimo */
+    }
+
+    /* Valores muy pequeños */
+    .historial-venta__valor {
+        font-size: 0.85rem;
+        /* Fuente mínima */
+    }
+}

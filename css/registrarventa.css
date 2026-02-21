@@ -1,0 +1,561 @@
+/* ==================== ESTILOS PARA LA PÁGINA DE REGISTRAR VENTA ==================== */
+/* Este archivo contiene los estilos para el formulario de registro de ventas */
+/* Incluye layout de 2 columnas, tabla de productos y resumen de venta */
+
+/* Importa las variables CSS personalizadas desde el archivo de propiedades */
+@import url(custom/custompropertiers.css);
+/* Importa estilos compartidos desde registroProducto */
+@import url(/css/registroProducto.css);
+
+/* ==================== RESET BÁSICO ==================== */
+/* Elimina los estilos por defecto del navegador para consistencia */
+* {
+    margin: 0;
+    /* Elimina márgenes por defecto */
+    padding: 0;
+    /* Elimina padding por defecto */
+    box-sizing: border-box;
+    /* El padding y border se incluyen en el ancho total */
+}
+
+/* ==================== ESTILOS DEL BODY ==================== */
+/* Configura el contenedor principal con flexbox */
+body {
+    display: flex;
+    /* Activa flexbox para layout de 2 columnas */
+    min-height: 100vh;
+    /* Altura mínima igual a la ventana del navegador */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Tipografía del sistema */
+    background-color: #f5f5f5;
+    /* Fondo gris claro */
+}
+
+/* ==================== SIDEBAR - BARRA LATERAL ==================== */
+/* Menú de navegación lateral izquierdo */
+.sidebar {
+    width: 180px;
+    /* Ancho fijo del sidebar */
+    background-color: #2C3E50;
+    /* Color azul oscuro de fondo */
+    min-height: 100vh;
+    /* Altura completa de la ventana */
+    padding: 20px 0;
+    /* Espaciado vertical interno */
+}
+
+/* Contenedor interno del sidebar - organiza los elementos en columna */
+.contenedor__sidebar {
+    display: flex;
+    /* Activa flexbox */
+    flex-direction: column;
+    /* Los elementos se apilan verticalmente */
+}
+
+/* Título principal del sidebar "Tienda Don Pedro" */
+.sidebar__titulo-principal {
+    color: white;
+    /* Texto blanco */
+    font-size: 1.5rem;
+    /* Tamaño de fuente grande */
+    padding: 20px;
+    /* Espaciado interno */
+    margin-bottom: 20px;
+    /* Espacio debajo del título */
+    line-height: 1.3;
+    /* Altura de línea para mejor legibilidad */
+}
+
+/* Enlaces de navegación del sidebar */
+.sidebar__link {
+    color: white;
+    /* Texto blanco */
+    text-decoration: none;
+    /* Sin subrayado */
+    padding: 12px 20px;
+    /* Espaciado interno */
+    display: block;
+    /* Ocupa todo el ancho disponible */
+    transition: background-color 0.3s;
+    /* Animación suave al hover */
+}
+
+/* Efecto hover en los enlaces - fondo semi-transparente */
+.sidebar__link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Blanco al 10% de opacidad */
+}
+
+/* Estilo para el enlace activo/seleccionado */
+.sidebar__link--activo {
+    background-color: rgba(255, 255, 255, 0.2);
+    /* Blanco al 20% de opacidad */
+}
+
+/* Botón de retroceso (flecha) en el sidebar */
+.sidebar__back {
+    color: white;
+    /* Texto/icono blanco */
+    padding: 15px 20px;
+    /* Espaciado interno */
+    display: block;
+    /* Ocupa todo el ancho */
+    font-size: 1.2rem;
+    /* Tamaño del icono */
+    transition: background-color 0.3s;
+    /* Animación suave */
+}
+
+/* Efecto hover en el botón de retroceso */
+.sidebar__back:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Fondo semi-transparente */
+}
+
+/* ==================== ÁREA PRINCIPAL (MAIN) ==================== */
+/* Contenedor del contenido principal a la derecha del sidebar */
+main {
+    flex: 1;
+    /* Ocupa todo el espacio disponible */
+    display: flex;
+    /* Activa flexbox */
+    justify-content: center;
+    /* Centra horizontalmente el contenido */
+    padding: 30px;
+    /* Espaciado interno */
+}
+
+/* ==================== LAYOUT DE 2 COLUMNAS ==================== */
+/* Columna izquierda - contiene el formulario y tabla de productos */
+.columna-izquierda {
+    padding: 0;
+    /* Sin padding adicional */
+    display: flex;
+    /* Activa flexbox */
+    flex-direction: column;
+    /* Elementos apilados verticalmente */
+    gap: 15px;
+    /* Espacio entre elementos */
+}
+
+/* Columna derecha - contiene el resumen de la venta */
+.columna-derecha {
+    padding: 0;
+    /* Sin padding adicional */
+}
+
+/* ==================== CONTENEDOR PRINCIPAL DE REGISTRO ==================== */
+/* Tarjeta blanca con layout grid de 2 columnas */
+.registro-venta {
+    justify-content: center;
+    /* Centra el contenido */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    /* Sombra pronunciada */
+    min-height: 650px;
+    /* Altura mínima */
+    width: 900px;
+    /* Ancho fijo */
+    display: grid;
+    /* Activa CSS Grid */
+    grid-template-columns: 65% 35%;
+    /* 65% para productos, 35% para resumen */
+    background-color: rgb(255, 255, 255);
+    /* Fondo blanco */
+    border-radius: 8px;
+    /* Esquinas redondeadas */
+    padding: 30px;
+    /* Espaciado interno */
+    gap: 30px;
+    /* Espacio entre las 2 columnas */
+}
+
+/* ==================== FORMULARIO DE CLIENTE Y BÚSQUEDA ==================== */
+/* Contenedor del formulario con nombre del cliente y búsqueda */
+.registro-venta__formulario {
+    font-family: 'Courier New', Courier, monospace;
+    /* Tipografía monoespaciada */
+    font-size: 20px;
+    /* Tamaño de fuente */
+    display: flex;
+    /* Activa flexbox */
+    flex-direction: column;
+    /* Elementos apilados verticalmente */
+}
+
+/* Input de texto para nombre del cliente */
+.registro-venta__input {
+    width: 100%;
+    /* Ancho completo */
+    padding: 10px;
+    /* Espaciado interno */
+    margin-bottom: 20px;
+    /* Espacio debajo */
+    border: 1px solid #ccc;
+    /* Borde gris */
+    border-radius: 4px;
+    /* Esquinas redondeadas */
+    box-sizing: border-box;
+    /* Incluye padding en el ancho */
+}
+
+/* Etiqueta "Nombre del cliente" */
+.registro-venta__label {
+    font-size: 1.2rem;
+    /* Tamaño de fuente */
+    margin-bottom: 10px;
+    /* Espacio debajo */
+    font-family: 'Courier New', Courier, monospace;
+    /* Tipografía monoespaciada */
+}
+
+/* Contenedor de la barra de búsqueda de productos */
+.registro-venta__busqueda {
+    display: flex;
+    /* Flexbox para alinear icono e input */
+    align-items: center;
+    /* Centra verticalmente */
+    border: 1px solid #ccc;
+    /* Borde gris */
+    border-radius: 4px;
+    /* Esquinas redondeadas */
+    padding: 5px 10px;
+    /* Espaciado interno */
+    margin-bottom: 20px;
+    /* Espacio debajo */
+}
+
+/* Icono de lupa en la búsqueda */
+.registro-venta__icono-busqueda {
+    margin-right: 10px;
+    /* Espacio a la derecha del icono */
+}
+
+/* Campo de texto para buscar productos */
+.registro-venta__input-busqueda {
+    color: #999;
+    /* Color del texto/placeholder */
+    margin-right: 10px;
+    /* Margen derecho */
+    border: none;
+    /* Sin borde propio */
+    width: 100%;
+    /* Ancho completo */
+    height: 100%;
+    /* Altura completa */
+}
+
+/* ==================== TABLA DE PRODUCTOS ==================== */
+/* Cada fila de producto en la tabla */
+.registro-venta__item {
+    border: 1px solid #ccc;
+    /* Borde gris */
+    border-radius: 4px;
+    /* Esquinas redondeadas */
+    overflow: hidden;
+    /* Oculta el desbordamiento */
+    flex-grow: 1;
+    /* Crece para ocupar espacio */
+    width: 500px;
+    /* Ancho fijo */
+}
+
+/* Contenedor de la tabla con scroll */
+.contenedor-tabla {
+    width: 100%;
+    /* Ancho completo */
+    max-height: 450px;
+    /* Altura máxima con scroll */
+    overflow-y: auto;
+    /* Scroll vertical cuando hay muchos productos */
+    overflow-x: hidden;
+    /* Sin scroll horizontal */
+    border: 1px solid #ccc;
+    /* Borde gris */
+    border-radius: 4px;
+    /* Esquinas redondeadas */
+    display: block;
+    /* Elemento de bloque */
+}
+
+/* Encabezado de la tabla - fijo al hacer scroll */
+.contenedor-tabla thead {
+    position: sticky;
+    /* Se queda fijo al hacer scroll */
+    top: 0;
+    /* Pegado al tope del contenedor */
+    background-color: #ecf0f1;
+    /* Fondo gris claro */
+    z-index: 2;
+    /* Por encima del contenido */
+    display: block;
+    /* Elemento de bloque */
+    width: 100%;
+    /* Ancho completo */
+}
+
+/* Celdas del encabezado de la tabla */
+.registro-venta__columna {
+    padding: 15px 10px;
+    /* Espaciado interno */
+    text-align: left;
+    /* Texto a la izquierda */
+    font-weight: 600;
+    /* Texto en negrita */
+    color: #333;
+    /* Color oscuro */
+    display: flex;
+    /* Flexbox */
+    justify-content: center;
+    /* Centra horizontalmente */
+}
+
+/* Tabla principal de productos */
+.registro-venta__tabla {
+    width: 100%;
+    /* Ancho completo */
+    border-collapse: collapse;
+    /* Sin espacios entre celdas */
+    table-layout: fixed;
+    /* Columnas de ancho fijo */
+    background-color: var(--aside-fondo);
+    /* Color de fondo desde variable CSS */
+}
+
+/* Filas del encabezado y filas de datos - usan CSS Grid */
+.registro-venta__tabla-head tr,
+.registro-venta__item {
+    display: grid;
+    /* Activa CSS Grid */
+    grid-template-columns: 70px 1fr 90px 90px 60px;
+    /* 5 columnas: Cant, Desc, Precio, Subtotal, Acciones */
+    align-items: center;
+    /* Centra verticalmente */
+    padding: 10px 0;
+    /* Espaciado vertical */
+    width: 100%;
+    /* Ancho completo */
+}
+
+/* Celdas del encabezado (th) */
+.registro-venta__tabla-head th {
+    padding: 10px;
+    /* Espaciado interno */
+    background-color: #ecf0f1;
+    /* Fondo gris claro */
+    text-align: left;
+    /* Texto a la izquierda */
+}
+
+/* Cuerpo de la tabla (tbody) */
+.contenedor-tabla tbody {
+    display: block;
+    /* Elemento de bloque para scroll */
+    width: 100%;
+    /* Ancho completo */
+}
+
+/* Filas de datos en el tbody */
+.contenedor-tabla tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    /* Línea separadora */
+    width: 100%;
+    /* Ancho completo */
+}
+
+/* Celdas de datos (td) */
+.registro-venta__item td {
+    display: flex;
+    /* Flexbox para alinear contenido */
+    align-items: center;
+    /* Centra verticalmente */
+    text-align: left;
+    /* Texto a la izquierda */
+    padding: 0 10px;
+    /* Espaciado horizontal */
+}
+
+/* Celda de valor con contenido centrado */
+.registro-venta__valor {
+    justify-content: space-around;
+    /* Distribuye el espacio */
+}
+
+/* ==================== ICONOS DE ACCIÓN ==================== */
+/* Iconos de editar y borrar en cada fila */
+.registro-venta__icono-editar,
+.registro-venta__icono-borrar {
+    cursor: pointer;
+    /* Cursor de mano */
+    font-size: 14px;
+    /* Tamaño del icono */
+    padding: 4px;
+    /* Área de clic */
+}
+
+/* Icono de editar - color azul */
+.registro-venta__icono-editar {
+    color: #3498db;
+    /* Azul */
+    margin-right: 8px;
+    /* Espacio a la derecha */
+}
+
+/* Hover en icono editar - azul más oscuro */
+.registro-venta__icono-editar:hover {
+    color: #2980b9;
+    /* Azul oscuro */
+}
+
+/* Icono de borrar - color rojo */
+.registro-venta__icono-borrar {
+    color: #e74c3c;
+    /* Rojo */
+}
+
+/* Hover en icono borrar - rojo más oscuro */
+.registro-venta__icono-borrar:hover {
+    color: #c0392b;
+    /* Rojo oscuro */
+}
+
+/* ==================== SECCIÓN DE RESUMEN ==================== */
+/* Caja con el resumen de la venta (total, productos, fiado) */
+.registro-venta__resumen-box {
+    display: flex;
+    /* Activa flexbox */
+    flex-direction: column;
+    /* Elementos apilados verticalmente */
+    justify-content: space-around;
+    /* Distribuye espacio entre elementos */
+    gap: 20px;
+    /* Espacio entre elementos */
+    margin-top: 80px;
+    /* Margen superior grande */
+    border: 1px solid #ccc;
+    /* Borde gris */
+    height: 220px;
+    /* Altura fija */
+    border-radius: 8px;
+    /* Esquinas redondeadas */
+    padding: 20px;
+    /* Espaciado interno */
+    width: 80%;
+    /* 80% del ancho disponible */
+    font-size: 16px;
+    /* Tamaño de fuente */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Sombra suave */
+}
+
+/* Cada línea del resumen (Total, Productos) */
+.registro-venta__linea-total {
+    display: flex;
+    /* Flexbox */
+    justify-content: space-between;
+    /* Etiqueta a la izq, valor a la der */
+}
+
+/* Contenedor del checkbox de fiado */
+.registro-venta__fiado {
+    display: flex;
+    /* Flexbox */
+    gap: 20px;
+    /* Espacio entre checkbox y texto */
+    align-items: center;
+    /* Centra verticalmente */
+}
+
+/* Checkbox del fiado */
+.registrarventa__checkbox {
+    width: 20px;
+    /* Ancho del checkbox */
+    height: 50px;
+    /* Altura del checkbox */
+}
+
+/* Texto "Fiado" junto al checkbox */
+.registrarventa__texto {
+    font-size: 19px;
+    /* Tamaño de fuente */
+}
+
+/* Botón "Ver historial" */
+.registro-venta__btn-historial {
+    width: 80%;
+    /* 80% del ancho */
+    margin: 0 auto;
+    /* Centrado horizontalmente */
+    padding: 10px;
+    /* Espaciado interno */
+    border-radius: 5px;
+    /* Esquinas redondeadas */
+    border: none;
+    /* Sin borde */
+    background-color: #C4DCFF;
+    /* Azul claro */
+    cursor: pointer;
+    /* Cursor de mano */
+}
+
+/* ==================== BOTONES DE ACCIÓN FINAL ==================== */
+/* Contenedor de los botones Guardar e Imprimir */
+.registro-venta__acciones-finales {
+    margin-top: 40px;
+    /* Margen superior */
+    display: flex;
+    /* Activa flexbox */
+    flex-direction: column;
+    /* Botones apilados */
+    width: 80%;
+    /* 80% del ancho */
+    align-items: center;
+    /* Centra horizontalmente */
+    justify-content: center;
+    /* Centra verticalmente */
+}
+
+/* Botón "Guardar venta" - azul oscuro */
+.registro-venta__btn-guardar {
+    width: 100%;
+    /* Ancho completo del contenedor */
+    height: 50px;
+    /* Altura fija */
+    margin: 0 auto;
+    /* Centrado */
+    padding: 10px;
+    /* Espaciado interno */
+    border-radius: 5px;
+    /* Esquinas redondeadas */
+    border: none;
+    /* Sin borde */
+    background-color: #2C3E50;
+    /* Azul oscuro corporativo */
+    color: white;
+    /* Texto blanco */
+    margin-bottom: 20px;
+    /* Espacio debajo */
+    cursor: pointer;
+    /* Cursor de mano */
+}
+
+/* Botón "Imprimir ticket" - transparente con borde */
+.registro-venta__btn-imprimir {
+    width: 100%;
+    /* Ancho completo del contenedor */
+    margin: 0 auto;
+    /* Centrado */
+    padding: 10px;
+    /* Espaciado interno */
+    border-radius: 5px;
+    /* Esquinas redondeadas */
+    border: none;
+    /* Sin borde (se define abajo) */
+    background-color: transparent;
+    /* Fondo transparente */
+    height: 50px;
+    /* Altura fija */
+    border: 1px solid black;
+    /* Borde negro */
+    cursor: pointer;
+    /* Cursor de mano */
+}

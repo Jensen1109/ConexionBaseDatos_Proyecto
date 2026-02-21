@@ -1,0 +1,576 @@
+/* ==================== MEDIA QUERIES - REGISTRAR VENTA ==================== */
+/* Este archivo contiene los estilos responsive para la página de registrar venta */
+/* El layout de 2 columnas cambia a 1 columna y las tablas se convierten en cards */
+
+/* ========== TABLET (menos de 991px) ========== */
+/* Se aplica cuando el ancho de pantalla es menor o igual a 991 pixeles */
+@media screen and (max-width: 991px) {
+
+    /* Cambia el body de fila a columna para apilar sidebar y contenido */
+    body {
+        flex-direction: column;
+        /* Sidebar arriba, contenido abajo */
+    }
+
+    /* El sidebar se convierte en barra horizontal */
+    .sidebar {
+        width: 100%;
+        /* Ocupa todo el ancho de la pantalla */
+        min-height: auto;
+        /* Altura según contenido */
+        padding: 10px 0;
+        /* Espaciado vertical */
+    }
+
+    /* Los elementos del sidebar se muestran en fila */
+    .contenedor__sidebar {
+        flex-direction: row;
+        /* Elementos en horizontal */
+        flex-wrap: wrap;
+        /* Pueden saltar de línea si no caben */
+        align-items: center;
+        /* Centrado vertical */
+        padding: 0 15px;
+        /* Espaciado horizontal */
+        gap: 5px;
+        /* Espacio entre elementos */
+    }
+
+    /* Título más pequeño para tablet */
+    .sidebar__titulo-principal {
+        font-size: 1.2rem;
+        /* Fuente reducida */
+        padding: 10px;
+        /* Espaciado interno */
+        margin-bottom: 0;
+        /* Sin margen inferior */
+    }
+
+    /* Botón de retroceso más compacto */
+    .sidebar__back {
+        padding: 10px;
+        /* Espaciado uniforme */
+    }
+
+    /* Enlaces del sidebar compactos */
+    .sidebar__link {
+        padding: 10px 15px;
+        /* Espaciado reducido */
+    }
+
+    /* Área principal con menos espaciado */
+    main {
+        padding: 20px;
+        /* Espaciado de 20px */
+    }
+
+    /* ===== CAMBIO DE LAYOUT DE 2 COLUMNAS A 1 COLUMNA ===== */
+
+    /* El contenedor de registro cambia de grid 2 columnas a 1 columna */
+    .registro-venta {
+        width: 100%;
+        /* Ancho completo */
+        max-width: 100%;
+        /* Sin límite */
+        height: auto;
+        /* Altura automática */
+        min-height: auto;
+        /* Sin mínimo */
+        padding: 20px;
+        /* Espaciado interno */
+        grid-template-columns: 1fr;
+        /* 1 sola columna en vez de 65%/35% */
+        gap: 20px;
+        /* Espacio entre elementos */
+    }
+
+    /* Ambas columnas ocupan el ancho completo */
+    .columna-izquierda,
+    .columna-derecha {
+        width: 100%;
+        /* Ancho completo */
+    }
+
+    /* El resumen ocupa todo el ancho */
+    .registro-venta__resumen-box {
+        margin-top: 20px;
+        /* Espacio arriba */
+        width: 100%;
+        /* Ancho completo */
+    }
+
+    /* Las acciones finales ocupan todo el ancho */
+    .registro-venta__acciones-finales {
+        width: 100%;
+        /* Ancho completo */
+    }
+}
+
+/* ========== CELULAR (menos de 768px) ========== */
+/* Se aplica cuando el ancho es menor a 768px - las tablas se convierten en cards */
+@media screen and (max-width: 768px) {
+
+    /* Sidebar más compacto */
+    .sidebar {
+        padding: 8px 0;
+        /* Menos espaciado vertical */
+    }
+
+    /* Sidebar con scroll horizontal para muchos enlaces */
+    .contenedor__sidebar {
+        flex-direction: row;
+        /* Mantiene fila */
+        flex-wrap: nowrap;
+        /* Todo en una fila, sin saltar */
+        align-items: center;
+        /* Centrado vertical */
+        justify-content: flex-start;
+        /* Alineado al inicio */
+        padding: 0 10px;
+        /* Espaciado horizontal */
+        gap: 0;
+        /* Sin espacio extra */
+        overflow-x: auto;
+        /* Permite scroll horizontal */
+    }
+
+    /* Botón de retroceso en móvil */
+    .sidebar__back {
+        padding: 8px 10px;
+        /* Espaciado compacto */
+        font-size: 1rem;
+        /* Fuente estándar */
+        flex-shrink: 0;
+        /* No se encoge */
+    }
+
+    /* Título en móvil - una sola línea */
+    .sidebar__titulo-principal {
+        font-size: 1rem;
+        /* Fuente reducida */
+        padding: 8px 10px;
+        /* Espaciado compacto */
+        margin-bottom: 0;
+        /* Sin margen */
+        flex-shrink: 0;
+        /* No se encoge */
+        white-space: nowrap;
+        /* No salta de línea */
+    }
+
+    /* Oculta el salto de línea (<br>) del título */
+    .sidebar__titulo-principal br {
+        display: none;
+        /* El <br> no se muestra */
+    }
+
+    /* Enlaces del sidebar en móvil */
+    .sidebar__link {
+        padding: 8px 12px;
+        /* Espaciado compacto */
+        font-size: 0.9rem;
+        /* Fuente ligeramente menor */
+        flex-shrink: 0;
+        /* No se encoge */
+        white-space: nowrap;
+        /* Texto en una línea */
+    }
+
+    /* Área principal ajustada */
+    main {
+        padding: 15px;
+        /* Menos espaciado */
+    }
+
+    /* Contenedor de registro adaptado */
+    .registro-venta {
+        width: 100%;
+        /* Ancho completo */
+        padding: 15px;
+        /* Espaciado reducido */
+        border-radius: 12px;
+        /* Bordes redondeados */
+    }
+
+    /* Formulario con fuente más pequeña */
+    .registro-venta__formulario {
+        font-size: 16px;
+        /* Fuente estándar para móvil */
+    }
+
+    /* Etiqueta del cliente más pequeña */
+    .registro-venta__label {
+        font-size: 1rem;
+        /* Fuente reducida */
+    }
+
+    /* Input adaptado a móvil */
+    .registro-venta__input {
+        padding: 10px;
+        /* Espaciado cómodo para tocar */
+        font-size: 14px;
+        /* Fuente legible */
+    }
+
+    /* Barra de búsqueda más compacta */
+    .registro-venta__busqueda {
+        padding: 8px 10px;
+        /* Espaciado reducido */
+    }
+
+    /* ===== TRANSFORMACIÓN DE TABLA A CARDS ===== */
+
+    /* Contenedor de tabla sin restricciones */
+    .contenedor-tabla {
+        overflow: visible;
+        /* Las cards se ven completas */
+        max-height: none;
+        /* Sin límite de altura */
+        border: none;
+        /* Sin borde de tabla */
+    }
+
+    /* Oculta el encabezado de la tabla */
+    .contenedor-tabla thead,
+    .registro-venta__tabla-head {
+        display: none;
+        /* Los encabezados no se muestran en modo card */
+    }
+
+    /* El tbody se convierte en contenedor de cards */
+    .contenedor-tabla tbody {
+        display: flex;
+        /* Flexbox para organizar cards */
+        flex-direction: column;
+        /* Cards apiladas verticalmente */
+        gap: 10px;
+        /* Espacio de 10px entre cards */
+    }
+
+    /* Cada fila (tr) se convierte en una card */
+    .registro-venta__item {
+        display: flex !important;
+        /* Fuerza flexbox */
+        flex-direction: column;
+        /* Elementos en columna */
+        gap: 8px;
+        /* Espacio entre elementos */
+        padding: 15px;
+        /* Espaciado interno de la card */
+        border: 1px solid #eee;
+        /* Borde sutil */
+        border-radius: 12px;
+        /* Esquinas redondeadas */
+        background-color: #fff;
+        /* Fondo blanco */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        /* Sombra suave */
+        width: 100% !important;
+        /* Ancho completo forzado */
+    }
+
+    /* Anula el grid original de la tabla */
+    .registro-venta__tabla-head tr,
+    .registro-venta__item {
+        grid-template-columns: 1fr;
+        /* 1 columna para override */
+    }
+
+    /* Cada celda muestra label y valor lado a lado */
+    .registro-venta__valor {
+        display: flex;
+        /* Flexbox para label y valor */
+        justify-content: space-between;
+        /* Label a la izq, valor a la der */
+        align-items: center;
+        /* Centrado vertical */
+        padding: 5px 0;
+        /* Espaciado vertical */
+        text-align: left;
+        /* Texto alineado a la izquierda */
+    }
+
+    /* Genera la etiqueta usando data-label */
+    .registro-venta__valor::before {
+        content: attr(data-label);
+        /* Toma el valor del atributo data-label */
+        font-weight: 600;
+        /* Texto en negrita */
+        font-size: 0.85rem;
+        /* Fuente ligeramente más pequeña */
+        color: #888;
+        /* Color gris para la etiqueta */
+    }
+
+    /* Iconos de editar/borrar más grandes para táctil */
+    .registro-venta__icono-editar,
+    .registro-venta__icono-borrar {
+        font-size: 16px;
+        /* Fuente más grande */
+        padding: 8px;
+        /* Área de toque más grande */
+    }
+
+    /* ===== SECCIÓN DE RESUMEN ===== */
+
+    /* Box de resumen adaptado */
+    .registro-venta__resumen-box {
+        margin-top: 10px;
+        /* Menos margen superior */
+        width: 100%;
+        /* Ancho completo */
+        height: auto;
+        /* Altura automática */
+        padding: 15px;
+        /* Espaciado interno */
+    }
+
+    /* Líneas de total más pequeñas */
+    .registro-venta__linea-total {
+        font-size: 15px;
+        /* Fuente reducida */
+    }
+
+    /* Checkbox de fiado más compacto */
+    .registro-venta__fiado {
+        gap: 10px;
+        /* Menos espacio entre elementos */
+    }
+
+    /* Texto de fiado más pequeño */
+    .registrarventa__texto {
+        font-size: 16px;
+        /* Fuente estándar */
+    }
+
+    /* Botón de historial ocupa todo el ancho */
+    .registro-venta__btn-historial {
+        width: 100%;
+        /* Ancho completo */
+        padding: 12px;
+        /* Espaciado cómodo */
+    }
+
+    /* Sección de acciones finales */
+    .registro-venta__acciones-finales {
+        margin-top: 20px;
+        /* Espacio arriba */
+        width: 100%;
+        /* Ancho completo */
+    }
+
+    /* Botones de guardar e imprimir */
+    .registro-venta__btn-guardar,
+    .registro-venta__btn-imprimir {
+        width: 100%;
+        /* Ancho completo */
+        height: 45px;
+        /* Altura fija */
+        font-size: 14px;
+        /* Fuente legible */
+    }
+}
+
+/* ========== CELULAR PEQUEÑO (menos de 425px) ========== */
+/* Para móviles pequeños como iPhone SE, Galaxy S pequeños */
+@media screen and (max-width: 425px) {
+
+    /* Sidebar con envoltura de línea */
+    .contenedor__sidebar {
+        flex-wrap: wrap;
+        /* Permite salto de línea */
+        justify-content: center;
+        /* Centra los elementos */
+        gap: 5px;
+        /* Pequeño espacio entre elementos */
+    }
+
+    /* Botón de retroceso al inicio */
+    .sidebar__back {
+        order: -1;
+        /* Lo posiciona primero visualmente */
+        width: auto;
+        /* Ancho según contenido */
+    }
+
+    /* Título al inicio y expandido */
+    .sidebar__titulo-principal {
+        order: -1;
+        /* Después del botón back */
+        flex-grow: 1;
+        /* Ocupa espacio disponible */
+        text-align: left;
+        /* Alineado a la izquierda */
+    }
+
+    /* Enlaces muy compactos */
+    .sidebar__link {
+        padding: 6px 10px;
+        /* Espaciado mínimo */
+        font-size: 0.85rem;
+        /* Fuente pequeña */
+    }
+
+    /* Área principal con espaciado mínimo */
+    main {
+        padding: 10px;
+        /* Espaciado reducido */
+    }
+
+    /* Registro más compacto */
+    .registro-venta {
+        padding: 12px;
+        /* Espaciado reducido */
+        border-radius: 10px;
+        /* Bordes menos redondeados */
+    }
+
+    /* Etiqueta más pequeña */
+    .registro-venta__label {
+        font-size: 0.95rem;
+        /* Fuente ligeramente menor */
+        margin-bottom: 8px;
+        /* Espacio debajo */
+    }
+
+    /* Input más compacto */
+    .registro-venta__input {
+        padding: 10px;
+        /* Espaciado reducido */
+        margin-bottom: 15px;
+        /* Menos margen */
+    }
+
+    /* Cards más compactas */
+    .registro-venta__item {
+        padding: 12px;
+        /* Menos espaciado interno */
+        gap: 6px;
+        /* Menos espacio entre elementos */
+    }
+
+    /* Valores más pequeños */
+    .registro-venta__valor {
+        font-size: 0.9rem;
+        /* Fuente reducida */
+    }
+
+    /* Resumen más compacto */
+    .registro-venta__resumen-box {
+        padding: 12px;
+        /* Espaciado reducido */
+        gap: 15px;
+        /* Menos espacio entre líneas */
+    }
+
+    /* Botones más pequeños */
+    .registro-venta__btn-guardar,
+    .registro-venta__btn-imprimir {
+        height: 42px;
+        /* Altura ligeramente menor */
+        font-size: 13px;
+        /* Fuente más pequeña */
+    }
+}
+
+/* ========== CELULAR MUY PEQUEÑO (menos de 375px) ========== */
+/* Para dispositivos muy pequeños como iPhone 5/SE primera generación */
+@media screen and (max-width: 375px) {
+
+    /* Sidebar con espaciado mínimo */
+    .contenedor__sidebar {
+        padding: 0 8px;
+        /* Espaciado horizontal mínimo */
+    }
+
+    /* Título muy compacto */
+    .sidebar__titulo-principal {
+        font-size: 0.9rem;
+        /* Fuente muy pequeña */
+        padding: 6px 8px;
+        /* Espaciado mínimo */
+    }
+
+    /* Enlaces muy pequeños */
+    .sidebar__link {
+        padding: 5px 8px;
+        /* Espaciado mínimo */
+        font-size: 0.8rem;
+        /* Fuente mínima pero legible */
+    }
+
+    /* Área principal muy compacta */
+    main {
+        padding: 8px;
+        /* Espaciado mínimo */
+    }
+
+    /* Registro muy compacto */
+    .registro-venta {
+        padding: 10px;
+        /* Espaciado mínimo */
+    }
+
+    /* Etiqueta muy pequeña */
+    .registro-venta__label {
+        font-size: 0.9rem;
+        /* Fuente muy pequeña */
+    }
+
+    /* Input muy compacto */
+    .registro-venta__input {
+        padding: 8px;
+        /* Espaciado mínimo */
+        font-size: 13px;
+        /* Fuente pequeña */
+    }
+
+    /* Búsqueda muy compacta */
+    .registro-venta__busqueda {
+        padding: 6px 8px;
+        /* Espaciado mínimo */
+    }
+
+    /* Cards muy compactas */
+    .registro-venta__item {
+        padding: 10px;
+        /* Espaciado mínimo */
+    }
+
+    /* Valores muy pequeños */
+    .registro-venta__valor {
+        font-size: 0.85rem;
+        /* Fuente mínima */
+    }
+
+    /* Resumen muy compacto */
+    .registro-venta__resumen-box {
+        padding: 10px;
+        /* Espaciado mínimo */
+        gap: 12px;
+        /* Menos espacio entre líneas */
+    }
+
+    /* Texto de fiado más pequeño */
+    .registrarventa__texto {
+        font-size: 14px;
+        /* Fuente más pequeña */
+    }
+
+    /* Botón de historial más pequeño */
+    .registro-venta__btn-historial {
+        padding: 10px;
+        /* Espaciado reducido */
+        font-size: 13px;
+        /* Fuente más pequeña */
+    }
+
+    /* Botones muy compactos */
+    .registro-venta__btn-guardar,
+    .registro-venta__btn-imprimir {
+        height: 40px;
+        /* Altura mínima */
+        font-size: 12px;
+        /* Fuente mínima */
+    }
+}

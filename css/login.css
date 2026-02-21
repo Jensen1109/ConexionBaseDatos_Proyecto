@@ -1,0 +1,7 @@
+/* ==================== ESTILOS PARA LA PÁGINA DE LOGIN ==================== */
+/* Este archivo importa los estilos de registro ya que comparten el mismo diseño */
+/* La página de login hereda todos los estilos del formulario de registro */
+
+/* Importa todos los estilos desde registro.css */
+/* Esto evita duplicar código ya que ambas páginas tienen el mismo diseño */
+@import url(registro.css);
