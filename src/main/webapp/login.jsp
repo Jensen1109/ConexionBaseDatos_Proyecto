@@ -1,17 +1,30 @@
-<%-- 
-    Document   : login
-    Created on : 19/02/2026, 10:18:16 a. m.
-    Author     : Propietario
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
-        <h1>Hello World!</h1>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Tienda del Barrio</title>
+</head>
+<body>
+
+    <h2>Iniciar Sesión</h2>
+
+    <!-- Muestra el error si el controlador lo envió -->
+    <% String error = (String) request.getAttribute("error"); %>
+    <% if (error != null) { %>
+        <p style="color:red;"><%= error %></p>
+    <% } %>
+
+    <!-- El action debe coincidir con @WebServlet en tu controlador -->
+    <form action="LoginControlador" method="post">
+        <label>Email:</label><br>
+        <input type="email" name="email" required /><br><br>
+
+        <label>Contraseña:</label><br>
+        <input type="password" name="contrasena" required /><br><br>
+
+        <button type="submit">Entrar</button>
+    </form>
+
+</body>
 </html>
