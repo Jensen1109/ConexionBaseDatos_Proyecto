@@ -1,0 +1,6 @@
+controladores\LoginControlador.class
+dao\UsuarioDAO.class
+modelos\Categoria.class
+modelos\Usuario.class
+com\Tienda_Barrio\config\conexion.class
+com\Tienda_Barrio\config\TextConexion.class
