@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebServlet("/RegistroControlador")
-public class RegistroControlador extends HttpServlet {
+public class RegistroControladores extends HttpServlet {
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 

@@ -18,6 +18,8 @@
 <body>
     <h1>¡Bienvenido, <%= nombre %>!</h1>
     <p>Iniciaste sesión correctamente.</p>
-    <a href="LogoutControlador">Cerrar sesión</a>
+    <a href="LogoutControlador">Cerrar sesión</a>  
+    
 </body>
+
 </html>

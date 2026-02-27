@@ -8,6 +8,19 @@ public class Usuario {
     private String apellido;
     private String cedula;
 
+    // Constructor vacío
+    public Usuario() {}
+
+    // Constructor completo
+    public Usuario(int idUsuario, int idRol, String email, String nombre, String apellido, String cedula) {
+        this.idUsuario = idUsuario;
+        this.idRol = idRol;
+        this.email = email;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.cedula = cedula;
+    }
+
     public int getIdUsuario() { return idUsuario; }
     public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
 

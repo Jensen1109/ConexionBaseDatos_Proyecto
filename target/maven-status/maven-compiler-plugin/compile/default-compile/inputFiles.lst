@@ -1,6 +1,16 @@
 C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\com\Tienda_Barrio\config\conexion.java
 C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\com\Tienda_Barrio\config\TextConexion.java
 C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\controladores\LoginControlador.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\controladores\RegistroControladores.java
 C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\dao\UsuarioDAO.java
 C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Categoria.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\DetallePedido.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Deuda.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Imagen.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\MetodoPago.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Pedido.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Permisos.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Producto.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Rol.java
+C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Telefono.java
 C:\Users\Propietario\Documents\NetBeansProjects\proyecto_personal\src\main\java\modelos\Usuario.java

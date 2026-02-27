@@ -1,6 +1,16 @@
+modelos\Rol.class
 controladores\LoginControlador.class
-dao\UsuarioDAO.class
 modelos\Categoria.class
+modelos\Permisos.class
+modelos\Pedido.class
 modelos\Usuario.class
+modelos\DetallePedido.class
 com\Tienda_Barrio\config\conexion.class
+modelos\Producto.class
+modelos\MetodoPago.class
+modelos\Deuda.class
+modelos\Imagen.class
+dao\UsuarioDAO.class
+controladores\RegistroControladores.class
+modelos\Telefono.class
 com\Tienda_Barrio\config\TextConexion.class
