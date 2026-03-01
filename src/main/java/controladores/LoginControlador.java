@@ -25,11 +25,11 @@ public class LoginControlador extends HttpServlet {
         // Si ya hay sesión activa, redirige al inicio
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("usuarioLogueado") != null) {
-            response.sendRedirect(request.getContextPath() + "/index.html");
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
             return;
         }
 
-        request.getRequestDispatcher("/login.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/login.jsp").forward(request, response);
     }
 
     // ─────────────────────────────────────────────
@@ -45,7 +45,7 @@ public class LoginControlador extends HttpServlet {
         // Validación básica de campos vacíos
         if (email == null || email.isBlank() || contrasena == null || contrasena.isBlank()) {
             request.setAttribute("error", "Por favor completa todos los campos.");
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/login.jsp").forward(request, response);
             return;
         }
 
@@ -62,15 +62,15 @@ public class LoginControlador extends HttpServlet {
 
             // Redirigir según el rol
             if (usuario.getIdRol() == 1) {
-                response.sendRedirect(request.getContextPath() + "/index.html");
+                response.sendRedirect(request.getContextPath() + "/view/productos.jsp");
             } else {
-                response.sendRedirect(request.getContextPath() + "/index.html");
+                response.sendRedirect(request.getContextPath() + "/view/productos.jsp");
             }
 
         } else {
             // Login fallido
             request.setAttribute("error", "Email o contraseña incorrectos.");
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/login.jsp").forward(request, response);
         }
     }
 }

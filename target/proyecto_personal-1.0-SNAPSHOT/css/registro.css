@@ -1,0 +1,178 @@
+/* ==================== ESTILOS PARA LA PÁGINA DE REGISTRO ==================== */
+/* Este archivo contiene los estilos para el formulario de registro de usuarios */
+/* Layout de 2 columnas: imagen a la izquierda, formulario a la derecha */
+
+/* Importa las variables CSS personalizadas desde el archivo de propiedades */
+@import url(custom/custompropertiers.css);
+
+/* ==================== RESET BÁSICO ==================== */
+/* Elimina los estilos por defecto del navegador para consistencia */
+* {
+    padding: 0;
+    /* Sin padding por defecto */
+    margin: 0;
+    /* Sin márgenes por defecto */
+    box-sizing: border-box;
+    /* El padding se incluye en el ancho total */
+}
+
+/* ==================== LAYOUT PRINCIPAL ==================== */
+/* Página dividida en 2 columnas usando CSS Grid */
+.registro {
+    display: grid;
+    /* Activa CSS Grid */
+    grid-template-columns: 1fr 1fr;
+    /* 2 columnas de igual tamaño */
+    height: 100vh;
+    /* Altura completa de la ventana */
+    margin: 0;
+    /* Sin margen */
+}
+
+/* ==================== COLUMNA DE IMAGEN ==================== */
+/* Contenedor de la imagen de fondo a la izquierda */
+.registro__imagen-contenedor {
+    overflow: hidden;
+    /* Oculta cualquier desbordamiento de la imagen */
+}
+
+/* Imagen de fondo/decorativa */
+.registro__imagen {
+    width: 100%;
+    /* Ancho completo del contenedor */
+    height: 100%;
+    /* Altura completa del contenedor */
+    object-fit: cover;
+    /* La imagen cubre el espacio sin deformarse */
+}
+
+/* ==================== COLUMNA DE FORMULARIO ==================== */
+/* Contenedor del formulario a la derecha */
+.registro__formulario {
+    display: flex;
+    /* Activa flexbox */
+    justify-content: center;
+    /* Centra horizontalmente el formulario */
+    align-items: center;
+    /* Centra verticalmente el formulario */
+    padding: 20px;
+    /* Espaciado interno */
+    background-color: var(--fondo-formulario);
+    /* Color de fondo desde variable */
+}
+
+/* ==================== FORMULARIO ==================== */
+/* Contenedor del formulario con los campos */
+.formulario {
+    display: flex;
+    /* Activa flexbox */
+    flex-direction: column;
+    /* Campos apilados verticalmente */
+    max-width: 450px;
+    /* Ancho máximo del formulario */
+    width: 90%;
+    /* 90% del contenedor padre */
+    padding: 30px;
+    /* Espaciado interno */
+    margin-top: 15px;
+    /* Margen superior */
+}
+
+/* Etiquetas de los campos (duplicado - para especificidad) */
+.formulario__etiqueta {
+    margin-top: 25px;
+    /* Espacio arriba de cada campo */
+    font-family: sans-serif;
+    /* Tipografía sans-serif */
+    font-weight: bold;
+    /* Texto en negrita */
+}
+
+/* Etiquetas de los campos - estilos finales */
+.formulario__etiqueta {
+    display: block;
+    /* Elemento de bloque */
+    font-weight: 500;
+    /* Texto semi-negrita */
+    margin-bottom: 5px;
+    /* Espacio debajo de la etiqueta */
+    color: var(--formulario-color);
+    /* Color desde variable */
+}
+
+/* ==================== CAMPOS DE ENTRADA ==================== */
+/* Inputs de texto (nombre, email, contraseña) */
+.formulario__input {
+    width: 100%;
+    /* Ancho completo */
+    padding: 12px 15px;
+    /* Espaciado interno cómodo */
+    border: 1px solid #ccc;
+    /* Borde gris (será sobrescrito) */
+    border-radius: 6px;
+    /* Esquinas redondeadas */
+    box-sizing: border-box;
+    /* Padding incluido en el ancho */
+    background-color: var(--fondo-formulario-input);
+    /* Color de fondo desde variable */
+    border: none;
+    /* Sin borde (sobrescribe el anterior) */
+    font-size: 16px;
+    /* Tamaño de fuente legible */
+}
+
+/* ==================== BOTÓN DE ENVÍO ==================== */
+/* Botón para enviar el formulario de registro */
+.formulario__boton {
+    background-color: var(--fondo-boton);
+    /* Color de fondo desde variable */
+    color: var(--color-texto);
+    /* Color de texto desde variable */
+    padding: 15px 20px;
+    /* Espaciado interno */
+    border: none;
+    /* Sin borde */
+    border-radius: 4px;
+    /* Esquinas redondeadas (será sobrescrito) */
+    cursor: pointer;
+    /* Cursor de mano */
+    margin-top: 30px;
+    /* Espacio arriba del botón */
+    text-transform: uppercase;
+    /* Texto en mayúsculas */
+    margin-left: 125px;
+    /* Margen izquierdo para centrar */
+    border-radius: 8px;
+    /* Esquinas más redondeadas */
+}
+
+/* ==================== CAMPO DE CONTRASEÑA CON ICONO ==================== */
+/* Contenedor del input de contraseña con el icono del ojo */
+.formulario__input-contenedor {
+    display: flex;
+    /* Flexbox para alinear input e icono */
+    align-items: center;
+    /* Centra verticalmente */
+    position: relative;
+    /* Para posicionar el icono de forma absoluta */
+}
+
+/* Input de contraseña dentro del contenedor - con espacio para el icono */
+.formulario__input-contenedor .formulario__input {
+    padding-right: 40px;
+    /* Espacio a la derecha para el icono */
+}
+
+/* Icono del ojo para mostrar/ocultar contraseña */
+.formulario__input-contenedor .formulario__icono-ojo {
+    position: absolute;
+    /* Posición absoluta dentro del contenedor */
+    right: 15px;
+    /* A 15px del borde derecho */
+    color: #888;
+    /* Color gris */
+    cursor: pointer;
+    /* Cursor de mano para indicar que es clickeable */
+    font-size: 18px;
+    /* Tamaño del icono */
+}

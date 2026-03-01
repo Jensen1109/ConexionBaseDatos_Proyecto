@@ -15,7 +15,7 @@ public class Pedido {
     public Pedido() {}
 
     public Pedido(int idPedido, int idCliente, int idUsuario, int idPago,
-                  LocalDateTime fechaVenta, BigDecimal total, String estado) {
+                LocalDateTime fechaVenta, BigDecimal total, String estado) {
         this.idPedido = idPedido;
         this.idCliente = idCliente;
         this.idUsuario = idUsuario;

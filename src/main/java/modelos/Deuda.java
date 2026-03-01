@@ -14,7 +14,7 @@ public class Deuda {
     public Deuda() {}
 
     public Deuda(int idDeuda, int idPedido, BigDecimal montoPendiente,
-                 String estado, BigDecimal abono, LocalDate fechaAbono) {
+                String estado, BigDecimal abono, LocalDate fechaAbono) {
         this.idDeuda = idDeuda;
         this.idPedido = idPedido;
         this.montoPendiente = montoPendiente;

@@ -1,0 +1,165 @@
+/* ==================== COMPONENTE: VENTANA EMERGENTE (MODAL) ==================== */
+/* Componente reutilizable para modales - usa CSS :target */
+/* Importar este archivo en cualquier página que necesite modales */
+
+/* Fondo oscuro del modal - oculto por defecto */
+.ventana-emergente {
+    display: none;
+    /* Oculto por defecto */
+    position: fixed;
+    /* Fijo en la pantalla */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Fondo oscuro semi-transparente */
+    z-index: 1000;
+    /* Por encima de todo */
+    justify-content: center;
+    /* Centra horizontalmente */
+    align-items: center;
+    /* Centra verticalmente */
+}
+
+/* Mostrar modal cuando se hace clic (usando :target) */
+.ventana-emergente:target {
+    display: flex;
+    /* Se muestra como flex para centrar contenido */
+}
+
+/* Contenedor del contenido del modal */
+.ventana-emergente__contenido {
+    background-color: white;
+    /* Fondo blanco */
+    padding: 40px;
+    /* Espaciado interno generoso */
+    border-radius: 20px;
+    /* Esquinas muy redondeadas */
+    text-align: center;
+    /* Texto centrado */
+    max-width: 400px;
+    /* Ancho máximo */
+    width: 90%;
+    /* Ancho responsive */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    /* Sombra pronunciada */
+    animation: aparecer 0.3s ease;
+    /* Animación de entrada */
+}
+
+/* Contenedor del icono */
+.ventana-emergente__icono {
+    width: 80px;
+    /* Tamaño del círculo */
+    height: 80px;
+    background-color: var(--color-exito);
+    /* Verde éxito */
+    border-radius: 50%;
+    /* Forma circular */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+    /* Centrado y margen inferior */
+}
+
+/* Icono dentro del círculo */
+.ventana-emergente__icono i {
+    font-size: 40px;
+    /* Tamaño del icono */
+    color: white;
+    /* Blanco */
+}
+
+/* Icono de advertencia (para confirmación) */
+.ventana-emergente__icono--advertencia {
+    background-color: var(--color-advertencia);
+    /* Naranja advertencia */
+}
+
+/* Título del modal */
+.ventana-emergente__titulo {
+    font-size: 1.5rem;
+    /* Tamaño grande */
+    color: var(--fondo-sidebar);
+    /* Azul oscuro */
+    margin-bottom: 10px;
+    /* Espacio debajo */
+    font-weight: 600;
+    /* Semi-negrita */
+}
+
+/* Mensaje del modal */
+.ventana-emergente__mensaje {
+    font-size: 1rem;
+    /* Tamaño normal */
+    color: #666;
+    /* Gris */
+    margin-bottom: 25px;
+    /* Espacio debajo */
+    line-height: 1.5;
+    /* Altura de línea */
+}
+
+/* Botón base */
+.ventana-emergente__boton {
+    display: inline-block;
+    /* Inline-block para padding */
+    padding: 12px 40px;
+    /* Espaciado interno */
+    background-color: var(--color-exito);
+    /* Verde éxito */
+    color: white;
+    /* Texto blanco */
+    text-decoration: none;
+    /* Sin subrayado */
+    border-radius: 25px;
+    /* Esquinas muy redondeadas */
+    font-size: 1rem;
+    /* Tamaño de fuente */
+    font-weight: 600;
+    /* Semi-negrita */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    /* Transiciones suaves */
+}
+
+/* Efecto hover en el botón */
+.ventana-emergente__boton:hover {
+    background-color: #219a52;
+    /* Verde más oscuro */
+    transform: translateY(-2px);
+    /* Se eleva ligeramente */
+}
+
+/* Contenedor de los botones Sí/No */
+.ventana-emergente__botones {
+    display: flex;
+    /* Flexbox */
+    gap: 15px;
+    /* Espacio entre botones */
+    justify-content: center;
+    /* Centra los botones */
+}
+
+/* Botón Sí - verde */
+.ventana-emergente__boton--si {
+    background-color: var(--color-exito);
+    /* Verde */
+}
+
+.ventana-emergente__boton--si:hover {
+    background-color: #219a52;
+    /* Verde más oscuro */
+}
+
+/* Botón No - rojo */
+.ventana-emergente__boton--no {
+    background-color: var(--color-error);
+    /* Rojo */
+}
+
+.ventana-emergente__boton--no:hover {
+    background-color: #c0392b;
+    /* Rojo más oscuro */
+}

@@ -9,7 +9,7 @@ public class conexion {
     // Si tu base de datos se llama 'tienda', ponla después del 3306/
     private static final String URL = "jdbc:mysql://localhost:3306/proyectoPersonal";
     private static final String USER = "root";
-    private static final String PASSWORD = "#Aprendiz2024";
+    private static final String PASSWORD = "Jensen1234";
 
     public static Connection getConnection() {
         Connection con = null;

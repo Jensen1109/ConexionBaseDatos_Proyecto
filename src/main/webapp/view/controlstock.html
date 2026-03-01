@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/controlstock.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <title>Control de stock</title>
+</head>
+
+<body>
+    <header class="header">
+
+        <div class="header__contenedor">
+            <a href="productos.html" class="header__link">
+                <i class="fa-solid fa-arrow-left header__icono"></i>
+            </a>
+            <h2 class="header__titulo">Stock de productos</h2>
+        </div>
+
+    </header>
+
+    <main class="main">
+        <div class="stock-card">
+            <h3 class="stock-card_titulo">Tabla stock</h3>
+
+
+            <div class="stock-card__control">
+                <div class="control-filtros">
+                    <span class="control-filtros__titulo">Filtrar:</span>
+                    <label class="control-filtro">
+                        <input type="checkbox" class="control-filtro__checkbox" data-filtro="bajo">
+                        <span class="control-filtro__texto control-filtro__texto--bajo">Bajo</span>
+                    </label>
+                    <label class="control-filtro">
+                        <input type="checkbox" class="control-filtro__checkbox" data-filtro="suficiente">
+                        <span class="control-filtro__texto control-filtro__texto--suficiente">Suficiente</span>
+                    </label>
+                    <label class="control-filtro">
+                        <input type="checkbox" class="control-filtro__checkbox" data-filtro="critico">
+                        <span class="control-filtro__texto control-filtro__texto--critico">Crítico</span>
+                    </label>
+                </div>
+
+                <div class="stock-card__search">
+                    <i class="fa-solid fa-magnifying-glass search__icon"></i>
+                    <input type="text" class="search__input" placeholder="Buscar producto...">
+                </div>
+            </div>
+
+            <table class="contenedor-tabla">
+                <thead>
+                    <tr>
+                        <th class="tabla__header">Producto</th>
+                        <th class="tabla__header">Stock actual</th>
+                        <th class="tabla__header">Stock minmo</th>
+                        <th class="tabla__header ">Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Papa criolla</td>
+                        <td class="tabla__data">150</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Tomate</td>
+                        <td class="tabla__data">15</td>
+                        <td class="tabla__data">30</td>
+                        <td class="tabla__data estado--bajo">Bajo</td>
+                    </tr>
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Jamon</td>
+                        <td class="tabla__data">5</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--critico">Critico</td>
+                    </tr>
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Manzanas</td>
+                        <td class="tabla__data">70</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Manzanas</td>
+                        <td class="tabla__data">70</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Manzanas</td>
+                        <td class="tabla__data">70</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Manzanas</td>
+                        <td class="tabla__data">70</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Manzanas</td>
+                        <td class="tabla__data">70</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Manzanas</td>
+                        <td class="tabla__data">70</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Manzanas</td>
+                        <td class="tabla__data">70</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+
+                    <tr class="tabla__row">
+                        <td class="tabla__data">Manzanas</td>
+                        <td class="tabla__data">70</td>
+                        <td class="tabla__data">50</td>
+                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/css/editarproducto.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header__contenedor">
+            <a href="productos.html" class="header__link">
+                <i class="fa-solid fa-arrow-left  header__icono"></i>
+            </a>
+            <h2 class="header__titulo">Edicion de producto</h2>
+        </div>
+    </header>
+    <main class="main">
+
+        <form class="formulario" action="">
+
+            <div class="formulario__producto">
+                <label for="nombre" class="formulario__etiqueta">Nombre del producto</label>
+                <input type="text" id="nombre" name="nombre" class="formulario__input" placeholder="Papa criolla">
+            </div>
+
+            <div class="formulario__producto">
+                <label for="nombre" class="formulario__etiqueta">Descripcion</label>
+                <textarea name="Descripcion" id="Descripcion" class="formulario__input"></textarea>
+            </div>
+
+            <div class="formulario__producto">
+                <label for="precio" class="formulario__etiqueta">precio</label>
+                <input type="text" id="precio" name="precio" class="formulario__input" placeholder="$ 50.000">
+            </div>
+
+            <div class="formulario__producto">
+                <label for="cantidad" class="formulario__etiqueta">Cantidad</label>
+                <input type="number" id="cantidad" name="cantidad" class="formulario__input" placeholder="20">
+            </div>
+
+            <button type="submit" class="formulario__boton">Confirmar edicion</button>
+
+        </form>
+
+    </main>
+</body>
+
+</html>

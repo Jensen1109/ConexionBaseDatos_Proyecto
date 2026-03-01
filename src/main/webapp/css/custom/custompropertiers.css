@@ -1,0 +1,62 @@
+/* ==================== VARIABLES CSS PERSONALIZADAS ==================== */
+/* Este archivo contiene las custom properties (variables CSS) del proyecto */
+/* Estas variables se utilizan en todo el proyecto para mantener consistencia */
+
+/* Selector :root define variables globales disponibles en todo el documento */
+:root {
+    /* ===== COLORES DE FORMULARIOS ===== */
+    --fondo-formulario: #ffff;
+    /* Fondo blanco para los formularios */
+    --fondo-main: #ffff;
+    /* Fondo blanco para el área principal */
+    --formulario-color: #333;
+    /* Color del texto en formularios (gris oscuro) */
+    --fondo-formulario-input: #f0f5ff;
+    /* Fondo azul muy claro para inputs */
+
+    /* ===== COLORES DE BOTONES ===== */
+    --fondo-boton: #1a1a1a;
+    /* Fondo negro/gris oscuro para botones */
+    --color-boton--texto: #ffff;
+    /* Texto blanco en botones */
+    --color-boton: #112244;
+    /* Azul oscuro para botones de la página de inicio */
+
+    /* ===== COLORES GENERALES ===== */
+    --fondo-inicio: #2c3e50;
+    /* Azul oscuro - color principal de la página de inicio */
+    --color-texto: #f4f7f6;
+    /* Texto claro (casi blanco) para fondos oscuros */
+
+    /* ===== COLORES DEL SIDEBAR Y ASIDE ===== */
+    --aside-fondo: #EEF5FF;
+    /* Fondo azul muy claro para áreas secundarias */
+    --aside-links: #170d9b;
+    /* Azul para enlaces en aside (no utilizado actualmente) */
+    --fondo-sidebar: #2c3e50;
+    /* Azul oscuro para el sidebar de navegación */
+
+    /* ===== COLORES DE CARDS Y TABLAS ===== */
+    --color-card-background: #ffffff;
+    /* Fondo blanco para tarjetas */
+    --color-border: #dfe6e9;
+    /* Gris claro para bordes de tablas y controles */
+    --color-text-dark: #34495e;
+    /* Texto principal - azul grisáceo oscuro */
+    --color-text-light: #7f8c8d;
+    /* Texto secundario, íconos - gris medio */
+
+    /* ===== COLORES DE ESTADO ===== */
+    --color-exito: #27ae60;
+    /* Verde para éxito/confirmación */
+    --color-error: #e74c3c;
+    /* Rojo para error/eliminar */
+    --color-editar: #3498db;
+    /* Azul para editar/acciones */
+    --color-advertencia: #f39c12;
+    /* Naranja para advertencias */
+
+    /* ===== COLORES DE FONDO ALTERNATIVO ===== */
+    --fondo-alternativo: #f8f9fa;
+    /* Gris muy claro para filas alternas */
+}

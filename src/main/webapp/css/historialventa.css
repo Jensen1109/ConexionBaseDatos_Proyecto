@@ -1,0 +1,316 @@
+/* ==================== ESTILOS PARA LA PÁGINA DE HISTORIAL DE VENTAS ==================== */
+/* Este archivo contiene los estilos para la visualización del historial de ventas */
+/* Incluye barra de búsqueda, tabla de ventas y estados de pago */
+
+/* Este archivo NO necesita importar las custom properties porque */
+/* ya se importan a través de styles.css */
+/* Importa estilos compartidos desde registroProducto */
+@import url(/css/registroProducto.css);
+
+/* ==================== RESET BÁSICO ==================== */
+/* Elimina los estilos por defecto del navegador para consistencia */
+* {
+    margin: 0;
+    /* Elimina márgenes por defecto */
+    padding: 0;
+    /* Elimina padding por defecto */
+    box-sizing: border-box;
+    /* El padding y border se incluyen en el ancho total */
+}
+
+/* ==================== ESTILOS DEL BODY ==================== */
+/* Configura el contenedor principal con flexbox */
+body {
+    display: flex;
+    /* Activa flexbox para layout de 2 columnas */
+    min-height: 100vh;
+    /* Altura mínima igual a la ventana del navegador */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Tipografía del sistema */
+    background-color: #f5f5f5;
+    /* Fondo gris claro */
+}
+
+/* ==================== SIDEBAR - BARRA LATERAL ==================== */
+/* Menú de navegación lateral izquierdo */
+.sidebar {
+    width: 180px;
+    /* Ancho fijo del sidebar */
+    background-color: var(--fondo-sidebar);
+    /* Color azul oscuro de fondo */
+    min-height: 100vh;
+    /* Altura completa de la ventana */
+    padding: 20px 0;
+    /* Espaciado vertical interno */
+}
+
+/* Contenedor interno del sidebar - organiza los elementos en columna */
+.contenedor__sidebar {
+    display: flex;
+    /* Activa flexbox */
+    flex-direction: column;
+    /* Los elementos se apilan verticalmente */
+}
+
+/* Título principal del sidebar "Tienda Don Pedro" */
+.sidebar__titulo-principal {
+    color: white;
+    /* Texto blanco */
+    font-size: 1.5rem;
+    /* Tamaño de fuente grande */
+    padding: 20px;
+    /* Espaciado interno */
+    margin-bottom: 20px;
+    /* Espacio debajo del título */
+    line-height: 1.3;
+    /* Altura de línea para mejor legibilidad */
+}
+
+/* Enlaces de navegación del sidebar */
+.sidebar__link {
+    color: white;
+    /* Texto blanco */
+    text-decoration: none;
+    /* Sin subrayado */
+    padding: 12px 20px;
+    /* Espaciado interno */
+    display: block;
+    /* Ocupa todo el ancho disponible */
+    transition: background-color 0.3s;
+    /* Animación suave al hover */
+}
+
+/* Efecto hover en los enlaces - fondo semi-transparente */
+.sidebar__link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Blanco al 10% de opacidad */
+}
+
+/* Estilo para el enlace activo/seleccionado */
+.sidebar__link--activo {
+    background-color: rgba(255, 255, 255, 0.2);
+    /* Blanco al 20% de opacidad */
+}
+
+/* Botón de retroceso (flecha) en el sidebar */
+.sidebar__back {
+    color: white;
+    /* Texto/icono blanco */
+    padding: 15px 20px;
+    /* Espaciado interno */
+    display: block;
+    /* Ocupa todo el ancho */
+    font-size: 1.2rem;
+    /* Tamaño del icono */
+    transition: background-color 0.3s;
+    /* Animación suave */
+}
+
+/* Efecto hover en el botón de retroceso */
+.sidebar__back:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Fondo semi-transparente */
+}
+
+/* ==================== ÁREA PRINCIPAL (MAIN) ==================== */
+/* Contenedor del contenido principal a la derecha del sidebar */
+main {
+    flex: 1;
+    /* Ocupa todo el espacio disponible */
+    display: flex;
+    /* Activa flexbox */
+    justify-content: center;
+    /* Centra horizontalmente el contenido */
+    padding: 30px;
+    /* Espaciado interno */
+}
+
+/* ==================== CONTENEDOR DEL HISTORIAL ==================== */
+/* Tarjeta blanca que contiene la barra de búsqueda y tabla */
+.historial-venta {
+    display: flex;
+    /* Activa flexbox */
+    flex-direction: column;
+    /* Elementos apilados verticalmente */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    /* Sombra pronunciada */
+    background-color: rgb(255, 255, 255);
+    /* Fondo blanco */
+    border-radius: 8px;
+    /* Esquinas redondeadas */
+    padding: 30px;
+    /* Espaciado interno */
+    width: 700px;
+    /* Ancho fijo */
+    min-height: 400px;
+    /* Altura mínima */
+    gap: 20px;
+    /* Espacio entre elementos internos */
+}
+
+/* ==================== BARRA DE BÚSQUEDA ==================== */
+/* Contenedor de la barra de búsqueda con icono */
+.historial-venta__busqueda {
+    display: flex;
+    /* Flexbox para alinear icono e input */
+    align-items: center;
+    /* Centra verticalmente */
+    border: 1px solid #ccc;
+    /* Borde gris */
+    border-radius: 4px;
+    /* Esquinas redondeadas */
+    padding: 10px 15px;
+    /* Espaciado interno */
+}
+
+/* Icono de lupa de búsqueda */
+.historial-venta__icono-busqueda {
+    margin-right: 10px;
+    /* Espacio a la derecha del icono */
+    color: #999;
+    /* Color gris */
+}
+
+/* Campo de texto de búsqueda */
+.historial-venta__input-busqueda {
+    color: #333;
+    /* Color del texto */
+    border: none;
+    /* Sin borde propio */
+    width: 100%;
+    /* Ocupa todo el ancho disponible */
+    height: 100%;
+    /* Altura completa */
+    font-size: 16px;
+    /* Tamaño de fuente */
+    outline: none;
+    /* Sin outline al focus */
+}
+
+/* Estilo del placeholder del input */
+.historial-venta__input-busqueda::placeholder {
+    color: #999;
+    /* Color gris claro */
+}
+
+/* ==================== TABLA DE HISTORIAL ==================== */
+/* Contenedor de la tabla con scroll */
+.contenedor-tabla {
+    width: 100%;
+    /* Ancho completo */
+    max-height: 400px;
+    /* Altura máxima con scroll */
+    overflow-y: auto;
+    /* Scroll vertical si excede la altura */
+    border-collapse: collapse;
+    /* Sin espacios entre celdas */
+    border: 1px solid #e0e0e0;
+    /* Borde gris claro */
+    border-radius: 4px;
+    /* Esquinas redondeadas */
+    display: flex;
+    /* Flexbox para organizar thead y tbody */
+    flex-direction: column;
+    /* Thead arriba, tbody abajo */
+}
+
+/* Encabezado de la tabla (thead) */
+.historial-venta__tabla-head {
+    background-color: #f5f5f5;
+    /* Fondo gris muy claro */
+    display: flex;
+    /* Flexbox */
+    width: 100%;
+    /* Ancho completo */
+}
+
+/* Fila del encabezado - usa CSS Grid para columnas */
+.historial-venta__tabla-head tr {
+    display: grid;
+    /* Activa CSS Grid */
+    grid-template-columns: 1fr 1.5fr 1fr 1fr;
+    /* 4 columnas: Fecha, Cliente, Total, Estado */
+    align-items: center;
+    /* Centra verticalmente el contenido */
+    width: 100%;
+    /* Ancho completo */
+}
+
+/* Celdas del encabezado (th) */
+.historial-venta__columna {
+    padding: 15px 10px;
+    /* Espaciado interno */
+    text-align: left;
+    /* Texto alineado a la izquierda */
+    font-weight: 600;
+    /* Texto en negrita */
+    color: #333;
+    /* Color oscuro */
+    border-bottom: 1px solid #e0e0e0;
+    /* Línea inferior */
+}
+
+/* Cuerpo de la tabla (tbody) */
+.historial-venta__tabla-body {
+    display: flex;
+    /* Flexbox */
+    flex-direction: column;
+    /* Filas apiladas */
+    width: 100%;
+    /* Ancho completo */
+}
+
+/* Filas de datos - usan CSS Grid para coincidir con el encabezado */
+.historial-venta__tabla-body tr {
+    display: grid;
+    /* Activa CSS Grid */
+    grid-template-columns: 1fr 1.5fr 1fr 1fr;
+    /* Mismas proporciones que el thead */
+    align-items: center;
+    /* Centra verticalmente */
+    border-bottom: 1px solid #f0f0f0;
+    /* Línea separadora */
+    width: 100%;
+    /* Ancho completo */
+}
+
+/* Elimina el borde de la última fila */
+.historial-venta__tabla-body tr:last-child {
+    border-bottom: none;
+    /* Sin borde inferior */
+}
+
+/* Efecto hover en las filas de datos */
+.historial-venta__item:hover {
+    background-color: #fafafa;
+    /* Fondo gris muy sutil */
+}
+
+/* Celdas de datos (td) */
+.historial-venta__valor {
+    padding: 15px 10px;
+    /* Espaciado interno */
+    text-align: left;
+    /* Texto alineado a la izquierda */
+    color: #333;
+    /* Color oscuro */
+    font-size: 14px;
+    /* Tamaño de fuente */
+}
+
+/* ==================== ESTADOS DE PAGO ==================== */
+/* Estado "Completado" - texto verde */
+.historial-venta__estado--completado {
+    color: var(--color-exito);
+    /* Verde */
+    font-weight: 500;
+    /* Texto semi-negrita */
+}
+
+/* Estado "Pendiente" - texto naranja */
+.historial-venta__estado--pendiente {
+    color: #e67e22;
+    /* Naranja */
+    font-weight: 500;
+    /* Texto semi-negrita */
+}

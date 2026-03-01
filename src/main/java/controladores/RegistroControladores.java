@@ -13,6 +13,12 @@ import java.io.IOException;
 public class RegistroControladores extends HttpServlet {
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/view/registro.jsp").forward(request, response);
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -33,14 +39,14 @@ public class RegistroControladores extends HttpServlet {
             cedula == null || cedula.isBlank()) {
 
             request.setAttribute("error", "Por favor completa todos los campos.");
-            request.getRequestDispatcher("/registro.html").forward(request, response);
+            request.getRequestDispatcher("/registro.jsp").forward(request, response);
             return;
         }
 
         // Verificar si el email ya existe
         if (usuarioDAO.emailExiste(email)) {
             request.setAttribute("error", "Este email ya está registrado.");
-            request.getRequestDispatcher("/registro.html").forward(request, response);
+            request.getRequestDispatcher("/registro.jsp").forward(request, response);
             return;
         }
 
@@ -59,7 +65,7 @@ public class RegistroControladores extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/LoginControlador");
         } else {
             request.setAttribute("error", "Error al registrar. Intenta de nuevo.");
-            request.getRequestDispatcher("/registro.html").forward(request, response);
+            request.getRequestDispatcher("/registro.jsp").forward(request, response);
         }
     }
 }

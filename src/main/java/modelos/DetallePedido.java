@@ -12,7 +12,7 @@ public class DetallePedido {
     public DetallePedido() {}
 
     public DetallePedido(int idDetalle, int idPedido, int idProducto,
-                         int cantidadVendida, BigDecimal precioUnitario) {
+                        int cantidadVendida, BigDecimal precioUnitario) {
         this.idDetalle = idDetalle;
         this.idPedido = idPedido;
         this.idProducto = idProducto;
