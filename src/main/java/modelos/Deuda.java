@@ -40,4 +40,9 @@ public class Deuda {
 
     public LocalDate getFechaAbono() { return fechaAbono; }
     public void setFechaAbono(LocalDate fechaAbono) { this.fechaAbono = fechaAbono; }
+
+    // Campo calculado via JOIN (no persiste en BD)
+    private String nombreCliente;
+    public String getNombreCliente() { return nombreCliente; }
+    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
 }

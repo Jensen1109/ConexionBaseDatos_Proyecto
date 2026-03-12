@@ -1,12 +1,17 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.List, modelos.Producto" %>
+<%
+    List<Producto> productos = (List<Producto>) request.getAttribute("productos");
+    String ctx = request.getContextPath();
+%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/styles.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/controlstock.css">
+    <link rel="stylesheet" href="<%= ctx %>/styles.css">
+    <link rel="stylesheet" href="<%= ctx %>/css/controlstock.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <title>Control de stock</title>
 </head>
@@ -14,7 +19,7 @@
 <body>
     <header class="header">
         <div class="header__contenedor">
-            <a href="productos.jsp" class="header__link">
+            <a href="<%= ctx %>/ProductoControlador" class="header__link">
                 <i class="fa-solid fa-arrow-left header__icono"></i>
             </a>
             <h2 class="header__titulo">Stock de productos</h2>
@@ -44,11 +49,12 @@
 
                 <div class="stock-card__search">
                     <i class="fa-solid fa-magnifying-glass search__icon"></i>
-                    <input type="text" class="search__input" placeholder="Buscar producto...">
+                    <input type="text" id="buscador" class="search__input" placeholder="Buscar producto..."
+                           oninput="filtrarTabla()">
                 </div>
             </div>
 
-            <table class="contenedor-tabla">
+            <table class="contenedor-tabla" id="tablaStock">
                 <thead>
                     <tr>
                         <th class="tabla__header">Producto</th>
@@ -58,34 +64,63 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="tabla__row">
-                        <td class="tabla__data">Papa criolla</td>
-                        <td class="tabla__data">150</td>
-                        <td class="tabla__data">50</td>
-                        <td class="tabla__data estado--suficiente">Suficiente</td>
+                    <% if (productos == null || productos.isEmpty()) { %>
+                    <tr>
+                        <td colspan="4" style="text-align:center;">No hay productos registrados.</td>
                     </tr>
-                    <tr class="tabla__row">
-                        <td class="tabla__data">Tomate</td>
-                        <td class="tabla__data">15</td>
-                        <td class="tabla__data">30</td>
-                        <td class="tabla__data estado--bajo">Bajo</td>
+                    <% } else {
+                        for (Producto p : productos) {
+                            int stock   = p.getStock();
+                            int minimo  = p.getStockMinimo();
+                            String estado;
+                            String claseEstado;
+                            if (stock == 0 || (minimo > 0 && stock <= minimo * 0.2)) {
+                                estado      = "Crítico";
+                                claseEstado = "estado--critico";
+                            } else if (stock < minimo) {
+                                estado      = "Bajo";
+                                claseEstado = "estado--bajo";
+                            } else {
+                                estado      = "Suficiente";
+                                claseEstado = "estado--suficiente";
+                            }
+                    %>
+                    <tr class="tabla__row" data-estado="<%= estado.toLowerCase().replace("í","i") %>">
+                        <td class="tabla__data"><%= p.getNombre() %></td>
+                        <td class="tabla__data"><%= stock %></td>
+                        <td class="tabla__data"><%= minimo %></td>
+                        <td class="tabla__data <%= claseEstado %>"><%= estado %></td>
                     </tr>
-                    <tr class="tabla__row">
-                        <td class="tabla__data">Jamon</td>
-                        <td class="tabla__data">5</td>
-                        <td class="tabla__data">50</td>
-                        <td class="tabla__data estado--critico">Critico</td>
-                    </tr>
-                    <tr class="tabla__row">
-                        <td class="tabla__data">Manzanas</td>
-                        <td class="tabla__data">70</td>
-                        <td class="tabla__data">50</td>
-                        <td class="tabla__data estado--suficiente">Suficiente</td>
-                    </tr>
+                    <%  }
+                    } %>
                 </tbody>
             </table>
         </div>
     </main>
+
+    <script>
+        // Filtro por checkboxes de estado
+        document.querySelectorAll('.control-filtro__checkbox').forEach(cb => {
+            cb.addEventListener('change', aplicarFiltros);
+        });
+
+        function aplicarFiltros() {
+            const activos = [...document.querySelectorAll('.control-filtro__checkbox:checked')]
+                            .map(cb => cb.dataset.filtro);
+            document.querySelectorAll('#tablaStock tbody tr[data-estado]').forEach(tr => {
+                tr.style.display = (activos.length === 0 || activos.includes(tr.dataset.estado))
+                    ? '' : 'none';
+            });
+        }
+
+        function filtrarTabla() {
+            const texto = document.getElementById('buscador').value.toLowerCase();
+            document.querySelectorAll('#tablaStock tbody tr[data-estado]').forEach(tr => {
+                const nombre = tr.querySelector('td').textContent.toLowerCase();
+                tr.style.display = nombre.includes(texto) ? '' : 'none';
+            });
+        }
+    </script>
 </body>
 
 </html>

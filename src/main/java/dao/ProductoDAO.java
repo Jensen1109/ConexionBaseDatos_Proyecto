@@ -1,6 +1,7 @@
 package dao;
 
 import com.Tienda_Barrio.config.conexion;
+import modelos.Categoria;
 import modelos.Producto;
 
 import java.sql.Connection;
@@ -138,6 +139,11 @@ public class ProductoDAO {
             System.err.println("Error al actualizar producto: " + e.getMessage());
             return false;
         }
+    }
+
+    // LISTAR CATEGORÍAS (para los formularios)
+    public List<Categoria> listarCategorias() {
+        return new CategoriaDAO().listarTodas();
     }
 
     // ELIMINAR

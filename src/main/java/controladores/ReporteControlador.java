@@ -26,7 +26,7 @@ public class ReporteControlador extends HttpServlet {
         }
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
         if (usuario.getIdRol() != 1) {
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/ProductoControlador");
             return;
         }
 
@@ -35,6 +35,7 @@ public class ReporteControlador extends HttpServlet {
         request.setAttribute("totalDeudasPendientes", reporteDAO.totalDeudasPendientes());
         request.setAttribute("totalClientes",       reporteDAO.contarClientes());
 
-        request.getRequestDispatcher("/WEB-INF/view/reportes.jsp").forward(request, response);
+        // CORREGIDO: /view/ (antes apuntaba a /WEB-INF/view/ que no existe)
+        request.getRequestDispatcher("/view/reportes.jsp").forward(request, response);
     }
 }

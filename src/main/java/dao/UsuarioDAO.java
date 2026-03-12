@@ -94,6 +94,41 @@ public class UsuarioDAO {
         return lista;
     }
 
+    // ACTUALIZAR DATOS BÁSICOS DE UN CLIENTE
+    public boolean actualizarCliente(int idUsuario, String nombre, String apellido, String email) {
+        String sql = "UPDATE Usuario SET nombre=?, apellido=?, email=? WHERE id_usuario=?";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nombre);
+            ps.setString(2, apellido);
+            ps.setString(3, email);
+            ps.setInt(4, idUsuario);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar cliente: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ELIMINAR CLIENTE
+    public boolean eliminarCliente(int idUsuario) {
+        String sql = "DELETE FROM Usuario WHERE id_usuario = ? AND id_rol = 2";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar cliente: " + e.getMessage());
+            return false;
+        }
+    }
+
     // VERIFICAR EMAIL
     public boolean emailExiste(String email) {
         String sql = "SELECT COUNT(*) FROM Usuario WHERE email = ?";

@@ -162,6 +162,104 @@ public class PedidoDAO {
         return lista;
     }
 
+    // REGISTRAR PEDIDO Y RETORNAR ID GENERADO (-1 si falla)
+    // Igual que crear() pero devuelve el id_pedido para poder enlazar una Deuda (ventas fiadas)
+    public int registrar(Pedido pedido, List<DetallePedido> detalles) {
+        String sqlPedido  = "INSERT INTO Pedido (id_cliente, id_usuario, id_pago, fecha_venta, total, estado) " +
+                            "VALUES (?, ?, ?, NOW(), ?, ?)";
+        String sqlDetalle = "INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad_vendida, precio_unitario) " +
+                            "VALUES (?, ?, ?, ?)";
+        String sqlStock   = "UPDATE Producto SET stock = stock - ? WHERE id_producto = ?";
+
+        Connection con = null;
+        try {
+            con = conexion.getConnection();
+            con.setAutoCommit(false);
+
+            int idNuevo;
+            try (PreparedStatement ps = con.prepareStatement(sqlPedido, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, pedido.getIdCliente());
+                ps.setInt(2, pedido.getIdUsuario());
+                ps.setInt(3, pedido.getIdPago());
+                ps.setBigDecimal(4, pedido.getTotal());
+                ps.setString(5, pedido.getEstado());
+                ps.executeUpdate();
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (!keys.next()) throw new SQLException("No se obtuvo el ID del pedido.");
+                    idNuevo = keys.getInt(1);
+                }
+            }
+
+            try (PreparedStatement psD = con.prepareStatement(sqlDetalle);
+                 PreparedStatement psS = con.prepareStatement(sqlStock)) {
+                for (DetallePedido d : detalles) {
+                    psD.setInt(1, idNuevo);
+                    psD.setInt(2, d.getIdProducto());
+                    psD.setInt(3, d.getCantidadVendida());
+                    psD.setBigDecimal(4, d.getPrecioUnitario());
+                    psD.addBatch();
+                    psS.setInt(1, d.getCantidadVendida());
+                    psS.setInt(2, d.getIdProducto());
+                    psS.addBatch();
+                }
+                psD.executeBatch();
+                psS.executeBatch();
+            }
+
+            con.commit();
+            return idNuevo;
+
+        } catch (SQLException e) {
+            System.err.println("Error al registrar pedido: " + e.getMessage());
+            if (con != null) try { con.rollback(); } catch (SQLException ex) { /* ignorar */ }
+            return -1;
+        } finally {
+            if (con != null) try { con.setAutoCommit(true); con.close(); } catch (SQLException ex) { /* ignorar */ }
+        }
+    }
+
+    // LISTAR TODOS CON NOMBRE DE CLIENTE (JOIN con Usuario)
+    public List<Pedido> listarConCliente() {
+        List<Pedido> lista = new ArrayList<>();
+        String sql = "SELECT p.*, CONCAT(u.nombre, ' ', u.apellido) AS nombre_cliente " +
+                     "FROM Pedido p " +
+                     "LEFT JOIN Usuario u ON p.id_cliente = u.id_usuario " +
+                     "ORDER BY p.fecha_venta DESC";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Pedido p = mapear(rs);
+                p.setNombreCliente(rs.getString("nombre_cliente"));
+                lista.add(p);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al listar pedidos con cliente: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    // OBTENER PEDIDO POR ID
+    public Pedido obtenerPorId(int id) {
+        String sql = "SELECT * FROM Pedido WHERE id_pedido = ?";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapear(rs);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al obtener pedido por id: " + e.getMessage());
+        }
+        return null;
+    }
+
     // CAMBIAR ESTADO (ej: "pendiente" → "entregado")
     public boolean cambiarEstado(int idPedido, String nuevoEstado) {
         String sql = "UPDATE Pedido SET estado = ? WHERE id_pedido = ?";

@@ -22,10 +22,10 @@ public class LoginControlador extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Si ya hay sesión activa, redirige al inicio
+        // Si ya hay sesión activa, redirige al dashboard (evita el bucle con index.jsp)
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("usuarioLogueado") != null) {
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/ProductoControlador");
             return;
         }
 
@@ -60,12 +60,8 @@ public class LoginControlador extends HttpServlet {
             session.setAttribute("rolUsuario", usuario.getIdRol());
             session.setMaxInactiveInterval(30 * 60); // 30 minutos
 
-            // Redirigir según el rol
-            if (usuario.getIdRol() == 1) {
-                response.sendRedirect(request.getContextPath() + "/view/productos.jsp");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/view/productos.jsp");
-            }
+            // Redirigir al dashboard (ProductoControlador maneja ambos roles)
+            response.sendRedirect(request.getContextPath() + "/ProductoControlador");
 
         } else {
             // Login fallido

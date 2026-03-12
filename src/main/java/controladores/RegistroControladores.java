@@ -1,3 +1,4 @@
+
 package controladores;
 
 import dao.UsuarioDAO;
@@ -39,14 +40,14 @@ public class RegistroControladores extends HttpServlet {
             cedula == null || cedula.isBlank()) {
 
             request.setAttribute("error", "Por favor completa todos los campos.");
-            request.getRequestDispatcher("/registro.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/registro.jsp").forward(request, response);
             return;
         }
 
         // Verificar si el email ya existe
         if (usuarioDAO.emailExiste(email)) {
             request.setAttribute("error", "Este email ya está registrado.");
-            request.getRequestDispatcher("/registro.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/registro.jsp").forward(request, response);
             return;
         }
 
@@ -65,7 +66,7 @@ public class RegistroControladores extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/LoginControlador");
         } else {
             request.setAttribute("error", "Error al registrar. Intenta de nuevo.");
-            request.getRequestDispatcher("/registro.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/registro.jsp").forward(request, response);
         }
     }
 }

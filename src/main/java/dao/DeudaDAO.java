@@ -81,6 +81,49 @@ public class DeudaDAO {
         }
     }
 
+    // REGISTRAR DEUDA NUEVA (para ventas fiadas)
+    public boolean registrarDeuda(Deuda d) {
+        String sql = "INSERT INTO Deuda (id_pedido, monto_pendiente, estado, abono) VALUES (?, ?, 'pendiente', 0)";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, d.getIdPedido());
+            ps.setBigDecimal(2, d.getMontoPendiente());
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al registrar deuda: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // LISTAR DEUDAS PENDIENTES CON NOMBRE DE CLIENTE (JOIN con Pedido + Usuario)
+    public List<Deuda> listarPendientesConCliente() {
+        List<Deuda> lista = new ArrayList<>();
+        String sql = "SELECT d.*, CONCAT(u.nombre, ' ', u.apellido) AS nombre_cliente " +
+                     "FROM Deuda d " +
+                     "LEFT JOIN Pedido p  ON d.id_pedido  = p.id_pedido " +
+                     "LEFT JOIN Usuario u ON p.id_cliente = u.id_usuario " +
+                     "WHERE d.estado = 'pendiente' " +
+                     "ORDER BY d.id_deuda DESC";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Deuda d2 = mapear(rs);
+                d2.setNombreCliente(rs.getString("nombre_cliente"));
+                lista.add(d2);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al listar deudas con cliente: " + e.getMessage());
+        }
+        return lista;
+    }
+
     // TOTAL DEUDAS PENDIENTES
     public java.math.BigDecimal totalPendiente() {
         String sql = "SELECT COALESCE(SUM(monto_pendiente), 0) FROM Deuda WHERE estado = 'pendiente'";
