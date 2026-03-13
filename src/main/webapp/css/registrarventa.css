@@ -5,7 +5,7 @@
 /* Importa las variables CSS personalizadas desde el archivo de propiedades */
 @import url(custom/custompropertiers.css);
 /* Importa estilos compartidos desde registroProducto */
-@import url(/css/registroProducto.css);
+@import url(registroProducto.css);
 
 /* ==================== RESET BÁSICO ==================== */
 /* Elimina los estilos por defecto del navegador para consistencia */
@@ -558,4 +558,33 @@ main {
     /* Borde negro */
     cursor: pointer;
     /* Cursor de mano */
+}
+
+/* ==================== CLASES FALTANTES ==================== */
+/* Cuerpo de la tabla de productos seleccionados */
+.registro-venta__tabla-body {
+    display: block;
+    width: 100%;
+}
+
+/* Contenedor externo del resumen de venta */
+.registro-venta__resumen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+/* Etiqueta de línea del resumen (Total, Productos) */
+.registro-venta__total-label {
+    font-size: 1rem;
+    color: #555;
+    font-weight: 500;
+}
+
+/* Valor de línea del resumen ($0, 0) */
+.registro-venta__total-valor {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
 }

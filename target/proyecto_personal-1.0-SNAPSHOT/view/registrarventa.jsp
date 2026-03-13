@@ -4,168 +4,318 @@
     List<Producto>   productos   = (List<Producto>)   request.getAttribute("productos");
     List<Usuario>    clientes    = (List<Usuario>)    request.getAttribute("clientes");
     List<MetodoPago> metodosPago = (List<MetodoPago>) request.getAttribute("metodosPago");
+    String error = (String) request.getAttribute("error");
     String ctx = request.getContextPath();
+    Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
+    boolean esAdmin = (usuarioActual != null && usuarioActual.getIdRol() == 1);
 %>
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="<%= ctx %>/styles.css">
-    <link rel="stylesheet" href="<%= ctx %>/css/registrarventa.css">
-    <link rel="stylesheet" href="<%= ctx %>/css/registrarventa-mediaqueries.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <title>Registrar venta</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Registrar Venta — Tienda Don Pedro</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { display: flex; min-height: 100vh; font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 230px; background: #1e293b; min-height: 100vh;
+            display: flex; flex-direction: column;
+            position: fixed; top: 0; left: 0; height: 100vh;
+            overflow-y: auto; z-index: 100; transition: transform 0.3s;
+        }
+        .sidebar__brand { padding: 1.4rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar__brand-title { color: #f8fafc; font-size: 1rem; font-weight: 700; }
+        .sidebar__brand-sub   { color: #64748b; font-size: 0.72rem; margin-top: 2px; }
+        .sidebar__section { padding: 1.2rem 0 0.4rem; }
+        .sidebar__label {
+            color: #475569; font-size: 0.63rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 0 1.2rem; display: block; margin-bottom: 0.2rem;
+        }
+        .sidebar__link {
+            display: flex; align-items: center; gap: 0.65rem;
+            color: #94a3b8; text-decoration: none;
+            padding: 0.55rem 1.2rem; font-size: 0.85rem;
+            border-left: 3px solid transparent; transition: all 0.18s;
+        }
+        .sidebar__link i { width: 15px; text-align: center; font-size: 0.8rem; }
+        .sidebar__link:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); border-left-color: #3b82f6; }
+        .sidebar__link--activo { color: #fff; background: rgba(59,130,246,0.12); border-left-color: #3b82f6; }
+
+        /* ── MAIN ── */
+        .main { margin-left: 230px; flex: 1; padding: 2rem 2.5rem; }
+        .page-header { margin-bottom: 1.8rem; }
+        .page-header__title { font-size: 1.65rem; font-weight: 700; color: #1e293b; }
+        .page-header__sub   { color: #64748b; font-size: 0.85rem; margin-top: 0.2rem; }
+
+        /* ── ERROR ── */
+        .alert-error {
+            background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626;
+            border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem;
+            font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        /* ── LAYOUT GRID ── */
+        .layout { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; align-items: start; }
+
+        /* ── CARD ── */
+        .card { background: #fff; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 1.5rem; }
+        .card__title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .card__title i { color: #3b82f6; }
+
+        /* ── FORM FIELDS ── */
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+        .form-label { font-size: 0.8rem; font-weight: 600; color: #374151; }
+        .form-select, .form-input {
+            padding: 0.6rem 0.85rem; border: 1.5px solid #e2e8f0;
+            border-radius: 8px; font-size: 0.875rem; color: #1e293b;
+            background: #f8fafc; transition: border-color 0.18s; font-family: inherit; width: 100%;
+        }
+        .form-select:focus, .form-input:focus {
+            outline: none; border-color: #3b82f6; background: #fff;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
+        }
+
+        /* ── AGREGAR PRODUCTO ── */
+        .add-row { display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; }
+        .add-row .form-group { margin-bottom: 0; flex: 1; min-width: 160px; }
+        .qty-group { width: 85px; flex-shrink: 0; }
+        .btn-add {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.6rem 1rem; background: #3b82f6; color: #fff;
+            border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; white-space: nowrap; transition: background 0.18s; flex-shrink: 0;
+        }
+        .btn-add:hover { background: #2563eb; }
+
+        /* ── PRODUCTS TABLE ── */
+        .products-table { width: 100%; border-collapse: collapse; }
+        .products-table thead tr { background: #f8fafc; }
+        .products-table th {
+            padding: 0.65rem 0.85rem; text-align: left;
+            font-size: 0.72rem; font-weight: 700; color: #475569;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .products-table td { padding: 0.75rem 0.85rem; font-size: 0.85rem; color: #334155; border-bottom: 1px solid #f8fafc; }
+        .products-table tbody tr:last-child td { border-bottom: none; }
+        .td-prod  { font-weight: 600; color: #1e293b; }
+        .td-price { color: #22c55e; font-weight: 700; }
+        .btn-remove { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem; padding: 0.2rem 0.4rem; border-radius: 4px; transition: color 0.15s; }
+        .btn-remove:hover { color: #ef4444; }
+        .empty-productos { text-align: center; padding: 1.8rem; color: #94a3b8; font-size: 0.85rem; }
+
+        /* ── SUMMARY ── */
+        .summary-line { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid #f1f5f9; }
+        .summary-line:last-of-type { border-bottom: none; }
+        .summary-label { color: #64748b; font-size: 0.875rem; }
+        .summary-val   { font-weight: 700; color: #1e293b; }
+        .summary-total { font-size: 1.4rem; color: #22c55e; }
+
+        /* ── FIADO ── */
+        .fiado-row {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.9rem; background: #fef2f2; border-radius: 8px;
+            margin: 1rem 0; cursor: pointer;
+        }
+        .fiado-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #ef4444; }
+        .fiado-label { font-size: 0.875rem; font-weight: 600; color: #dc2626; cursor: pointer; display: block; }
+        .fiado-sub   { font-size: 0.75rem; color: #94a3b8; }
+
+        /* ── SUBMIT ── */
+        .btn-submit {
+            width: 100%; padding: 0.85rem; background: #22c55e; color: #fff;
+            border: none; border-radius: 10px; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: background 0.18s, transform 0.15s;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-submit:hover { background: #16a34a; transform: translateY(-1px); }
+        .btn-link { display: block; text-align: center; margin-top: 0.75rem; color: #64748b; font-size: 0.85rem; text-decoration: none; }
+        .btn-link:hover { color: #1e293b; }
+
+        /* ── HAMBURGER ── */
+        .hamburger-btn {
+            display: none; position: fixed; top: 0.8rem; left: 0.8rem;
+            z-index: 150; background: #1e293b; color: #fff;
+            border: none; border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 1rem; cursor: pointer;
+        }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 90; }
+
+        @media (max-width: 900px)  { .layout { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .overlay.open { display: block; }
+            .hamburger-btn { display: flex; align-items: center; }
+            .main { margin-left: 0; padding: 1rem; padding-top: 4rem; }
+        }
+    </style>
 </head>
-
 <body>
-    <aside class="sidebar">
-        <input type="checkbox" id="hamburger-toggle" class="hamburger-checkbox">
-        <label for="hamburger-toggle" class="hamburger-overlay"></label>
 
-        <nav class="hamburger-nav">
-            <label for="hamburger-toggle" class="hamburger-close">
-                <i class="fa-solid fa-xmark"></i>
-            </label>
-            <h2 class="hamburger-titulo">Tienda Don Pedro</h2>
-            <a href="<%= ctx %>/PedidoControlador"             class="hamburger-link">Historial</a>
-            <a href="<%= ctx %>/PedidoControlador?accion=nuevo" class="hamburger-link hamburger-link--activo">Registrar Venta</a>
-            <a href="<%= ctx %>/DeudaControlador"               class="hamburger-link">Deudores</a>
-        </nav>
+    <button class="hamburger-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-        <div class="contenedor__sidebar">
-            <a href="<%= ctx %>/ProductoControlador" class="sidebar__back">
-                <i class="fa-solid fa-arrow-left"></i>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar__brand">
+            <div class="sidebar__brand-title">Tienda Don Pedro</div>
+            <div class="sidebar__brand-sub">Panel de gestión</div>
+        </div>
+        <div class="sidebar__section">
+            <span class="sidebar__label">Productos</span>
+            <a href="<%= ctx %>/ProductoControlador" class="sidebar__link">
+                <i class="fas fa-box"></i> Ver productos
             </a>
-            <h2 class="sidebar__titulo-principal">Tienda<br>Don Pedro</h2>
-            <a href="<%= ctx %>/PedidoControlador"             class="sidebar__link">Historial</a>
-            <a href="<%= ctx %>/PedidoControlador?accion=nuevo" class="sidebar__link sidebar__link--activo">Registrar Venta</a>
-            <a href="<%= ctx %>/DeudaControlador"               class="sidebar__link">Deudores</a>
-
-            <label for="hamburger-toggle" class="hamburger-btn">
-                <span></span><span></span><span></span>
-            </label>
+            <a href="<%= ctx %>/ProductoControlador?accion=stock" class="sidebar__link">
+                <i class="fas fa-chart-bar"></i> Control de stock
+            </a>
+        </div>
+        <div class="sidebar__section">
+            <span class="sidebar__label">Ventas</span>
+            <a href="<%= ctx %>/PedidoControlador?accion=nuevo" class="sidebar__link sidebar__link--activo">
+                <i class="fas fa-cart-plus"></i> Registrar venta
+            </a>
+            <a href="<%= ctx %>/PedidoControlador" class="sidebar__link">
+                <i class="fas fa-history"></i> Historial de venta
+            </a>
+            <% if (esAdmin) { %>
+            <a href="<%= ctx %>/ReporteControlador" class="sidebar__link">
+                <i class="fas fa-chart-line"></i> Reportes
+            </a>
+            <% } %>
+        </div>
+        <div class="sidebar__section">
+            <span class="sidebar__label">Clientes</span>
+            <a href="<%= ctx %>/ClienteControlador" class="sidebar__link">
+                <i class="fas fa-users"></i> Ver / Editar clientes
+            </a>
+            <a href="<%= ctx %>/DeudaControlador" class="sidebar__link">
+                <i class="fas fa-file-invoice-dollar"></i> Deudores
+            </a>
         </div>
     </aside>
 
     <main class="main">
+        <div class="page-header">
+            <h1 class="page-header__title">Registrar Venta</h1>
+            <p class="page-header__sub">Seleccione cliente, productos y método de pago.</p>
+        </div>
 
-        <% String error = (String) request.getAttribute("error"); %>
         <% if (error != null) { %>
-            <p style="color:red;text-align:center;"><%= error %></p>
+        <div class="alert-error"><i class="fas fa-exclamation-circle"></i> <%= error %></div>
         <% } %>
 
-        <form class="registro-venta" id="formVenta"
-              action="<%= ctx %>/PedidoControlador" method="post"
-              onsubmit="return validarFormulario()">
-
+        <form id="formVenta" action="<%= ctx %>/PedidoControlador" method="post" onsubmit="return validar()">
             <input type="hidden" name="accion" value="registrar">
 
-            <div class="columna-izquierda">
+            <div class="layout">
+                <!-- IZQUIERDA -->
+                <div>
+                    <div class="card" style="margin-bottom:1.5rem;">
+                        <div class="card__title"><i class="fas fa-user"></i> Datos de la venta</div>
+                        <div class="form-group">
+                            <label class="form-label">Cliente *</label>
+                            <select name="idCliente" class="form-select" required>
+                                <option value="">-- Seleccionar cliente --</option>
+                                <% if (clientes != null) { for (Usuario c : clientes) { %>
+                                <option value="<%= c.getIdUsuario() %>">
+                                    <%= c.getNombre() %> <%= c.getApellido() != null ? c.getApellido() : "" %>
+                                </option>
+                                <% } } %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Método de pago *</label>
+                            <select name="idPago" class="form-select" required>
+                                <option value="">-- Seleccionar método --</option>
+                                <% if (metodosPago != null) { for (MetodoPago mp : metodosPago) { %>
+                                <option value="<%= mp.getIdPago() %>"><%= mp.getNombre() %></option>
+                                <% } } %>
+                            </select>
+                        </div>
+                    </div>
 
-                <!-- ── CLIENTE ── -->
-                <div class="registro-venta__formulario">
-                    <h3 class="registro-venta__label">Cliente</h3>
-                    <select name="idCliente" class="registro-venta__input" required>
-                        <option value="">-- Seleccionar cliente --</option>
-                        <% if (clientes != null) {
-                            for (Usuario c : clientes) { %>
-                        <option value="<%= c.getIdUsuario() %>">
-                            <%= c.getNombre() %> <%= c.getApellido() %>
-                        </option>
-                        <%  }
-                        } %>
-                    </select>
+                    <div class="card">
+                        <div class="card__title"><i class="fas fa-box"></i> Agregar productos</div>
+                        <div class="add-row">
+                            <div class="form-group" style="flex:1; margin-bottom:0;">
+                                <label class="form-label">Producto</label>
+                                <select id="selectProducto" class="form-select">
+                                    <option value="">-- Seleccionar --</option>
+                                    <% if (productos != null) { for (Producto p : productos) { %>
+                                    <option value="<%= p.getIdProducto() %>"
+                                            data-precio="<%= p.getPrecio() %>"
+                                            data-nombre="<%= p.getNombre().replace("\"","&quot;") %>"
+                                            data-stock="<%= p.getStock() %>">
+                                        <%= p.getNombre() %> — $<%= String.format("%,.0f", p.getPrecio()) %>
+                                    </option>
+                                    <% } } %>
+                                </select>
+                            </div>
+                            <div class="form-group qty-group" style="margin-bottom:0;">
+                                <label class="form-label">Cant.</label>
+                                <input type="number" id="inputCantidad" class="form-input" value="1" min="1">
+                            </div>
+                            <button type="button" class="btn-add" onclick="agregarProducto()">
+                                <i class="fas fa-plus"></i> Agregar
+                            </button>
+                        </div>
+
+                        <table class="products-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cant.</th>
+                                    <th>Precio unit.</th>
+                                    <th>Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaProductos">
+                                <tr id="filaVacia">
+                                    <td colspan="5" class="empty-productos">
+                                        <i class="fas fa-shopping-cart" style="font-size:1.8rem;display:block;margin-bottom:0.4rem;"></i>
+                                        Sin productos — agrega uno arriba
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <!-- ── MÉTODO DE PAGO ── -->
-                <div class="registro-venta__formulario">
-                    <h3 class="registro-venta__label">Método de pago</h3>
-                    <select name="idPago" class="registro-venta__input" required>
-                        <option value="">-- Seleccionar método --</option>
-                        <% if (metodosPago != null) {
-                            for (MetodoPago mp : metodosPago) { %>
-                        <option value="<%= mp.getIdPago() %>"><%= mp.getNombre() %></option>
-                        <%  }
-                        } %>
-                    </select>
-                </div>
+                <!-- DERECHA -->
+                <div class="card">
+                    <div class="card__title"><i class="fas fa-calculator"></i> Resumen</div>
 
-                <!-- ── SELECTOR DE PRODUCTO ── -->
-                <div class="registro-venta__busqueda">
-                    <select id="selectProducto" class="registro-venta__input-busqueda">
-                        <option value="">-- Buscar producto --</option>
-                        <% if (productos != null) {
-                            for (Producto p : productos) { %>
-                        <option value="<%= p.getIdProducto() %>"
-                                data-precio="<%= p.getPrecio() %>"
-                                data-nombre="<%= p.getNombre().replace("\"","&quot;") %>"
-                                data-stock="<%= p.getStock() %>">
-                            <%= p.getNombre() %> — $<%= p.getPrecio() %>
-                        </option>
-                        <%  }
-                        } %>
-                    </select>
-                    <input type="number" id="inputCantidad" class="registro-venta__input"
-                           value="1" min="1" style="width:70px;">
-                    <button type="button" class="registro-venta__btn-historial"
-                            onclick="agregarProducto()">
-                        <i class="fas fa-plus"></i> Agregar
+                    <div class="summary-line">
+                        <span class="summary-label"><i class="fas fa-box" style="color:#3b82f6;margin-right:4px;"></i> Productos</span>
+                        <span class="summary-val" id="cantProductos">0</span>
+                    </div>
+                    <div class="summary-line">
+                        <span class="summary-label"><i class="fas fa-dollar-sign" style="color:#22c55e;margin-right:4px;"></i> Total</span>
+                        <span class="summary-val summary-total" id="totalDisplay">$0</span>
+                    </div>
+
+                    <div class="fiado-row">
+                        <input type="checkbox" name="fiado" value="on" id="chkFiado">
+                        <div>
+                            <label class="fiado-label" for="chkFiado">Venta a fiado</label>
+                            <span class="fiado-sub">Se registra como deuda pendiente</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-check-circle"></i> Guardar venta
                     </button>
+                    <a href="<%= ctx %>/PedidoControlador" class="btn-link">
+                        <i class="fas fa-history"></i> Ver historial
+                    </a>
                 </div>
-
-                <!-- ── TABLA DE PRODUCTOS SELECCIONADOS ── -->
-                <table class="contenedor-tabla">
-                    <thead class="registro-venta__tabla-head">
-                        <tr>
-                            <th class="registro-venta__columna">Cantidad</th>
-                            <th class="registro-venta__columna">Producto</th>
-                            <th class="registro-venta__columna">Precio Unit.</th>
-                            <th class="registro-venta__columna">Subtotal</th>
-                            <th class="registro-venta__columna"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaProductos" class="registro-venta__tabla-body">
-                        <!-- filas añadidas por JS -->
-                    </tbody>
-                </table>
-
-            </div><!-- /columna-izquierda -->
-
-            <div class="columna-derecha">
-                <div class="registro-venta__resumen">
-                    <div class="registro-venta__resumen-box">
-
-                        <div class="registro-venta__linea-total">
-                            <span class="registro-venta__total-label">Total</span>
-                            <span id="totalDisplay" class="registro-venta__total-valor">$0</span>
-                        </div>
-
-                        <div class="registro-venta__linea-total">
-                            <span class="registro-venta__total-label">Productos</span>
-                            <span id="cantProductos" class="registro-venta__total-valor">0</span>
-                        </div>
-
-                        <label class="registro-venta__fiado">
-                            <input type="checkbox" name="fiado" value="on"
-                                   class="registrarventa__checkbox">
-                            <p class="registrarventa__texto">Fiado (registra deuda)</p>
-                        </label>
-
-                        <a href="<%= ctx %>/PedidoControlador"
-                           class="registro-venta__btn-historial">Ver historial</a>
-
-                    </div>
-
-                    <div class="registro-venta__acciones-finales">
-                        <button type="submit" class="registro-venta__btn-guardar">
-                            Guardar venta
-                        </button>
-                    </div>
-                </div>
-            </div><!-- /columna-derecha -->
-
+            </div>
         </form>
     </main>
 
@@ -176,42 +326,34 @@
             const sel  = document.getElementById('selectProducto');
             const opt  = sel.options[sel.selectedIndex];
             const cant = parseInt(document.getElementById('inputCantidad').value) || 1;
-
             if (!opt.value) { alert('Selecciona un producto.'); return; }
-
             const id     = opt.value;
             const nombre = opt.dataset.nombre;
             const precio = parseFloat(opt.dataset.precio);
             const stock  = parseInt(opt.dataset.stock);
+            if (cant > stock) { alert('Stock insuficiente. Disponible: ' + stock); return; }
 
-            if (cant > stock) {
-                alert('Stock insuficiente. Disponible: ' + stock);
-                return;
-            }
-
+            document.getElementById('filaVacia').style.display = 'none';
             filaId++;
             const subtotal = precio * cant;
-            const tbody    = document.getElementById('tablaProductos');
-            const tr       = document.createElement('tr');
-            tr.className   = 'registro-venta__item';
-            tr.id          = 'fila-' + filaId;
-            tr.innerHTML   = `
-                <td class="registro-venta__valor" data-label="Cantidad">${cant}</td>
-                <td class="registro-venta__valor" data-label="Producto">${nombre}</td>
-                <td class="registro-venta__valor" data-label="Precio Unit.">$${precio.toLocaleString('es-CO')}</td>
-                <td class="registro-venta__valor" data-label="Subtotal">$${subtotal.toLocaleString('es-CO')}</td>
-                <td class="registro-venta__valor">
-                    <i class="fas fa-trash-alt registro-venta__icono-borrar"
-                       style="cursor:pointer"
-                       onclick="eliminarFila('fila-${filaId}')"></i>
+            const tbody = document.getElementById('tablaProductos');
+            const tr = document.createElement('tr');
+            tr.id = 'fila-' + filaId;
+            tr.innerHTML = `
+                <td class="td-prod">${nombre}</td>
+                <td>${cant}</td>
+                <td class="td-price">$${precio.toLocaleString('es-CO')}</td>
+                <td style="font-weight:600;">$${subtotal.toLocaleString('es-CO')}</td>
+                <td>
+                    <button type="button" class="btn-remove" onclick="eliminarFila('fila-${filaId}')">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </td>
-                <input type="hidden" name="idProducto"    value="${id}">
-                <input type="hidden" name="cantidad"      value="${cant}">
+                <input type="hidden" name="idProducto"     value="${id}">
+                <input type="hidden" name="cantidad"       value="${cant}">
                 <input type="hidden" name="precioUnitario" value="${precio}">
             `;
             tbody.appendChild(tr);
-
-            // reset selector
             sel.value = '';
             document.getElementById('inputCantidad').value = 1;
             actualizarResumen();
@@ -220,29 +362,32 @@
         function eliminarFila(id) {
             const fila = document.getElementById(id);
             if (fila) { fila.remove(); actualizarResumen(); }
+            if (document.querySelectorAll('input[name="idProducto"]').length === 0)
+                document.getElementById('filaVacia').style.display = '';
         }
 
         function actualizarResumen() {
             const cantidades = document.querySelectorAll('input[name="cantidad"]');
             const precios    = document.querySelectorAll('input[name="precioUnitario"]');
             let total = 0;
-            for (let i = 0; i < cantidades.length; i++) {
+            for (let i = 0; i < cantidades.length; i++)
                 total += parseInt(cantidades[i].value) * parseFloat(precios[i].value);
-            }
-            document.getElementById('totalDisplay').textContent =
-                '$' + total.toLocaleString('es-CO');
+            document.getElementById('totalDisplay').textContent = '$' + total.toLocaleString('es-CO');
             document.getElementById('cantProductos').textContent = cantidades.length;
         }
 
-        function validarFormulario() {
-            const filas = document.querySelectorAll('input[name="idProducto"]');
-            if (filas.length === 0) {
+        function validar() {
+            if (document.querySelectorAll('input[name="idProducto"]').length === 0) {
                 alert('Agrega al menos un producto a la venta.');
                 return false;
             }
             return true;
         }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
     </script>
 </body>
-
 </html>

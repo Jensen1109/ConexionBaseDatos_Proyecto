@@ -307,3 +307,47 @@ body {
 .producto__icono:has(.fa-trash) {
   background-color: var(--color-error);
 }
+
+/* ==================== MENÚ MÓVIL (clases faltantes) ==================== */
+.hamburguesa-linea {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: white;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.header-mobile__titulo {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.nav-mobile__seccion {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.nav-mobile__titulo {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 20px;
+  font-weight: 600;
+}
+
+.nav-mobile__link {
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.nav-mobile__link:hover {
+  background-color: rgba(255,255,255,0.1);
+}

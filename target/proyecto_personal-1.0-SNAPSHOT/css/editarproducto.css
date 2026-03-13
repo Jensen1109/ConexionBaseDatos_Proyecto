@@ -7,4 +7,4 @@
 
 /* Importa todos los estilos del formulario de registro de producto */
 /* Esto evita duplicar código ya que ambas páginas tienen el mismo diseño */
-@import url(/css/registroProducto.css);
+@import url(registroProducto.css);

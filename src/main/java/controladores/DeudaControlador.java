@@ -1,6 +1,7 @@
 package controladores;
 
 import dao.DeudaDAO;
+import dao.UsuarioDAO;
 import modelos.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 public class DeudaControlador extends HttpServlet {
 
     private final DeudaDAO deudaDAO = new DeudaDAO();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     // ─────────────────────────────────────────────
     // Solo admin puede gestionar deudas
@@ -35,7 +37,7 @@ public class DeudaControlador extends HttpServlet {
     }
 
     // ─────────────────────────────────────────────
-    // GET: listar deudas pendientes con nombre de cliente
+    // GET: listar deudas pendientes o mostrar formulario de nueva deuda
     // ─────────────────────────────────────────────
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,13 +45,22 @@ public class DeudaControlador extends HttpServlet {
 
         if (!verificarAdmin(request, response)) return;
 
+        String accion = request.getParameter("accion");
+
+        if ("nuevoFormulario".equals(accion)) {
+            request.setAttribute("clientes", usuarioDAO.listarClientes());
+            request.getRequestDispatcher("/view/registrarDeuda.jsp").forward(request, response);
+            return;
+        }
+
+        // Default: listar deudas
         request.setAttribute("deudas",        deudaDAO.listarPendientesConCliente());
         request.setAttribute("totalPendiente", deudaDAO.totalPendiente());
         request.getRequestDispatcher("/view/deudores.jsp").forward(request, response);
     }
 
     // ─────────────────────────────────────────────
-    // POST: registrar abono a una deuda
+    // POST: registrar abono o registrar deuda nueva
     // ─────────────────────────────────────────────
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -59,6 +70,17 @@ public class DeudaControlador extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
+        String accion = request.getParameter("accion");
+
+        if ("registrar".equals(accion)) {
+            int idCliente = Integer.parseInt(request.getParameter("idCliente"));
+            BigDecimal monto = new BigDecimal(request.getParameter("montoPendiente"));
+            deudaDAO.registrarDeudaDirecta(idCliente, monto);
+            response.sendRedirect(request.getContextPath() + "/DeudaControlador");
+            return;
+        }
+
+        // Default: registrar abono a deuda existente
         int idDeuda = Integer.parseInt(request.getParameter("idDeuda"));
         BigDecimal monto = new BigDecimal(request.getParameter("monto"));
         deudaDAO.registrarAbono(idDeuda, monto);

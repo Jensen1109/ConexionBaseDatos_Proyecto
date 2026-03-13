@@ -5,7 +5,7 @@
 /* Este archivo NO necesita importar las custom properties porque */
 /* ya se importan a través de styles.css */
 /* Importa estilos compartidos desde registroProducto */
-@import url(/css/registroProducto.css);
+@import url(registroProducto.css);
 
 /* ==================== RESET BÁSICO ==================== */
 /* Elimina los estilos por defecto del navegador para consistencia */

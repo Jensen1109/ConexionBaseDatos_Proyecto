@@ -239,3 +239,62 @@ body {
     background-color: #d0d0d0;
     /* Gris ligeramente más oscuro */
 }
+
+/* ==================== TABLA DE CLIENTES ==================== */
+.contenedor-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.editar-usuario__th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    background-color: #f5f5f5;
+    border-bottom: 2px solid #e0e0e0;
+    color: #333;
+    font-size: 14px;
+}
+
+.editar-usuario__fila {
+    transition: background-color 0.2s;
+}
+
+.editar-usuario__fila:hover {
+    background-color: #fafafa;
+}
+
+.editar-usuario__celda {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    color: #333;
+}
+
+.editar-usuario__btn {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    margin-right: 6px;
+    background-color: var(--fondo-sidebar);
+    color: white;
+    border: none;
+}
+
+.editar-usuario__btn:hover {
+    background-color: #1a2b3c;
+}
+
+.editar-usuario__btn--eliminar {
+    background-color: var(--color-error);
+}
+
+.editar-usuario__btn--eliminar:hover {
+    background-color: #c0392b;
+}

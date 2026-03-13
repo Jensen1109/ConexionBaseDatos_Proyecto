@@ -41,6 +41,11 @@ public class Deuda {
     public LocalDate getFechaAbono() { return fechaAbono; }
     public void setFechaAbono(LocalDate fechaAbono) { this.fechaAbono = fechaAbono; }
 
+    // Referencia directa al cliente (para deudas manuales sin pedido)
+    private int idCliente;
+    public int getIdCliente() { return idCliente; }
+    public void setIdCliente(int idCliente) { this.idCliente = idCliente; }
+
     // Campo calculado via JOIN (no persiste en BD)
     private String nombreCliente;
     public String getNombreCliente() { return nombreCliente; }

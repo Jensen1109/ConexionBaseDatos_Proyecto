@@ -9,10 +9,16 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProductoDAO {
+
+    private static final String SELECT_BASE =
+        "SELECT p.*, i.url AS imagen_url " +
+        "FROM Producto p " +
+        "LEFT JOIN Imagen i ON p.id_imagen = i.id_imagen ";
 
     // ─────────────────────────────────────────────
     // Mapear ResultSet → Producto
@@ -30,13 +36,14 @@ public class ProductoDAO {
         Date fecha = rs.getDate("fecha_vencimiento");
         if (fecha != null) p.setFechaVencimiento(fecha.toLocalDate());
         p.setUnidadMedida(rs.getString("unidad_medida"));
+        p.setImagenUrl(rs.getString("imagen_url")); // viene del JOIN con Imagen
         return p;
     }
 
     // LISTAR TODOS
     public List<Producto> listarTodos() {
         List<Producto> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Producto ORDER BY nombre";
+        String sql = SELECT_BASE + "ORDER BY p.nombre";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -52,7 +59,7 @@ public class ProductoDAO {
 
     // BUSCAR POR ID
     public Producto buscarPorId(int id) {
-        String sql = "SELECT * FROM Producto WHERE id_producto = ?";
+        String sql = SELECT_BASE + "WHERE p.id_producto = ?";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -71,7 +78,7 @@ public class ProductoDAO {
     // BUSCAR POR CATEGORÍA
     public List<Producto> buscarPorCategoria(int idCategoria) {
         List<Producto> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Producto WHERE id_categoria = ? ORDER BY nombre";
+        String sql = SELECT_BASE + "WHERE p.id_categoria = ? ORDER BY p.nombre";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -97,7 +104,8 @@ public class ProductoDAO {
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, p.getIdCategoria());
-            ps.setInt(2, p.getIdImagen());
+            if (p.getIdImagen() > 0) ps.setInt(2, p.getIdImagen());
+            else                     ps.setNull(2, Types.INTEGER);
             ps.setString(3, p.getNombre());
             ps.setBigDecimal(4, p.getPrecio());
             ps.setInt(5, p.getStock());
@@ -116,7 +124,7 @@ public class ProductoDAO {
 
     // ACTUALIZAR
     public boolean actualizar(Producto p) {
-        String sql = "UPDATE Producto SET id_categoria=?, nombre=?, precio=?, stock=?, " +
+        String sql = "UPDATE Producto SET id_categoria=?, id_imagen=?, nombre=?, precio=?, stock=?, " +
                      "stock_minimo=?, descripcion=?, fecha_vencimiento=?, unidad_medida=? " +
                      "WHERE id_producto=?";
 
@@ -124,15 +132,17 @@ public class ProductoDAO {
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, p.getIdCategoria());
-            ps.setString(2, p.getNombre());
-            ps.setBigDecimal(3, p.getPrecio());
-            ps.setInt(4, p.getStock());
-            ps.setInt(5, p.getStockMinimo());
-            ps.setString(6, p.getDescripcion());
-            ps.setDate(7, p.getFechaVencimiento() != null
+            if (p.getIdImagen() > 0) ps.setInt(2, p.getIdImagen());
+            else                     ps.setNull(2, Types.INTEGER);
+            ps.setString(3, p.getNombre());
+            ps.setBigDecimal(4, p.getPrecio());
+            ps.setInt(5, p.getStock());
+            ps.setInt(6, p.getStockMinimo());
+            ps.setString(7, p.getDescripcion());
+            ps.setDate(8, p.getFechaVencimiento() != null
                     ? Date.valueOf(p.getFechaVencimiento()) : null);
-            ps.setString(8, p.getUnidadMedida());
-            ps.setInt(9, p.getIdProducto());
+            ps.setString(9, p.getUnidadMedida());
+            ps.setInt(10, p.getIdProducto());
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {

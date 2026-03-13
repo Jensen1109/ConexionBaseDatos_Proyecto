@@ -150,3 +150,12 @@ header {
     border-radius: 6px;
     /* Esquinas redondeadas */
 }
+
+/* Etiqueta de campo del formulario */
+.formulario__etiqueta {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.95rem;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 4px;
+}

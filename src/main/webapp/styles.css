@@ -3,14 +3,14 @@
 /* Variables, responsive y componentes reutilizables */
 
 /* Variables CSS personalizadas */
-@import url(/css/custom/custompropertiers.css);
+@import url(css/custom/custompropertiers.css);
 
 /* Estilos responsive globales */
-@import url(/css/responsive.css);
+@import url(css/responsive.css);
 
 /* ==================== COMPONENTES REUTILIZABLES ==================== */
 /* Componente de ventana emergente (modal) */
-@import url(/css/componentes/ventanaemergente.css);
+@import url(css/componentes/ventanaemergente.css);
 
 /* Componente de menú hamburguesa para móvil */
-@import url(/css/componentes/menu-hamburguesa.css);
+@import url(css/componentes/menu-hamburguesa.css);

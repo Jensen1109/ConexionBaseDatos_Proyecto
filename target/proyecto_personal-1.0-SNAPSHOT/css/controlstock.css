@@ -5,7 +5,7 @@
 /* Este archivo NO necesita importar las custom properties porque */
 /* ya se importan a través de styles.css */
 /* Importa estilos compartidos desde registroProducto */
-@import url(/css/registroProducto.css);
+@import url(registroProducto.css);
 
 /* ==================== ÁREA PRINCIPAL (MAIN) ==================== */
 /* Contenedor del contenido principal */
@@ -367,4 +367,48 @@ main {
 .contenedor-tabla tbody tr:last-child td {
   border-bottom: none;
   /* Sin borde inferior */
+}
+
+/* ==================== FILAS Y CELDAS DE DATOS ==================== */
+/* Fila de datos de la tabla */
+.tabla__header {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.tabla__header:last-child {
+  border-right: none;
+}
+
+.tabla__row {
+  transition: background-color 0.2s;
+}
+
+.tabla__row:hover {
+  background-color: #f9f9f9;
+}
+
+.tabla__data {
+  padding: 0.75rem 1rem;
+  color: var(--color-text-dark);
+  font-size: 0.9rem;
+}
+
+/* ==================== ESTADOS DE STOCK ==================== */
+.estado--critico {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.estado--bajo {
+  color: var(--color-advertencia);
+  font-weight: 600;
+}
+
+.estado--suficiente {
+  color: var(--color-exito);
+  font-weight: 600;
 }

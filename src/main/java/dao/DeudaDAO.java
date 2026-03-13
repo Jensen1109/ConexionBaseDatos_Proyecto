@@ -17,6 +17,7 @@ public class DeudaDAO {
         Deuda d = new Deuda();
         d.setIdDeuda(rs.getInt("id_deuda"));
         d.setIdPedido(rs.getInt("id_pedido"));
+        d.setIdCliente(rs.getInt("id_cliente"));
         d.setMontoPendiente(rs.getBigDecimal("monto_pendiente"));
         d.setEstado(rs.getString("estado"));
         d.setAbono(rs.getBigDecimal("abono"));
@@ -98,13 +99,33 @@ public class DeudaDAO {
         }
     }
 
-    // LISTAR DEUDAS PENDIENTES CON NOMBRE DE CLIENTE (JOIN con Pedido + Usuario)
+    // REGISTRAR DEUDA MANUAL (sin pedido, directo al cliente)
+    public boolean registrarDeudaDirecta(int idCliente, java.math.BigDecimal monto) {
+        String sql = "INSERT INTO Deuda (id_pedido, id_cliente, monto_pendiente, estado, abono) " +
+                     "VALUES (NULL, ?, ?, 'pendiente', 0)";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idCliente);
+            ps.setBigDecimal(2, monto);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al registrar deuda manual: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // LISTAR DEUDAS PENDIENTES CON NOMBRE DE CLIENTE (JOIN con Pedido + Usuario, o directo)
     public List<Deuda> listarPendientesConCliente() {
         List<Deuda> lista = new ArrayList<>();
-        String sql = "SELECT d.*, CONCAT(u.nombre, ' ', u.apellido) AS nombre_cliente " +
+        String sql = "SELECT d.*, " +
+                     "COALESCE(CONCAT(u1.nombre,' ',u1.apellido), CONCAT(u2.nombre,' ',u2.apellido)) AS nombre_cliente " +
                      "FROM Deuda d " +
-                     "LEFT JOIN Pedido p  ON d.id_pedido  = p.id_pedido " +
-                     "LEFT JOIN Usuario u ON p.id_cliente = u.id_usuario " +
+                     "LEFT JOIN Pedido  p  ON d.id_pedido  = p.id_pedido " +
+                     "LEFT JOIN Usuario u1 ON p.id_cliente = u1.id_usuario " +
+                     "LEFT JOIN Usuario u2 ON d.id_cliente = u2.id_usuario " +
                      "WHERE d.estado = 'pendiente' " +
                      "ORDER BY d.id_deuda DESC";
 
