@@ -156,6 +156,52 @@ public class ProductoDAO {
         return new CategoriaDAO().listarTodas();
     }
 
+    /**
+     * Verifica si ya existe un producto con ese nombre (para evitar duplicados).
+     * @param nombre nombre a verificar
+     * @return true si ya existe
+     */
+    public boolean nombreExiste(String nombre) {
+        String sql = "SELECT COUNT(*) FROM Producto WHERE nombre = ?";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nombre.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al verificar nombre: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Verifica si el nombre existe en otro producto (útil al editar).
+     * @param nombre    nombre a verificar
+     * @param idProducto producto a excluir
+     * @return true si ya existe en otro producto
+     */
+    public boolean nombreExisteExcluyendo(String nombre, int idProducto) {
+        String sql = "SELECT COUNT(*) FROM Producto WHERE nombre = ? AND id_producto != ?";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nombre.trim());
+            ps.setInt(2, idProducto);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al verificar nombre excluyendo: " + e.getMessage());
+        }
+        return false;
+    }
+
     // ELIMINAR
     public boolean eliminar(int id) {
         String sql = "DELETE FROM Producto WHERE id_producto = ?";

@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List, modelos.Usuario" %>
+<%@ page import="java.util.List, modelos.Cliente, modelos.Usuario" %>
 <%
-    List<Usuario> clientes = (List<Usuario>) request.getAttribute("clientes");
+    List<Cliente> clientes = (List<Cliente>) request.getAttribute("clientes");
     String error = (String) request.getAttribute("error");
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
@@ -122,6 +122,13 @@
             th:nth-child(3), td:nth-child(3),
             th:nth-child(4), td:nth-child(4) { display: none; }
         }
+        .sidebar__section--cuenta { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 0.5rem; }
+        .sidebar__user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.4rem 1.2rem 0.6rem; }
+        .sidebar__user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+        .sidebar__user-name { color: #e2e8f0; font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
+        .sidebar__user-role { color: #64748b; font-size: 0.7rem; }
+        .sidebar__link--logout { color: #f87171 !important; }
+        .sidebar__link--logout:hover { color: #fff !important; background: rgba(239,68,68,0.12) !important; border-left-color: #ef4444 !important; }
     </style>
 </head>
 <body>
@@ -166,6 +173,24 @@
                 <i class="fas fa-file-invoice-dollar"></i> Deudores
             </a>
         </div>
+        <div class="sidebar__section sidebar__section--cuenta">
+            <span class="sidebar__label">Mi cuenta</span>
+            <div class="sidebar__user-card">
+                <div class="sidebar__user-avatar">
+                    <%= usuarioActual != null ? String.valueOf(usuarioActual.getNombre().charAt(0)).toUpperCase() + String.valueOf(usuarioActual.getApellido().charAt(0)).toUpperCase() : "?" %>
+                </div>
+                <div>
+                    <div class="sidebar__user-name"><%= usuarioActual != null ? usuarioActual.getNombre() + " " + usuarioActual.getApellido() : "" %></div>
+                    <div class="sidebar__user-role"><%= usuarioActual != null && usuarioActual.getIdRol() == 1 ? "Administrador" : "Empleado" %></div>
+                </div>
+            </div>
+            <a href="<%= ctx %>/PerfilControlador" class="sidebar__link">
+                <i class="fas fa-user-circle"></i> Mi perfil
+            </a>
+            <a href="<%= ctx %>/LogoutControlador" class="sidebar__link sidebar__link--logout">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </a>
+        </div>
     </aside>
 
     <main class="main">
@@ -202,7 +227,7 @@
                         <td colspan="4"><i class="fas fa-users"></i>No hay clientes registrados.</td>
                     </tr>
                     <% } else {
-                        for (Usuario c : clientes) {
+                        for (Cliente c : clientes) {
                             String inicial = c.getNombre() != null && !c.getNombre().isEmpty()
                                 ? String.valueOf(c.getNombre().charAt(0)).toUpperCase() : "?";
                     %>
@@ -211,13 +236,13 @@
                             <span class="avatar"><%= inicial %></span>
                             <%= c.getNombre() %> <%= c.getApellido() != null ? c.getApellido() : "" %>
                         </td>
-                        <td class="td-email"><%= c.getEmail() %></td>
+                        <td class="td-email"><%= c.getTelefono() != null ? c.getTelefono() : "—" %></td>
                         <td class="td-cedula"><%= c.getCedula() != null ? c.getCedula() : "—" %></td>
                         <td>
-                            <a href="#modal-editar-<%= c.getIdUsuario() %>" class="btn-edit">
+                            <a href="#modal-editar-<%= c.getIdCliente() %>" class="btn-edit">
                                 <i class="fas fa-pencil"></i> Editar
                             </a>
-                            <a href="#modal-eliminar-<%= c.getIdUsuario() %>" class="btn-del">
+                            <a href="#modal-eliminar-<%= c.getIdCliente() %>" class="btn-del">
                                 <i class="fas fa-trash"></i> Eliminar
                             </a>
                         </td>
@@ -229,13 +254,13 @@
     </main>
 
     <!-- MODALES EDITAR -->
-    <% if (clientes != null) { for (Usuario c : clientes) { %>
-    <div id="modal-editar-<%= c.getIdUsuario() %>" class="modal">
+    <% if (clientes != null) { for (Cliente c : clientes) { %>
+    <div id="modal-editar-<%= c.getIdCliente() %>" class="modal">
         <div class="modal__box">
             <div class="modal__title"><i class="fas fa-user-edit"></i> Editar cliente</div>
             <form class="modal__form" action="<%= ctx %>/ClienteControlador" method="post">
                 <input type="hidden" name="accion"    value="actualizar">
-                <input type="hidden" name="idUsuario" value="<%= c.getIdUsuario() %>">
+                <input type="hidden" name="idCliente" value="<%= c.getIdCliente() %>">
                 <div class="modal__group">
                     <label class="modal__label">Nombre</label>
                     <input type="text" name="nombre" class="modal__input" value="<%= c.getNombre() %>" required>
@@ -245,8 +270,12 @@
                     <input type="text" name="apellido" class="modal__input" value="<%= c.getApellido() != null ? c.getApellido() : "" %>">
                 </div>
                 <div class="modal__group">
-                    <label class="modal__label">Email</label>
-                    <input type="email" name="email" class="modal__input" value="<%= c.getEmail() %>" required>
+                    <label class="modal__label">Cédula</label>
+                    <input type="text" name="cedula" class="modal__input" value="<%= c.getCedula() != null ? c.getCedula() : "" %>" required>
+                </div>
+                <div class="modal__group">
+                    <label class="modal__label">Teléfono</label>
+                    <input type="text" name="telefono" class="modal__input" value="<%= c.getTelefono() != null ? c.getTelefono() : "" %>">
                 </div>
                 <div class="modal__actions">
                     <button type="submit" class="btn-save">Guardar cambios</button>
@@ -258,8 +287,8 @@
     <% } } %>
 
     <!-- MODALES ELIMINAR -->
-    <% if (clientes != null) { for (Usuario c : clientes) { %>
-    <div id="modal-eliminar-<%= c.getIdUsuario() %>" class="modal">
+    <% if (clientes != null) { for (Cliente c : clientes) { %>
+    <div id="modal-eliminar-<%= c.getIdCliente() %>" class="modal">
         <div class="modal__box">
             <div class="modal-del__icon"><i class="fas fa-trash"></i></div>
             <div class="modal-del__title">¿Eliminar cliente?</div>
@@ -269,7 +298,7 @@
             <div class="modal__actions">
                 <form action="<%= ctx %>/ClienteControlador" method="post" style="flex:1; display:flex;">
                     <input type="hidden" name="accion"    value="eliminar">
-                    <input type="hidden" name="idUsuario" value="<%= c.getIdUsuario() %>">
+                    <input type="hidden" name="idCliente" value="<%= c.getIdCliente() %>">
                     <button type="submit" class="btn-danger" style="width:100%;">Sí, eliminar</button>
                 </form>
                 <a href="#" class="btn-cancel">Cancelar</a>

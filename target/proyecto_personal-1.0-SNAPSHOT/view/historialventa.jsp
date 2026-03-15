@@ -118,9 +118,8 @@
             padding: 0.28rem 0.7rem; border-radius: 20px;
             font-size: 0.73rem; font-weight: 700;
         }
-        .badge--completado { background: #f0fdf4; color: #16a34a; }
-        .badge--pendiente  { background: #fffbeb; color: #d97706; }
-        .badge--fiado      { background: #fef2f2; color: #dc2626; }
+        .badge--pagado  { background: #f0fdf4; color: #16a34a; }
+        .badge--credito { background: #fef2f2; color: #dc2626; }
         .badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
         /* ── EMPTY ── */
@@ -144,6 +143,13 @@
             .main { margin-left: 0; padding: 1rem; padding-top: 4rem; }
             th:nth-child(4), td:nth-child(4) { display: none; }
         }
+        .sidebar__section--cuenta { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 0.5rem; }
+        .sidebar__user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.4rem 1.2rem 0.6rem; }
+        .sidebar__user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+        .sidebar__user-name { color: #e2e8f0; font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
+        .sidebar__user-role { color: #64748b; font-size: 0.7rem; }
+        .sidebar__link--logout { color: #f87171 !important; }
+        .sidebar__link--logout:hover { color: #fff !important; background: rgba(239,68,68,0.12) !important; border-left-color: #ef4444 !important; }
     </style>
 </head>
 <body>
@@ -188,6 +194,24 @@
                 <i class="fas fa-file-invoice-dollar"></i> Deudores
             </a>
         </div>
+        <div class="sidebar__section sidebar__section--cuenta">
+            <span class="sidebar__label">Mi cuenta</span>
+            <div class="sidebar__user-card">
+                <div class="sidebar__user-avatar">
+                    <%= usuarioActual != null ? String.valueOf(usuarioActual.getNombre().charAt(0)).toUpperCase() + String.valueOf(usuarioActual.getApellido().charAt(0)).toUpperCase() : "?" %>
+                </div>
+                <div>
+                    <div class="sidebar__user-name"><%= usuarioActual != null ? usuarioActual.getNombre() + " " + usuarioActual.getApellido() : "" %></div>
+                    <div class="sidebar__user-role"><%= usuarioActual != null && usuarioActual.getIdRol() == 1 ? "Administrador" : "Empleado" %></div>
+                </div>
+            </div>
+            <a href="<%= ctx %>/PerfilControlador" class="sidebar__link">
+                <i class="fas fa-user-circle"></i> Mi perfil
+            </a>
+            <a href="<%= ctx %>/LogoutControlador" class="sidebar__link sidebar__link--logout">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </a>
+        </div>
     </aside>
 
     <main class="main">
@@ -203,12 +227,12 @@
 
         <%
             int totalVentas = pedidos != null ? pedidos.size() : 0;
-            int completados = 0, pendientes = 0;
+            int pagados = 0, creditos = 0;
             java.math.BigDecimal sumaTotal = java.math.BigDecimal.ZERO;
             if (pedidos != null) {
                 for (Pedido p : pedidos) {
-                    if ("completado".equalsIgnoreCase(p.getEstado())) completados++;
-                    else pendientes++;
+                    if ("pagado".equalsIgnoreCase(p.getEstado())) pagados++;
+                    else creditos++;
                     if (p.getTotal() != null) sumaTotal = sumaTotal.add(p.getTotal());
                 }
             }
@@ -220,11 +244,11 @@
             </div>
             <div class="stat-card">
                 <div class="stat-card__icon stat-card__icon--green"><i class="fas fa-check-circle"></i></div>
-                <div><div class="stat-card__val"><%= completados %></div><div class="stat-card__lbl">Completadas</div></div>
+                <div><div class="stat-card__val"><%= pagados %></div><div class="stat-card__lbl">Pagadas</div></div>
             </div>
             <div class="stat-card">
                 <div class="stat-card__icon stat-card__icon--amber"><i class="fas fa-clock"></i></div>
-                <div><div class="stat-card__val"><%= pendientes %></div><div class="stat-card__lbl">Pendientes/Fiado</div></div>
+                <div><div class="stat-card__val"><%= creditos %></div><div class="stat-card__lbl">A crédito</div></div>
             </div>
             <div class="stat-card">
                 <div class="stat-card__icon stat-card__icon--green"><i class="fas fa-dollar-sign"></i></div>
@@ -238,6 +262,17 @@
                     <i class="fas fa-search"></i>
                     <input type="text" id="buscador" placeholder="Buscar cliente..." oninput="filtrar()">
                 </div>
+                <form method="get" action="<%= ctx %>/PedidoControlador" style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                    <input type="date" name="fechaInicio"
+                           value="<%= request.getAttribute("fechaInicio") != null ? request.getAttribute("fechaInicio") : "" %>"
+                           style="padding:0.45rem 0.7rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.83rem;">
+                    <span style="color:#64748b;font-size:0.82rem;">al</span>
+                    <input type="date" name="fechaFin"
+                           value="<%= request.getAttribute("fechaFin") != null ? request.getAttribute("fechaFin") : "" %>"
+                           style="padding:0.45rem 0.7rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.83rem;">
+                    <button type="submit" style="padding:0.45rem 1rem;background:#3b82f6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.83rem;">Filtrar</button>
+                    <a href="<%= ctx %>/PedidoControlador" style="padding:0.45rem 0.7rem;color:#64748b;font-size:0.83rem;text-decoration:none;">Limpiar</a>
+                </form>
             </div>
             <table id="tablaHistorial">
                 <thead>
@@ -259,16 +294,16 @@
                                 ? p.getFechaVenta().toLocalDate().toString() : "-";
                             String cliente = p.getNombreCliente() != null
                                 ? p.getNombreCliente() : "Cliente #" + p.getIdCliente();
-                            String estado = p.getEstado() != null ? p.getEstado() : "pendiente";
-                            String badgeClass = "completado".equalsIgnoreCase(estado)
-                                ? "badge--completado"
-                                : ("fiado".equalsIgnoreCase(estado) ? "badge--fiado" : "badge--pendiente");
+                            String estado = p.getEstado() != null ? p.getEstado() : "credito";
+                            String badgeClass = "pagado".equalsIgnoreCase(estado)
+                                ? "badge--pagado" : "badge--credito";
+                            String estadoLabel = "pagado".equalsIgnoreCase(estado) ? "Pagado" : "Crédito";
                     %>
                     <tr data-cliente="<%= cliente.toLowerCase() %>">
                         <td class="td-fecha"><%= fechaStr %></td>
                         <td class="td-cliente"><%= cliente %></td>
                         <td class="td-total">$<%= String.format("%,.0f", p.getTotal()) %></td>
-                        <td><span class="badge <%= badgeClass %>"><%= estado %></span></td>
+                        <td><span class="badge <%= badgeClass %>"><%= estadoLabel %></span></td>
                     </tr>
                     <% } } %>
                 </tbody>

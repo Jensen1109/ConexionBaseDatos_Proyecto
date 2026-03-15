@@ -9,13 +9,16 @@ C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\Log
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\LogoutControlador.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\MetodoPagoControlador.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\PedidoControlador.java
+C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\PerfilControlador.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\PermisosControlador.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\ProductoControlador.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\RegistroControladores.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\ReporteControlador.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\SesionFiltro.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\TelefonoControlador.java
+C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\controladores\UsuarioControlador.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\dao\CategoriaDAO.java
+C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\dao\ClienteDAO.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\dao\DeudaDAO.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\dao\ImagenDAO.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\dao\MetodoPagoDAO.java
@@ -26,6 +29,7 @@ C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\dao\ReporteDAO.ja
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\dao\TelefonoDAO.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\dao\UsuarioDAO.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\modelos\Categoria.java
+C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\modelos\Cliente.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\modelos\DetallePedido.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\modelos\Deuda.java
 C:\trabajosjavascript\ConexionBaseDatos_Proyecto\src\main\java\modelos\Imagen.java

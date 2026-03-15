@@ -10,63 +10,86 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
+/**
+ * Controlador de autenticación.
+ * Acepta login con email O cédula + contraseña.
+ * Redirige según rol: Admin → ProductoControlador, Empleado → PedidoControlador?accion=nuevo
+ */
 @WebServlet("/LoginControlador")
 public class LoginControlador extends HttpServlet {
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
-    // ─────────────────────────────────────────────
-    // GET: muestra la página de login
-    // ─────────────────────────────────────────────
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Si ya hay sesión activa, redirige al dashboard (evita el bucle con index.jsp)
+        // Anti-caché: no guardar páginas autenticadas en historial del navegador
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader("Pragma", "no-cache");
+
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("usuarioLogueado") != null) {
-            response.sendRedirect(request.getContextPath() + "/ProductoControlador");
+            redirigirPorRol(request, response,
+                    (Usuario) session.getAttribute("usuarioLogueado"));
             return;
         }
 
         request.getRequestDispatcher("/view/login.jsp").forward(request, response);
     }
 
-    // ─────────────────────────────────────────────
-    // POST: procesa el formulario de login
-    // ─────────────────────────────────────────────
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String email      = request.getParameter("email");
-        String contrasena = request.getParameter("contrasena");
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader("Pragma", "no-cache");
 
-        // Validación básica de campos vacíos
-        if (email == null || email.isBlank() || contrasena == null || contrasena.isBlank()) {
+        String identificador = request.getParameter("email");      // campo "email" en el form
+        String contrasena    = request.getParameter("contrasena");
+
+        // Validación básica
+        if (identificador == null || identificador.isBlank() ||
+            contrasena    == null || contrasena.isBlank()) {
             request.setAttribute("error", "Por favor completa todos los campos.");
             request.getRequestDispatcher("/view/login.jsp").forward(request, response);
             return;
         }
 
-        // Intentar login
-        Usuario usuario = usuarioDAO.login(email.trim(), contrasena);
+        // Detectar si el identificador es email (contiene @) o cédula
+        Usuario usuario;
+        if (identificador.trim().contains("@")) {
+            usuario = usuarioDAO.login(identificador.trim(), contrasena);
+        } else {
+            usuario = usuarioDAO.loginPorCedula(identificador.trim(), contrasena);
+        }
 
         if (usuario != null) {
-            // Login exitoso: crear sesión
             HttpSession session = request.getSession();
             session.setAttribute("usuarioLogueado", usuario);
-            session.setAttribute("nombreUsuario", usuario.getNombre());
-            session.setAttribute("rolUsuario", usuario.getIdRol());
+            session.setAttribute("nombreUsuario",   usuario.getNombre());
+            session.setAttribute("rolUsuario",      usuario.getIdRol());
             session.setMaxInactiveInterval(30 * 60); // 30 minutos
 
-            // Redirigir al dashboard (ProductoControlador maneja ambos roles)
-            response.sendRedirect(request.getContextPath() + "/ProductoControlador");
-
+            redirigirPorRol(request, response, usuario);
         } else {
-            // Login fallido
-            request.setAttribute("error", "Email o contraseña incorrectos.");
+            request.setAttribute("error", "Credenciales incorrectas. Verifica email/cédula y contraseña.");
             request.getRequestDispatcher("/view/login.jsp").forward(request, response);
+        }
+    }
+
+    /**
+     * Redirige al dashboard correspondiente según el rol del usuario.
+     * Admin (1) → ProductoControlador
+     * Empleado (2) → PedidoControlador?accion=nuevo
+     */
+    private void redirigirPorRol(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  Usuario usuario) throws IOException {
+        if (usuario.getIdRol() == 1) {
+            response.sendRedirect(request.getContextPath() + "/ProductoControlador");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/PedidoControlador?accion=nuevo");
         }
     }
 }

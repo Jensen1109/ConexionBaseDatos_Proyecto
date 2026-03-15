@@ -12,9 +12,11 @@ controladores\PermisosControlador.class
 modelos\MetodoPago.class
 dao\MetodoPagoDAO.class
 dao\PedidoDAO.class
+modelos\Cliente.class
 controladores\ProductoControlador.class
 controladores\SesionFiltro.class
 modelos\Deuda.class
+dao\ClienteDAO.class
 dao\UsuarioDAO.class
 controladores\ClienteControlador.class
 modelos\Telefono.class
@@ -27,9 +29,11 @@ controladores\ImagenControlador.class
 controladores\MetodoPagoControlador.class
 modelos\DetallePedido.class
 controladores\LogoutControlador.class
+controladores\UsuarioControlador.class
 modelos\Producto.class
 controladores\PedidoControlador.class
 dao\CategoriaDAO.class
+controladores\PerfilControlador.class
 dao\PermisosDAO.class
 modelos\Imagen.class
 dao\ProductoDAO.class

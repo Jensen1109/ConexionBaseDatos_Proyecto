@@ -1,7 +1,6 @@
 package controladores;
 
 import dao.DeudaDAO;
-import dao.UsuarioDAO;
 import modelos.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,17 +11,19 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+/**
+ * Controlador de deudas y abonos.
+ * Solo administradores pueden gestionar deudas.
+ */
 @WebServlet("/DeudaControlador")
 public class DeudaControlador extends HttpServlet {
 
     private final DeudaDAO deudaDAO = new DeudaDAO();
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
-    // ─────────────────────────────────────────────
-    // Solo admin puede gestionar deudas
-    // ─────────────────────────────────────────────
     private boolean verificarAdmin(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader("Pragma", "no-cache");
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("usuarioLogueado") == null) {
             response.sendRedirect(request.getContextPath() + "/LoginControlador");
@@ -36,54 +37,45 @@ public class DeudaControlador extends HttpServlet {
         return true;
     }
 
-    // ─────────────────────────────────────────────
-    // GET: listar deudas pendientes o mostrar formulario de nueva deuda
-    // ─────────────────────────────────────────────
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         if (!verificarAdmin(request, response)) return;
 
-        String accion = request.getParameter("accion");
-
-        if ("nuevoFormulario".equals(accion)) {
-            request.setAttribute("clientes", usuarioDAO.listarClientes());
-            request.getRequestDispatcher("/view/registrarDeuda.jsp").forward(request, response);
-            return;
-        }
-
-        // Default: listar deudas
-        request.setAttribute("deudas",        deudaDAO.listarPendientesConCliente());
+        // Default: listar deudas activas con nombre del cliente
+        request.setAttribute("deudas",        deudaDAO.listarActivasConCliente());
         request.setAttribute("totalPendiente", deudaDAO.totalPendiente());
         request.getRequestDispatcher("/view/deudores.jsp").forward(request, response);
     }
 
-    // ─────────────────────────────────────────────
-    // POST: registrar abono o registrar deuda nueva
-    // ─────────────────────────────────────────────
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         if (!verificarAdmin(request, response)) return;
-
         request.setCharacterEncoding("UTF-8");
 
-        String accion = request.getParameter("accion");
+        // Registrar abono a deuda existente
+        String idDeudaStr = request.getParameter("idDeuda");
+        String montoStr   = request.getParameter("monto");
 
-        if ("registrar".equals(accion)) {
-            int idCliente = Integer.parseInt(request.getParameter("idCliente"));
-            BigDecimal monto = new BigDecimal(request.getParameter("montoPendiente"));
-            deudaDAO.registrarDeudaDirecta(idCliente, monto);
+        if (idDeudaStr == null || montoStr == null) {
             response.sendRedirect(request.getContextPath() + "/DeudaControlador");
             return;
         }
 
-        // Default: registrar abono a deuda existente
-        int idDeuda = Integer.parseInt(request.getParameter("idDeuda"));
-        BigDecimal monto = new BigDecimal(request.getParameter("monto"));
-        deudaDAO.registrarAbono(idDeuda, monto);
+        int idDeuda        = Integer.parseInt(idDeudaStr);
+        BigDecimal monto   = new BigDecimal(montoStr);
+
+        boolean ok = deudaDAO.abonar(idDeuda, monto);
+        if (!ok) {
+            request.setAttribute("deudas",        deudaDAO.listarActivasConCliente());
+            request.setAttribute("totalPendiente", deudaDAO.totalPendiente());
+            request.setAttribute("error", "El abono supera el monto pendiente.");
+            request.getRequestDispatcher("/view/deudores.jsp").forward(request, response);
+            return;
+        }
 
         response.sendRedirect(request.getContextPath() + "/DeudaControlador");
     }

@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List, modelos.Producto, modelos.Usuario, modelos.MetodoPago" %>
+<%@ page import="java.util.List, modelos.Producto, modelos.Cliente, modelos.Usuario, modelos.MetodoPago" %>
 <%
     List<Producto>   productos   = (List<Producto>)   request.getAttribute("productos");
-    List<Usuario>    clientes    = (List<Usuario>)    request.getAttribute("clientes");
+    List<Cliente>    clientes    = (List<Cliente>)    request.getAttribute("clientes");
     List<MetodoPago> metodosPago = (List<MetodoPago>) request.getAttribute("metodosPago");
     String error = (String) request.getAttribute("error");
     String ctx = request.getContextPath();
@@ -80,6 +80,50 @@
             box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
         }
 
+        /* ── CLIENTE SEARCH ── */
+        .cliente-search-wrap { position: relative; }
+        .cliente-dropdown {
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: #fff; border: 1.5px solid #3b82f6; border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 50;
+            max-height: 180px; overflow-y: auto; display: none;
+        }
+        .cliente-option {
+            padding: 0.6rem 0.85rem; font-size: 0.85rem; cursor: pointer;
+            border-bottom: 1px solid #f1f5f9; transition: background 0.15s;
+        }
+        .cliente-option:last-child { border-bottom: none; }
+        .cliente-option:hover { background: #eff6ff; }
+        .cliente-option .ced { color: #94a3b8; font-size: 0.75rem; margin-left: 0.4rem; }
+        .cliente-seleccionado {
+            display: none; align-items: center; gap: 0.5rem;
+            padding: 0.55rem 0.85rem; background: #eff6ff;
+            border: 1.5px solid #3b82f6; border-radius: 8px; font-size: 0.875rem;
+        }
+        .cliente-seleccionado span { flex: 1; font-weight: 600; color: #1e293b; }
+        .btn-clear-cliente {
+            background: none; border: none; color: #94a3b8; cursor: pointer;
+            font-size: 0.8rem; padding: 0.1rem 0.3rem; border-radius: 4px;
+        }
+        .btn-clear-cliente:hover { color: #ef4444; }
+        .btn-nuevo-cliente {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: none; border: 1px dashed #94a3b8; color: #64748b;
+            border-radius: 7px; padding: 0.4rem 0.8rem; font-size: 0.78rem;
+            cursor: pointer; margin-top: 0.4rem; transition: all 0.18s;
+        }
+        .btn-nuevo-cliente:hover { border-color: #22c55e; color: #16a34a; }
+        .nuevo-cliente-panel {
+            display: none; background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 10px; padding: 1rem; margin-top: 0.5rem;
+        }
+        .nuevo-cliente-panel .panel-title {
+            font-size: 0.8rem; font-weight: 700; color: #475569;
+            margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.35rem;
+        }
+        .nuevo-cliente-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+        @media (max-width: 600px) { .nuevo-cliente-grid { grid-template-columns: 1fr; } }
+
         /* ── AGREGAR PRODUCTO ── */
         .add-row { display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; }
         .add-row .form-group { margin-bottom: 0; flex: 1; min-width: 160px; }
@@ -153,6 +197,13 @@
             .hamburger-btn { display: flex; align-items: center; }
             .main { margin-left: 0; padding: 1rem; padding-top: 4rem; }
         }
+        .sidebar__section--cuenta { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 0.5rem; }
+        .sidebar__user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.4rem 1.2rem 0.6rem; }
+        .sidebar__user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+        .sidebar__user-name { color: #e2e8f0; font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
+        .sidebar__user-role { color: #64748b; font-size: 0.7rem; }
+        .sidebar__link--logout { color: #f87171 !important; }
+        .sidebar__link--logout:hover { color: #fff !important; background: rgba(239,68,68,0.12) !important; border-left-color: #ef4444 !important; }
     </style>
 </head>
 <body>
@@ -197,6 +248,24 @@
                 <i class="fas fa-file-invoice-dollar"></i> Deudores
             </a>
         </div>
+        <div class="sidebar__section sidebar__section--cuenta">
+            <span class="sidebar__label">Mi cuenta</span>
+            <div class="sidebar__user-card">
+                <div class="sidebar__user-avatar">
+                    <%= usuarioActual != null ? String.valueOf(usuarioActual.getNombre().charAt(0)).toUpperCase() + String.valueOf(usuarioActual.getApellido().charAt(0)).toUpperCase() : "?" %>
+                </div>
+                <div>
+                    <div class="sidebar__user-name"><%= usuarioActual != null ? usuarioActual.getNombre() + " " + usuarioActual.getApellido() : "" %></div>
+                    <div class="sidebar__user-role"><%= usuarioActual != null && usuarioActual.getIdRol() == 1 ? "Administrador" : "Empleado" %></div>
+                </div>
+            </div>
+            <a href="<%= ctx %>/PerfilControlador" class="sidebar__link">
+                <i class="fas fa-user-circle"></i> Mi perfil
+            </a>
+            <a href="<%= ctx %>/LogoutControlador" class="sidebar__link sidebar__link--logout">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </a>
+        </div>
     </aside>
 
     <main class="main">
@@ -217,17 +286,73 @@
                 <div>
                     <div class="card" style="margin-bottom:1.5rem;">
                         <div class="card__title"><i class="fas fa-user"></i> Datos de la venta</div>
+
+                        <!-- CLIENTE -->
                         <div class="form-group">
-                            <label class="form-label">Cliente *</label>
-                            <select name="idCliente" class="form-select" required>
-                                <option value="">-- Seleccionar cliente --</option>
-                                <% if (clientes != null) { for (Usuario c : clientes) { %>
-                                <option value="<%= c.getIdUsuario() %>">
-                                    <%= c.getNombre() %> <%= c.getApellido() != null ? c.getApellido() : "" %>
-                                </option>
-                                <% } } %>
-                            </select>
+                            <label class="form-label">
+                                Cliente
+                                <span id="clienteHint" style="color:#94a3b8;font-weight:400;">(opcional — requerido en fiado)</span>
+                            </label>
+
+                            <!-- Búsqueda -->
+                            <div class="cliente-search-wrap" id="searchWrap">
+                                <input type="text" id="buscarCliente" class="form-input"
+                                       placeholder="Escribe nombre o cédula..."
+                                       autocomplete="off"
+                                       oninput="filtrarClientes(this.value)"
+                                       onfocus="filtrarClientes(this.value)">
+                                <div class="cliente-dropdown" id="clienteDropdown"></div>
+                            </div>
+
+                            <!-- Cliente seleccionado -->
+                            <div class="cliente-seleccionado" id="clienteSeleccionado">
+                                <i class="fas fa-user-check" style="color:#3b82f6;"></i>
+                                <span id="nombreClienteSeleccionado"></span>
+                                <button type="button" class="btn-clear-cliente" onclick="limpiarCliente()" title="Cambiar cliente">
+                                    <i class="fas fa-times"></i> Cambiar
+                                </button>
+                            </div>
+
+                            <!-- Campo oculto con el ID -->
+                            <input type="hidden" name="idCliente" id="idClienteHidden">
+
+                            <!-- Botón nuevo cliente -->
+                            <button type="button" class="btn-nuevo-cliente" id="btnNuevoCliente"
+                                    onclick="toggleNuevoCliente()">
+                                <i class="fas fa-user-plus"></i> Registrar cliente nuevo
+                            </button>
+
+                            <!-- Panel inline nuevo cliente -->
+                            <div class="nuevo-cliente-panel" id="nuevoClientePanel">
+                                <div class="panel-title">
+                                    <i class="fas fa-user-plus" style="color:#22c55e;"></i>
+                                    Datos del nuevo cliente
+                                </div>
+                                <div class="nuevo-cliente-grid">
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label class="form-label">Nombre *</label>
+                                        <input type="text" name="nuevoClienteNombre" id="nuevoClienteNombre"
+                                               class="form-input" placeholder="Nombre">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label class="form-label">Apellido *</label>
+                                        <input type="text" name="nuevoClienteApellido"
+                                               class="form-input" placeholder="Apellido">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label class="form-label">Cédula *</label>
+                                        <input type="text" name="nuevoClienteCedula"
+                                               class="form-input" placeholder="Número de cédula">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label class="form-label">Teléfono</label>
+                                        <input type="text" name="nuevoClienteTelefono"
+                                               class="form-input" placeholder="Teléfono (opcional)">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
                         <div class="form-group">
                             <label class="form-label">Método de pago *</label>
                             <select name="idPago" class="form-select" required>
@@ -246,13 +371,15 @@
                                 <label class="form-label">Producto</label>
                                 <select id="selectProducto" class="form-select">
                                     <option value="">-- Seleccionar --</option>
-                                    <% if (productos != null) { for (Producto p : productos) { %>
-                                    <option value="<%= p.getIdProducto() %>"
-                                            data-precio="<%= p.getPrecio() %>"
-                                            data-nombre="<%= p.getNombre().replace("\"","&quot;") %>"
-                                            data-stock="<%= p.getStock() %>">
-                                        <%= p.getNombre() %> — $<%= String.format("%,.0f", p.getPrecio()) %>
-                                    </option>
+                                    <% if (productos != null) { for (Producto p : productos) {
+                                        if (p.getPrecio() == null || p.getNombre() == null) continue;
+                                        String nomOpt = p.getNombre()
+                                            .replace("&", "&amp;")
+                                            .replace("\"", "&quot;")
+                                            .replace("<", "&lt;")
+                                            .replace(">", "&gt;");
+                                    %>
+                                    <option value="<%= p.getIdProducto() %>"><%= nomOpt %> — $<%= String.format("%,.0f", p.getPrecio()) %></option>
                                     <% } } %>
                                 </select>
                             </div>
@@ -320,17 +447,123 @@
     </main>
 
     <script>
+        /* ── DATOS DE PRODUCTOS (cargados desde servidor) ── */
+        const productosData = [<%
+            if (productos != null) { for (Producto p : productos) {
+                if (p.getPrecio() == null || p.getNombre() == null) continue;
+                String nomJS = p.getNombre().replace("\\", "\\\\").replace("'", "\\'");
+        %>{ id: <%= p.getIdProducto() %>, nombre: '<%= nomJS %>', precio: <%= p.getPrecio().toPlainString() %>, stock: <%= p.getStock() %> },<% } } %>
+        ];
+
+        /* ── DATOS DE CLIENTES (cargados desde servidor) ── */
+        const clientes = [
+            <% if (clientes != null) { for (Cliente c : clientes) {
+                String _nom = c.getNombre() != null ? c.getNombre().replace("'", "\\'") : "";
+                String _ape = c.getApellido() != null ? c.getApellido().replace("'", "\\'") : "";
+                String _ced = c.getCedula() != null ? c.getCedula().replace("'", "\\'") : "";
+            %>
+            { id: <%= c.getIdCliente() %>, nombre: '<%= _nom %>', apellido: '<%= _ape %>', cedula: '<%= _ced %>' },
+            <% } } %>
+        ];
+
+        /* ── BÚSQUEDA DE CLIENTES ── */
+        let nuevoClientePanelAbierto = false;
+
+        function filtrarClientes(q) {
+            const dropdown = document.getElementById('clienteDropdown');
+            const seleccionado = document.getElementById('idClienteHidden').value;
+            if (seleccionado) return; // ya hay uno seleccionado
+
+            q = q.trim().toLowerCase();
+            if (q.length === 0) { dropdown.style.display = 'none'; return; }
+
+            const filtrados = clientes.filter(c =>
+                (c.nombre + ' ' + c.apellido).toLowerCase().includes(q) ||
+                c.cedula.toLowerCase().includes(q)
+            ).slice(0, 10);
+
+            if (filtrados.length === 0) {
+                dropdown.innerHTML = '<div class="cliente-option" style="color:#94a3b8;cursor:default;">Sin resultados</div>';
+            } else {
+                dropdown.innerHTML = filtrados.map(c =>
+                    `<div class="cliente-option" onclick="seleccionarCliente(${c.id}, '${c.nombre} ${c.apellido}')">
+                        ${c.nombre} ${c.apellido}
+                        <span class="ced">${c.cedula}</span>
+                    </div>`
+                ).join('');
+            }
+            dropdown.style.display = 'block';
+        }
+
+        function seleccionarCliente(id, nombreCompleto) {
+            document.getElementById('idClienteHidden').value = id;
+            document.getElementById('nombreClienteSeleccionado').textContent = nombreCompleto;
+            document.getElementById('clienteSeleccionado').style.display = 'flex';
+            document.getElementById('searchWrap').style.display = 'none';
+            document.getElementById('clienteDropdown').style.display = 'none';
+            document.getElementById('btnNuevoCliente').style.display = 'none';
+            // Cerrar panel nuevo cliente si estaba abierto
+            if (nuevoClientePanelAbierto) toggleNuevoCliente();
+        }
+
+        function limpiarCliente() {
+            document.getElementById('idClienteHidden').value = '';
+            document.getElementById('buscarCliente').value = '';
+            document.getElementById('clienteSeleccionado').style.display = 'none';
+            document.getElementById('searchWrap').style.display = 'block';
+            document.getElementById('btnNuevoCliente').style.display = 'inline-flex';
+        }
+
+        function toggleNuevoCliente() {
+            const panel = document.getElementById('nuevoClientePanel');
+            nuevoClientePanelAbierto = !nuevoClientePanelAbierto;
+            panel.style.display = nuevoClientePanelAbierto ? 'block' : 'none';
+            const btn = document.getElementById('btnNuevoCliente');
+            btn.innerHTML = nuevoClientePanelAbierto
+                ? '<i class="fas fa-times"></i> Cancelar'
+                : '<i class="fas fa-user-plus"></i> Registrar cliente nuevo';
+            btn.style.borderColor = nuevoClientePanelAbierto ? '#ef4444' : '';
+            btn.style.color       = nuevoClientePanelAbierto ? '#dc2626' : '';
+            // Si abre el panel, limpiar cliente seleccionado
+            if (nuevoClientePanelAbierto) {
+                document.getElementById('idClienteHidden').value = '';
+                document.getElementById('buscarCliente').value = '';
+                document.getElementById('clienteSeleccionado').style.display = 'none';
+                document.getElementById('searchWrap').style.display = 'none';
+            } else {
+                document.getElementById('searchWrap').style.display = 'block';
+                // Limpiar campos del panel
+                document.getElementById('nuevoClienteNombre').value = '';
+                document.querySelector('[name="nuevoClienteApellido"]').value = '';
+                document.querySelector('[name="nuevoClienteCedula"]').value = '';
+                document.querySelector('[name="nuevoClienteTelefono"]').value = '';
+            }
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('searchWrap').contains(e.target))
+                document.getElementById('clienteDropdown').style.display = 'none';
+        });
+
+        /* ── PRODUCTOS ── */
         let filaId = 0;
 
         function agregarProducto() {
             const sel  = document.getElementById('selectProducto');
-            const opt  = sel.options[sel.selectedIndex];
+            const id   = sel.value;
             const cant = parseInt(document.getElementById('inputCantidad').value) || 1;
-            if (!opt.value) { alert('Selecciona un producto.'); return; }
-            const id     = opt.value;
-            const nombre = opt.dataset.nombre;
-            const precio = parseFloat(opt.dataset.precio);
-            const stock  = parseInt(opt.dataset.stock);
+            if (!id) { alert('Selecciona un producto.'); return; }
+
+            const prod = productosData.find(function(p) { return p.id == id; });
+            if (!prod) { alert('Producto no encontrado.'); return; }
+
+            const precio = prod.precio;
+            const stock  = prod.stock;
+            const nombre = prod.nombre;
+
+            if (!precio || precio <= 0) { alert('Este producto tiene precio inválido.'); return; }
+            if (cant <= 0) { alert('La cantidad debe ser mayor a 0.'); return; }
             if (cant > stock) { alert('Stock insuficiente. Disponible: ' + stock); return; }
 
             document.getElementById('filaVacia').style.display = 'none';
@@ -339,20 +572,20 @@
             const tbody = document.getElementById('tablaProductos');
             const tr = document.createElement('tr');
             tr.id = 'fila-' + filaId;
-            tr.innerHTML = `
-                <td class="td-prod">${nombre}</td>
-                <td>${cant}</td>
-                <td class="td-price">$${precio.toLocaleString('es-CO')}</td>
-                <td style="font-weight:600;">$${subtotal.toLocaleString('es-CO')}</td>
-                <td>
-                    <button type="button" class="btn-remove" onclick="eliminarFila('fila-${filaId}')">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </td>
-                <input type="hidden" name="idProducto"     value="${id}">
-                <input type="hidden" name="cantidad"       value="${cant}">
-                <input type="hidden" name="precioUnitario" value="${precio}">
-            `;
+            const fid = filaId;
+            tr.innerHTML =
+                '<td class="td-prod">' + nombre + '</td>' +
+                '<td>' + cant + '</td>' +
+                '<td class="td-price">$' + precio.toLocaleString('es-CO') + '</td>' +
+                '<td style="font-weight:600;">$' + subtotal.toLocaleString('es-CO') + '</td>' +
+                '<td>' +
+                    '<button type="button" class="btn-remove" onclick="eliminarFila(\'fila-' + fid + '\')">' +
+                        '<i class="fas fa-times"></i>' +
+                    '</button>' +
+                    '<input type="hidden" name="idProducto"     value="' + id + '">' +
+                    '<input type="hidden" name="cantidad"       value="' + cant + '">' +
+                    '<input type="hidden" name="precioUnitario" value="' + precio + '">' +
+                '</td>';
             tbody.appendChild(tr);
             sel.value = '';
             document.getElementById('inputCantidad').value = 1;
@@ -376,9 +609,24 @@
             document.getElementById('cantProductos').textContent = cantidades.length;
         }
 
+        /* ── VALIDACIÓN ── */
         function validar() {
             if (document.querySelectorAll('input[name="idProducto"]').length === 0) {
                 alert('Agrega al menos un producto a la venta.');
+                return false;
+            }
+            // Si el panel de nuevo cliente está abierto, validar campos obligatorios
+            if (nuevoClientePanelAbierto) {
+                const nombre = document.getElementById('nuevoClienteNombre').value.trim();
+                const cedula = document.querySelector('[name="nuevoClienteCedula"]').value.trim();
+                if (!nombre) { alert('Ingresa el nombre del nuevo cliente.'); return false; }
+                if (!cedula) { alert('Ingresa la cédula del nuevo cliente.'); return false; }
+            }
+            // Fiado requiere cliente
+            const fiado = document.getElementById('chkFiado').checked;
+            const idCliente = document.getElementById('idClienteHidden').value;
+            if (fiado && !idCliente && !nuevoClientePanelAbierto) {
+                alert('Para venta a fiado debes seleccionar o registrar un cliente.');
                 return false;
             }
             return true;

@@ -91,6 +91,48 @@ public class PermisosDAO {
         }
     }
 
+    // VERIFICAR SI UN ROL TIENE UN PERMISO POR NOMBRE
+    // Admin (idRol=1) siempre tiene todos los permisos.
+    // Para otros roles se consulta la tabla rol_permiso.
+    public boolean tienePermiso(int idRol, String nombrePermiso) {
+        // Admin siempre tiene acceso completo — sin consultar la BD
+        if (idRol == 1) return true;
+
+        String sql = "SELECT 1 FROM rol_permiso rp " +
+                     "JOIN Permisos p ON rp.id_permiso = p.id_permiso " +
+                     "WHERE rp.id_rol = ? AND p.nombre = ?";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idRol);
+            ps.setString(2, nombrePermiso);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return true;
+            }
+
+            // Fallback para roles no-admin: si rol_permiso está vacía dar permisos básicos
+            if (!permisosConfigurados(con)) {
+                return nombrePermiso.equals("VER_PRODUCTOS")
+                    || nombrePermiso.equals("VER_STOCK")
+                    || nombrePermiso.equals("REGISTRAR_VENTA");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al verificar permiso: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private boolean permisosConfigurados(Connection con) {
+        try (PreparedStatement ps = con.prepareStatement("SELECT 1 FROM rol_permiso LIMIT 1");
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
     // QUITAR PERMISO DE ROL
     public boolean quitarPermiso(int idRol, int idPermiso) {
         String sql = "DELETE FROM rol_permiso WHERE id_rol = ? AND id_permiso = ?";

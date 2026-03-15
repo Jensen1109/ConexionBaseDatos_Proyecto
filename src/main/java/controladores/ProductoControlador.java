@@ -2,6 +2,7 @@ package controladores;
 
 import dao.CategoriaDAO;
 import dao.ImagenDAO;
+import dao.PermisosDAO;
 import dao.ProductoDAO;
 import modelos.Producto;
 import modelos.Usuario;
@@ -15,23 +16,34 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Controlador CRUD de productos.
+ * Solo los administradores pueden crear, editar y eliminar productos.
+ * Los empleados solo pueden visualizar catálogo y stock.
+ */
 @WebServlet("/ProductoControlador")
 @MultipartConfig(maxFileSize = 5242880) // 5 MB
 public class ProductoControlador extends HttpServlet {
 
     private static final String UPLOADS_DIR = "uploads" + File.separator + "productos";
 
-    private final ProductoDAO productoDAO = new ProductoDAO();
+    private final ProductoDAO  productoDAO  = new ProductoDAO();
     private final CategoriaDAO categoriaDAO = new CategoriaDAO();
-    private final ImagenDAO imagenDAO = new ImagenDAO();
+    private final ImagenDAO    imagenDAO    = new ImagenDAO();
+    private final PermisosDAO  permisosDAO  = new PermisosDAO();
 
     // ─────────────────────────────────────────────
     // Verificaciones de sesión / rol
     // ─────────────────────────────────────────────
-    private boolean verificarSesion(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    private boolean verificarSesion(HttpServletRequest req, HttpServletResponse res)
+            throws IOException {
+        response(res);
         HttpSession s = req.getSession(false);
         if (s == null || s.getAttribute("usuarioLogueado") == null) {
             res.sendRedirect(req.getContextPath() + "/LoginControlador");
@@ -40,14 +52,20 @@ public class ProductoControlador extends HttpServlet {
         return true;
     }
 
-    private boolean verificarAdmin(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    private boolean verificarPermiso(HttpServletRequest req, HttpServletResponse res,
+                                      String permiso, String fallback) throws IOException {
         if (!verificarSesion(req, res)) return false;
         Usuario u = (Usuario) req.getSession(false).getAttribute("usuarioLogueado");
-        if (u.getIdRol() != 1) {
-            res.sendRedirect(req.getContextPath() + "/ProductoControlador");
+        if (!permisosDAO.tienePermiso(u.getIdRol(), permiso)) {
+            res.sendRedirect(req.getContextPath() + fallback);
             return false;
         }
         return true;
+    }
+
+    private void response(HttpServletResponse res) {
+        res.setHeader("Cache-Control", "no-store");
+        res.setHeader("Pragma", "no-cache");
     }
 
     // ─────────────────────────────────────────────
@@ -60,28 +78,29 @@ public class ProductoControlador extends HttpServlet {
         String accion = request.getParameter("accion");
 
         if ("nuevo".equals(accion)) {
-            if (!verificarAdmin(request, response)) return;
+            if (!verificarPermiso(request, response, "GESTIONAR_PRODUCTOS", "/ProductoControlador")) return;
             request.setAttribute("categorias", categoriaDAO.listarTodas());
             request.getRequestDispatcher("/view/registroProducto.jsp").forward(request, response);
 
         } else if ("editar".equals(accion)) {
-            if (!verificarAdmin(request, response)) return;
+            if (!verificarPermiso(request, response, "GESTIONAR_PRODUCTOS", "/ProductoControlador")) return;
             int id = Integer.parseInt(request.getParameter("id"));
             Producto producto = productoDAO.buscarPorId(id);
             if (producto == null) {
                 response.sendRedirect(request.getContextPath() + "/ProductoControlador");
                 return;
             }
-            request.setAttribute("producto", producto);
+            request.setAttribute("producto",   producto);
             request.setAttribute("categorias", categoriaDAO.listarTodas());
             request.getRequestDispatcher("/view/editarproducto.jsp").forward(request, response);
 
         } else if ("stock".equals(accion)) {
-            if (!verificarSesion(request, response)) return;
+            if (!verificarPermiso(request, response, "VER_STOCK", "/ProductoControlador")) return;
             request.setAttribute("productos", productoDAO.listarTodos());
             request.getRequestDispatcher("/view/controlstock.jsp").forward(request, response);
 
         } else {
+            // Catálogo: cualquier usuario autenticado puede verlo
             if (!verificarSesion(request, response)) return;
             request.setAttribute("productos", productoDAO.listarTodos());
             request.getRequestDispatcher("/view/productos.jsp").forward(request, response);
@@ -95,7 +114,7 @@ public class ProductoControlador extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!verificarAdmin(request, response)) return;
+        if (!verificarPermiso(request, response, "GESTIONAR_PRODUCTOS", "/ProductoControlador")) return;
         request.setCharacterEncoding("UTF-8");
 
         String accion = request.getParameter("accion");
@@ -107,7 +126,30 @@ public class ProductoControlador extends HttpServlet {
         } else if ("actualizar".equals(accion)) {
             int id = Integer.parseInt(request.getParameter("id"));
 
-            // Cargar producto existente para preservar id_imagen si no se sube nueva
+            // Validar precio y stock > 0
+            BigDecimal precio = parseBigDecimal(request.getParameter("precio"));
+            int stock         = parseInt(request.getParameter("stock"));
+            if (precio == null || precio.compareTo(BigDecimal.ZERO) <= 0 ||
+                stock < 0) {
+                Producto existente = productoDAO.buscarPorId(id);
+                request.setAttribute("producto",   existente);
+                request.setAttribute("categorias", categoriaDAO.listarTodas());
+                request.setAttribute("error", "El precio debe ser mayor a 0 y el stock no puede ser negativo.");
+                request.getRequestDispatcher("/view/editarproducto.jsp").forward(request, response);
+                return;
+            }
+
+            // Validar nombre único (excluyendo el producto actual)
+            String nombre = request.getParameter("nombre");
+            if (productoDAO.nombreExisteExcluyendo(nombre, id)) {
+                Producto existente = productoDAO.buscarPorId(id);
+                request.setAttribute("producto",   existente);
+                request.setAttribute("categorias", categoriaDAO.listarTodas());
+                request.setAttribute("error", "Ya existe otro producto con ese nombre.");
+                request.getRequestDispatcher("/view/editarproducto.jsp").forward(request, response);
+                return;
+            }
+
             Producto existente = productoDAO.buscarPorId(id);
             Producto p = construirCampos(request);
             p.setIdProducto(id);
@@ -115,50 +157,76 @@ public class ProductoControlador extends HttpServlet {
             String nuevoArchivo = guardarArchivoSiExiste(request);
             if (nuevoArchivo != null) {
                 if (existente != null && existente.getIdImagen() > 0) {
-                    // Actualizar registro Imagen existente
                     imagenDAO.actualizarUrl(existente.getIdImagen(), nuevoArchivo);
                     p.setIdImagen(existente.getIdImagen());
                 } else {
-                    // Crear nuevo registro Imagen
                     int newImgId = imagenDAO.insertar(nuevoArchivo);
                     p.setIdImagen(newImgId);
                 }
             } else {
-                // Sin imagen nueva → preservar la existente
                 p.setIdImagen(existente != null ? existente.getIdImagen() : 0);
             }
 
-            productoDAO.actualizar(p);
+            if (!productoDAO.actualizar(p)) {
+                request.setAttribute("producto",   productoDAO.buscarPorId(id));
+                request.setAttribute("categorias", categoriaDAO.listarTodas());
+                request.setAttribute("error", "No se pudo actualizar el producto. Intenta de nuevo.");
+                request.getRequestDispatcher("/view/editarproducto.jsp").forward(request, response);
+                return;
+            }
 
         } else {
             // insertar
-            Producto p = construirCampos(request);
+            // Validar precio > 0 y stock >= 0
+            BigDecimal precio = parseBigDecimal(request.getParameter("precio"));
+            int stock         = parseInt(request.getParameter("stock"));
+            if (precio == null || precio.compareTo(BigDecimal.ZERO) <= 0 || stock < 0) {
+                request.setAttribute("categorias", categoriaDAO.listarTodas());
+                request.setAttribute("error", "El precio debe ser mayor a 0 y el stock no puede ser negativo.");
+                request.getRequestDispatcher("/view/registroProducto.jsp").forward(request, response);
+                return;
+            }
 
+            // Validar nombre único
+            String nombre = request.getParameter("nombre");
+            if (productoDAO.nombreExiste(nombre)) {
+                request.setAttribute("categorias", categoriaDAO.listarTodas());
+                request.setAttribute("error", "Ya existe un producto con ese nombre.");
+                request.getRequestDispatcher("/view/registroProducto.jsp").forward(request, response);
+                return;
+            }
+
+            Producto p = construirCampos(request);
             String nuevoArchivo = guardarArchivoSiExiste(request);
             if (nuevoArchivo != null) {
                 int imgId = imagenDAO.insertar(nuevoArchivo);
                 p.setIdImagen(imgId);
             }
 
-            productoDAO.crear(p);
+            if (!productoDAO.crear(p)) {
+                request.setAttribute("categorias", categoriaDAO.listarTodas());
+                request.setAttribute("error", "No se pudo guardar el producto. Verifica que la categoría sea válida e intenta de nuevo.");
+                request.getRequestDispatcher("/view/registroProducto.jsp").forward(request, response);
+                return;
+            }
         }
 
         response.sendRedirect(request.getContextPath() + "/ProductoControlador");
     }
 
     // ─────────────────────────────────────────────
-    // Construir Producto solo con los campos del formulario (sin imagen)
+    // Helpers
     // ─────────────────────────────────────────────
+
     private Producto construirCampos(HttpServletRequest request) {
         Producto p = new Producto();
         p.setNombre(request.getParameter("nombre"));
         p.setDescripcion(request.getParameter("descripcion"));
-        p.setPrecio(new BigDecimal(request.getParameter("precio")));
-        p.setStock(Integer.parseInt(request.getParameter("stock")));
-        p.setStockMinimo(Integer.parseInt(request.getParameter("stockMinimo")));
+        p.setPrecio(parseBigDecimal(request.getParameter("precio")));
+        p.setStock(parseInt(request.getParameter("stock")));
+        p.setStockMinimo(parseInt(request.getParameter("stockMinimo")));
         p.setUnidadMedida(request.getParameter("unidadMedida"));
-        p.setIdCategoria(Integer.parseInt(request.getParameter("idCategoria")));
-
+        p.setIdCategoria(parseInt(request.getParameter("idCategoria")));
         String fecha = request.getParameter("fechaVencimiento");
         if (fecha != null && !fecha.isBlank()) {
             p.setFechaVencimiento(LocalDate.parse(fecha));
@@ -166,28 +234,43 @@ public class ProductoControlador extends HttpServlet {
         return p;
     }
 
-    // ─────────────────────────────────────────────
-    // Guardar archivo de imagen al disco si se subió uno
-    // Retorna el nombre único del archivo, o null si no se subió nada
-    // ─────────────────────────────────────────────
     private String guardarArchivoSiExiste(HttpServletRequest request)
             throws IOException, ServletException {
-
         Part filePart = request.getPart("imagen");
         String fileName = getFileName(filePart);
         if (fileName == null || fileName.isBlank()) return null;
 
-        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOADS_DIR;
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) uploadDir.mkdirs();
+        // Ruta desplegada (sirve inmediatamente)
+        String deployedPath = getServletContext().getRealPath("") + File.separator + UPLOADS_DIR;
+        File deployedDir = new File(deployedPath);
+        if (!deployedDir.exists()) deployedDir.mkdirs();
 
         String uniqueName = System.currentTimeMillis() + "_" +
                             fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
-        filePart.write(uploadPath + File.separator + uniqueName);
+        filePart.write(deployedPath + File.separator + uniqueName);
+
+        // Copia a src/main/webapp para que sobreviva "Clean and Build"
+        try {
+            String deployedRoot = getServletContext().getRealPath("").replace("\\", "/");
+            String[] parts = deployedRoot.split("/target/");
+            if (parts.length >= 2) {
+                String srcPath = parts[0] + "/src/main/webapp/" + UPLOADS_DIR;
+                File srcDir = new File(srcPath);
+                if (srcDir.exists() || srcDir.mkdirs()) {
+                    Files.copy(
+                        Paths.get(deployedPath, uniqueName),
+                        Paths.get(srcPath, uniqueName),
+                        StandardCopyOption.REPLACE_EXISTING
+                    );
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Aviso: no se pudo copiar imagen a src: " + e.getMessage());
+        }
+
         return uniqueName;
     }
 
-    // Extrae el nombre de archivo del header Content-Disposition
     private String getFileName(Part part) {
         if (part == null) return null;
         String header = part.getHeader("content-disposition");
@@ -199,5 +282,23 @@ public class ProductoControlador extends HttpServlet {
             }
         }
         return null;
+    }
+
+    private BigDecimal parseBigDecimal(String value) {
+        try {
+            if (value == null || value.isBlank()) return null;
+            return new BigDecimal(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private int parseInt(String value) {
+        try {
+            if (value == null || value.isBlank()) return 0;
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

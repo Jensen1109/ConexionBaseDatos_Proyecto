@@ -46,8 +46,12 @@ public class Pedido {
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
 
-    // Campo calculado via JOIN (no persiste en BD)
+    // Campos calculados via JOIN (no persisten en BD)
     private String nombreCliente;
     public String getNombreCliente() { return nombreCliente; }
     public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
+
+    private String nombrePago;
+    public String getNombrePago() { return nombrePago; }
+    public void setNombrePago(String nombrePago) { this.nombrePago = nombrePago; }
 }

@@ -51,7 +51,8 @@ public class SesionFiltro implements Filter {
         uri.endsWith(".ico")                             ||
         uri.endsWith(".woff2")                           ||
         uri.endsWith(".ttf")                             ||
-        uri.endsWith(".svg");
+        uri.endsWith(".svg")                             ||
+        uri.startsWith(ctx + "/uploads/");              // imágenes subidas de productos
         if (esRutaPublica) {
             chain.doFilter(request, response);
             return;

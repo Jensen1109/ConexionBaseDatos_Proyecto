@@ -164,6 +164,13 @@
             .main { margin-left: 0; padding: 1rem; padding-top: 4.5rem; }
             .form__row { grid-template-columns: 1fr; }
         }
+        .sidebar__section--cuenta { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 0.5rem; }
+        .sidebar__user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.4rem 1.2rem 0.6rem; }
+        .sidebar__user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+        .sidebar__user-name { color: #e2e8f0; font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
+        .sidebar__user-role { color: #64748b; font-size: 0.7rem; }
+        .sidebar__link--logout { color: #f87171 !important; }
+        .sidebar__link--logout:hover { color: #fff !important; background: rgba(239,68,68,0.12) !important; border-left-color: #ef4444 !important; }
     </style>
 </head>
 <body>
@@ -217,6 +224,24 @@
             </a>
         </div>
         <% } %>
+        <div class="sidebar__section sidebar__section--cuenta">
+            <span class="sidebar__label">Mi cuenta</span>
+            <div class="sidebar__user-card">
+                <div class="sidebar__user-avatar">
+                    <%= usuarioActual != null ? String.valueOf(usuarioActual.getNombre().charAt(0)).toUpperCase() + String.valueOf(usuarioActual.getApellido().charAt(0)).toUpperCase() : "?" %>
+                </div>
+                <div>
+                    <div class="sidebar__user-name"><%= usuarioActual != null ? usuarioActual.getNombre() + " " + usuarioActual.getApellido() : "" %></div>
+                    <div class="sidebar__user-role"><%= usuarioActual != null && usuarioActual.getIdRol() == 1 ? "Administrador" : "Empleado" %></div>
+                </div>
+            </div>
+            <a href="<%= ctx %>/PerfilControlador" class="sidebar__link">
+                <i class="fas fa-user-circle"></i> Mi perfil
+            </a>
+            <a href="<%= ctx %>/LogoutControlador" class="sidebar__link sidebar__link--logout">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </a>
+        </div>
     </aside>
 
     <main class="main">
