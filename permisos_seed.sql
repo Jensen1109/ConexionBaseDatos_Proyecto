@@ -12,6 +12,7 @@ INSERT IGNORE INTO Permisos (nombre, descripcion) VALUES
     ('VER_STOCK',           'Ver panel de control de stock'),
     ('REGISTRAR_VENTA',     'Registrar nuevas ventas'),
     ('VER_HISTORIAL',       'Ver historial completo de ventas'),
+    ('VER_REPORTES',        'Ver reportes y estadísticas'),
     ('GESTIONAR_CLIENTES',  'Crear, editar y eliminar clientes'),
     ('GESTIONAR_DEUDAS',    'Ver y gestionar deudas y abonos'),
     ('GESTIONAR_USUARIOS',  'Crear, editar y eliminar usuarios del sistema');
@@ -20,10 +21,16 @@ INSERT IGNORE INTO Permisos (nombre, descripcion) VALUES
 INSERT IGNORE INTO rol_permiso (id_rol, id_permiso)
 SELECT 1, id_permiso FROM Permisos;
 
--- ── 3. Empleado (id_rol=2): permisos limitados ───────────────
+-- ── 3. Empleado (id_rol=2): permisos asignados ───────────────
 INSERT IGNORE INTO rol_permiso (id_rol, id_permiso)
 SELECT 2, id_permiso FROM Permisos
-WHERE nombre IN ('VER_PRODUCTOS', 'VER_STOCK', 'REGISTRAR_VENTA');
+WHERE nombre IN (
+    'VER_PRODUCTOS',
+    'VER_STOCK',
+    'REGISTRAR_VENTA',
+    'VER_HISTORIAL',
+    'VER_REPORTES'
+);
 
 -- ── 4. Verificar ──────────────────────────────────────────────
 SELECT r.nombre AS rol, p.nombre AS permiso

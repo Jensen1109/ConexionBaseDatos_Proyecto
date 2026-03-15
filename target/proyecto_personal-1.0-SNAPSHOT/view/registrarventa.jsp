@@ -1,13 +1,13 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List, modelos.Producto, modelos.Cliente, modelos.Usuario, modelos.MetodoPago" %>
+<%@ page import="java.util.List, modelos.Producto, modelos.Usuario, modelos.MetodoPago" %>
 <%
     List<Producto>   productos   = (List<Producto>)   request.getAttribute("productos");
-    List<Cliente>    clientes    = (List<Cliente>)    request.getAttribute("clientes");
     List<MetodoPago> metodosPago = (List<MetodoPago>) request.getAttribute("metodosPago");
     String error = (String) request.getAttribute("error");
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
     boolean esAdmin = (usuarioActual != null && usuarioActual.getIdRol() == 1);
+    request.setAttribute("_paginaActiva", "registrarVenta");
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -211,62 +211,7 @@
     <button class="hamburger-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar__brand">
-            <div class="sidebar__brand-title">Tienda Don Pedro</div>
-            <div class="sidebar__brand-sub">Panel de gestión</div>
-        </div>
-        <div class="sidebar__section">
-            <span class="sidebar__label">Productos</span>
-            <a href="<%= ctx %>/ProductoControlador" class="sidebar__link">
-                <i class="fas fa-box"></i> Ver productos
-            </a>
-            <a href="<%= ctx %>/ProductoControlador?accion=stock" class="sidebar__link">
-                <i class="fas fa-chart-bar"></i> Control de stock
-            </a>
-        </div>
-        <div class="sidebar__section">
-            <span class="sidebar__label">Ventas</span>
-            <a href="<%= ctx %>/PedidoControlador?accion=nuevo" class="sidebar__link sidebar__link--activo">
-                <i class="fas fa-cart-plus"></i> Registrar venta
-            </a>
-            <a href="<%= ctx %>/PedidoControlador" class="sidebar__link">
-                <i class="fas fa-history"></i> Historial de venta
-            </a>
-            <% if (esAdmin) { %>
-            <a href="<%= ctx %>/ReporteControlador" class="sidebar__link">
-                <i class="fas fa-chart-line"></i> Reportes
-            </a>
-            <% } %>
-        </div>
-        <div class="sidebar__section">
-            <span class="sidebar__label">Clientes</span>
-            <a href="<%= ctx %>/ClienteControlador" class="sidebar__link">
-                <i class="fas fa-users"></i> Ver / Editar clientes
-            </a>
-            <a href="<%= ctx %>/DeudaControlador" class="sidebar__link">
-                <i class="fas fa-file-invoice-dollar"></i> Deudores
-            </a>
-        </div>
-        <div class="sidebar__section sidebar__section--cuenta">
-            <span class="sidebar__label">Mi cuenta</span>
-            <div class="sidebar__user-card">
-                <div class="sidebar__user-avatar">
-                    <%= usuarioActual != null ? String.valueOf(usuarioActual.getNombre().charAt(0)).toUpperCase() + String.valueOf(usuarioActual.getApellido().charAt(0)).toUpperCase() : "?" %>
-                </div>
-                <div>
-                    <div class="sidebar__user-name"><%= usuarioActual != null ? usuarioActual.getNombre() + " " + usuarioActual.getApellido() : "" %></div>
-                    <div class="sidebar__user-role"><%= usuarioActual != null && usuarioActual.getIdRol() == 1 ? "Administrador" : "Empleado" %></div>
-                </div>
-            </div>
-            <a href="<%= ctx %>/PerfilControlador" class="sidebar__link">
-                <i class="fas fa-user-circle"></i> Mi perfil
-            </a>
-            <a href="<%= ctx %>/LogoutControlador" class="sidebar__link sidebar__link--logout">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </a>
-        </div>
-    </aside>
+    <jsp:include page="sidebar.jsp" />
 
     <main class="main">
         <div class="page-header">
@@ -455,44 +400,37 @@
         %>{ id: <%= p.getIdProducto() %>, nombre: '<%= nomJS %>', precio: <%= p.getPrecio().toPlainString() %>, stock: <%= p.getStock() %> },<% } } %>
         ];
 
-        /* ── DATOS DE CLIENTES (cargados desde servidor) ── */
-        const clientes = [
-            <% if (clientes != null) { for (Cliente c : clientes) {
-                String _nom = c.getNombre() != null ? c.getNombre().replace("'", "\\'") : "";
-                String _ape = c.getApellido() != null ? c.getApellido().replace("'", "\\'") : "";
-                String _ced = c.getCedula() != null ? c.getCedula().replace("'", "\\'") : "";
-            %>
-            { id: <%= c.getIdCliente() %>, nombre: '<%= _nom %>', apellido: '<%= _ape %>', cedula: '<%= _ced %>' },
-            <% } } %>
-        ];
-
-        /* ── BÚSQUEDA DE CLIENTES ── */
+        /* ── BÚSQUEDA DE CLIENTES (AJAX en tiempo real) ── */
+        const _ctx = '<%= ctx %>';
         let nuevoClientePanelAbierto = false;
+        let _debounce;
 
         function filtrarClientes(q) {
             const dropdown = document.getElementById('clienteDropdown');
-            const seleccionado = document.getElementById('idClienteHidden').value;
-            if (seleccionado) return; // ya hay uno seleccionado
+            if (document.getElementById('idClienteHidden').value) return;
 
-            q = q.trim().toLowerCase();
-            if (q.length === 0) { dropdown.style.display = 'none'; return; }
+            q = q.trim();
+            if (q.length < 2) { dropdown.style.display = 'none'; return; }
 
-            const filtrados = clientes.filter(c =>
-                (c.nombre + ' ' + c.apellido).toLowerCase().includes(q) ||
-                c.cedula.toLowerCase().includes(q)
-            ).slice(0, 10);
-
-            if (filtrados.length === 0) {
-                dropdown.innerHTML = '<div class="cliente-option" style="color:#94a3b8;cursor:default;">Sin resultados</div>';
-            } else {
-                dropdown.innerHTML = filtrados.map(c =>
-                    `<div class="cliente-option" onclick="seleccionarCliente(${c.id}, '${c.nombre} ${c.apellido}')">
-                        ${c.nombre} ${c.apellido}
-                        <span class="ced">${c.cedula}</span>
-                    </div>`
-                ).join('');
-            }
-            dropdown.style.display = 'block';
+            clearTimeout(_debounce);
+            _debounce = setTimeout(function() {
+                fetch(_ctx + '/ClienteControlador?accion=buscar&q=' + encodeURIComponent(q))
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.length === 0) {
+                            dropdown.innerHTML = '<div class="cliente-option" style="color:#94a3b8;cursor:default;">Sin resultados</div>';
+                        } else {
+                            dropdown.innerHTML = data.map(function(c) {
+                                var nombre = c.nombre + ' ' + c.apellido;
+                                var safe   = nombre.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                                return '<div class="cliente-option" onclick="seleccionarCliente(' + c.id + ', \'' + safe + '\')">' +
+                                    nombre + '<span class="ced">' + c.cedula + '</span></div>';
+                            }).join('');
+                        }
+                        dropdown.style.display = 'block';
+                    })
+                    .catch(function() { dropdown.style.display = 'none'; });
+            }, 250);
         }
 
         function seleccionarCliente(id, nombreCompleto) {

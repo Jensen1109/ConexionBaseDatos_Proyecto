@@ -11,10 +11,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Controlador CRUD de clientes (tabla Cliente).
  * Solo administradores pueden gestionar clientes.
+ * La acción "buscar" está disponible para cualquier usuario autenticado.
  */
 @WebServlet("/ClienteControlador")
 public class ClienteControlador extends HttpServlet {
@@ -43,9 +45,43 @@ public class ClienteControlador extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Búsqueda AJAX: disponible para cualquier usuario autenticado (empleados y admins)
+        if ("buscar".equals(request.getParameter("accion"))) {
+            HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("usuarioLogueado") == null) {
+                response.sendError(401);
+                return;
+            }
+            String q = request.getParameter("q");
+            if (q == null) q = "";
+            List<Cliente> resultados = clienteDAO.buscarPorTexto(q.trim());
+
+            response.setContentType("application/json; charset=UTF-8");
+            response.setHeader("Cache-Control", "no-store");
+            StringBuilder json = new StringBuilder("[");
+            for (int i = 0; i < resultados.size(); i++) {
+                Cliente c = resultados.get(i);
+                if (i > 0) json.append(",");
+                json.append("{\"id\":").append(c.getIdCliente())
+                    .append(",\"nombre\":\"").append(esc(c.getNombre())).append("\"")
+                    .append(",\"apellido\":\"").append(esc(c.getApellido())).append("\"")
+                    .append(",\"cedula\":\"").append(esc(c.getCedula())).append("\"}");
+            }
+            json.append("]");
+            response.getWriter().write(json.toString());
+            return;
+        }
+
         if (!verificarAdmin(request, response)) return;
         request.setAttribute("clientes", clienteDAO.listar());
         request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
+    }
+
+    /** Escapa caracteres especiales JSON básicos. */
+    private String esc(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").replace("\r", "\\r");
     }
 
     @Override

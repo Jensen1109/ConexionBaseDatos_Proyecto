@@ -1,6 +1,7 @@
 package controladores;
 
 import dao.DeudaDAO;
+import dao.PermisosDAO;
 import modelos.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,14 +14,15 @@ import java.math.BigDecimal;
 
 /**
  * Controlador de deudas y abonos.
- * Solo administradores pueden gestionar deudas.
+ * Requiere permiso GESTIONAR_DEUDAS.
  */
 @WebServlet("/DeudaControlador")
 public class DeudaControlador extends HttpServlet {
 
-    private final DeudaDAO deudaDAO = new DeudaDAO();
+    private final DeudaDAO    deudaDAO    = new DeudaDAO();
+    private final PermisosDAO permisosDAO = new PermisosDAO();
 
-    private boolean verificarAdmin(HttpServletRequest request, HttpServletResponse response)
+    private boolean verificarPermiso(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("Pragma", "no-cache");
@@ -30,7 +32,7 @@ public class DeudaControlador extends HttpServlet {
             return false;
         }
         Usuario u = (Usuario) session.getAttribute("usuarioLogueado");
-        if (u.getIdRol() != 1) {
+        if (!permisosDAO.tienePermiso(u.getIdRol(), "GESTIONAR_DEUDAS")) {
             response.sendRedirect(request.getContextPath() + "/ProductoControlador");
             return false;
         }
@@ -41,7 +43,7 @@ public class DeudaControlador extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!verificarAdmin(request, response)) return;
+        if (!verificarPermiso(request, response)) return;
 
         // Default: listar deudas activas con nombre del cliente
         request.setAttribute("deudas",        deudaDAO.listarActivasConCliente());
@@ -53,7 +55,7 @@ public class DeudaControlador extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!verificarAdmin(request, response)) return;
+        if (!verificarPermiso(request, response)) return;
         request.setCharacterEncoding("UTF-8");
 
         // Registrar abono a deuda existente

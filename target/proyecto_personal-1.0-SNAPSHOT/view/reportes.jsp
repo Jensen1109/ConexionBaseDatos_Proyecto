@@ -8,6 +8,7 @@
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
     boolean esAdmin = (usuarioActual != null && usuarioActual.getIdRol() == 1);
+    request.setAttribute("_paginaActiva", "reportes");
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -115,42 +116,7 @@
     <button class="hamburger-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar__brand">
-            <div class="sidebar__brand-title">Tienda Don Pedro</div>
-            <div class="sidebar__brand-sub">Panel de gestión</div>
-        </div>
-        <div class="sidebar__section">
-            <span class="sidebar__label">Productos</span>
-            <a href="<%= ctx %>/ProductoControlador" class="sidebar__link">
-                <i class="fas fa-box"></i> Ver productos
-            </a>
-            <a href="<%= ctx %>/ProductoControlador?accion=stock" class="sidebar__link">
-                <i class="fas fa-chart-bar"></i> Control de stock
-            </a>
-        </div>
-        <div class="sidebar__section">
-            <span class="sidebar__label">Ventas</span>
-            <a href="<%= ctx %>/PedidoControlador?accion=nuevo" class="sidebar__link">
-                <i class="fas fa-cart-plus"></i> Registrar venta
-            </a>
-            <a href="<%= ctx %>/PedidoControlador" class="sidebar__link">
-                <i class="fas fa-history"></i> Historial de venta
-            </a>
-            <a href="<%= ctx %>/ReporteControlador" class="sidebar__link sidebar__link--activo">
-                <i class="fas fa-chart-line"></i> Reportes
-            </a>
-        </div>
-        <div class="sidebar__section">
-            <span class="sidebar__label">Clientes</span>
-            <a href="<%= ctx %>/ClienteControlador" class="sidebar__link">
-                <i class="fas fa-users"></i> Ver / Editar clientes
-            </a>
-            <a href="<%= ctx %>/DeudaControlador" class="sidebar__link">
-                <i class="fas fa-file-invoice-dollar"></i> Deudores
-            </a>
-        </div>
-    </aside>
+    <jsp:include page="sidebar.jsp" />
 
     <main class="main">
         <div class="page-header">

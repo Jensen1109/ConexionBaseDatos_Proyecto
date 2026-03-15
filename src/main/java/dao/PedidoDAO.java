@@ -198,11 +198,9 @@ public class PedidoDAO {
     public List<Pedido> listarConCliente() {
         List<Pedido> lista = new ArrayList<>();
         String sql = "SELECT p.*, " +
-                     "CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente, " +
-                     "mp.nombre AS nombre_pago " +
+                     "CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente " +
                      "FROM Pedido p " +
                      "LEFT JOIN Cliente c ON p.id_cliente = c.id_cliente " +
-                     "LEFT JOIN metodo_pago mp ON p.id_pago = mp.id_pago " +
                      "ORDER BY p.fecha_venta DESC";
 
         try (Connection con = conexion.getConnection();
@@ -212,7 +210,6 @@ public class PedidoDAO {
             while (rs.next()) {
                 Pedido p = mapear(rs);
                 p.setNombreCliente(rs.getString("nombre_cliente"));
-                p.setNombrePago(rs.getString("nombre_pago"));
                 lista.add(p);
             }
 
@@ -231,11 +228,9 @@ public class PedidoDAO {
     public List<Pedido> listarPorFechas(LocalDate inicio, LocalDate fin) {
         List<Pedido> lista = new ArrayList<>();
         String sql = "SELECT p.*, " +
-                     "CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente, " +
-                     "mp.nombre AS nombre_pago " +
+                     "CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente " +
                      "FROM Pedido p " +
                      "LEFT JOIN Cliente c ON p.id_cliente = c.id_cliente " +
-                     "LEFT JOIN metodo_pago mp ON p.id_pago = mp.id_pago " +
                      "WHERE DATE(p.fecha_venta) BETWEEN ? AND ? " +
                      "ORDER BY p.fecha_venta DESC";
 
@@ -249,7 +244,6 @@ public class PedidoDAO {
                 while (rs.next()) {
                     Pedido p = mapear(rs);
                     p.setNombreCliente(rs.getString("nombre_cliente"));
-                    p.setNombrePago(rs.getString("nombre_pago"));
                     lista.add(p);
                 }
             }

@@ -164,6 +164,32 @@ public class ClienteDAO {
     }
 
     /**
+     * Busca clientes cuyo nombre, apellido o cédula contengan el texto dado.
+     * @param q texto a buscar
+     * @return lista de hasta 10 resultados
+     */
+    public List<Cliente> buscarPorTexto(String q) {
+        List<Cliente> lista = new ArrayList<>();
+        String like = "%" + q + "%";
+        String sql  = "SELECT * FROM Cliente WHERE nombre LIKE ? OR apellido LIKE ? OR cedula LIKE ? ORDER BY nombre LIMIT 10";
+
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, like);
+            ps.setString(2, like);
+            ps.setString(3, like);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(mapear(rs));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al buscar clientes: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    /**
      * Verifica si ya existe un cliente con esa cédula.
      * @param cedula cédula a verificar
      * @return true si ya existe

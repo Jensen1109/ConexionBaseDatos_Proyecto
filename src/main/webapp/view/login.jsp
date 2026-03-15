@@ -96,7 +96,7 @@
         <div class="card__footer">
             ¿No tienes cuenta?
             <a href="<%= ctx %>/RegistroControlador">
-                <i class="fas fa-user-plus"></i> Regístrate aquí
+                <i class="fas fa-user-plus"></i> Regístrate aquíPc
             </a>
         </div>
     </div>

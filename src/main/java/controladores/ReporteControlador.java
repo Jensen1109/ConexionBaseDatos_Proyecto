@@ -1,5 +1,6 @@
 package controladores;
 
+import dao.PermisosDAO;
 import dao.ReporteDAO;
 import modelos.Usuario;
 import jakarta.servlet.ServletException;
@@ -13,7 +14,8 @@ import java.io.IOException;
 @WebServlet("/ReporteControlador")
 public class ReporteControlador extends HttpServlet {
 
-    private final ReporteDAO reporteDAO = new ReporteDAO();
+    private final ReporteDAO   reporteDAO   = new ReporteDAO();
+    private final PermisosDAO  permisosDAO  = new PermisosDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -25,7 +27,7 @@ public class ReporteControlador extends HttpServlet {
             return;
         }
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
-        if (usuario.getIdRol() != 1) {
+        if (!permisosDAO.tienePermiso(usuario.getIdRol(), "VER_REPORTES")) {
             response.sendRedirect(request.getContextPath() + "/ProductoControlador");
             return;
         }

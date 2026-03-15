@@ -51,6 +51,13 @@ public class RegistroControladores extends HttpServlet {
             return;
         }
 
+        // Verificar si la cédula ya existe
+        if (usuarioDAO.cedulaExiste(cedula)) {
+            request.setAttribute("error", "Esta cédula ya está registrada.");
+            request.getRequestDispatcher("/view/registro.jsp").forward(request, response);
+            return;
+        }
+
         // Crear el objeto usuario (rol 2 = cliente por defecto)
         Usuario u = new Usuario();
         u.setIdRol(2);

@@ -144,7 +144,7 @@ public class DeudaDAO {
                      "abono = ?, " +
                      "fecha_abono = CURDATE(), " +
                      "monto_pendiente = monto_pendiente - ?, " +
-                     "estado = CASE WHEN monto_pendiente - ? <= 0 THEN 'pagada' ELSE 'activa' END " +
+                     "estado = CASE WHEN monto_pendiente <= 0 THEN 'pagada' ELSE 'activa' END " +
                      "WHERE id_deuda = ?";
 
         try (Connection con = conexion.getConnection();
@@ -152,8 +152,7 @@ public class DeudaDAO {
 
             ps.setBigDecimal(1, montoAbono);
             ps.setBigDecimal(2, montoAbono);
-            ps.setBigDecimal(3, montoAbono);
-            ps.setInt(4, idDeuda);
+            ps.setInt(3, idDeuda);
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {

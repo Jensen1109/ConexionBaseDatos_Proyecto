@@ -115,7 +115,9 @@ public class PermisosDAO {
             if (!permisosConfigurados(con)) {
                 return nombrePermiso.equals("VER_PRODUCTOS")
                     || nombrePermiso.equals("VER_STOCK")
-                    || nombrePermiso.equals("REGISTRAR_VENTA");
+                    || nombrePermiso.equals("REGISTRAR_VENTA")
+                    || nombrePermiso.equals("VER_HISTORIAL")
+                    || nombrePermiso.equals("VER_REPORTES");
             }
 
         } catch (SQLException e) {

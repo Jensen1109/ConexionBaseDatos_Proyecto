@@ -15,7 +15,7 @@ public class MetodoPagoDAO {
     // LISTAR TODOS
     public List<MetodoPago> listarTodos() {
         List<MetodoPago> lista = new ArrayList<>();
-        String sql = "SELECT id_pago, nombre FROM metodo_pago ORDER BY nombre";
+        String sql = "SELECT id_pago, nombre FROM MetodoPago ORDER BY nombre";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -33,7 +33,7 @@ public class MetodoPagoDAO {
 
     // CREAR
     public boolean crear(MetodoPago mp) {
-        String sql = "INSERT INTO metodo_pago (nombre) VALUES (?)";
+        String sql = "INSERT INTO MetodoPago (nombre) VALUES (?)";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -49,7 +49,7 @@ public class MetodoPagoDAO {
 
     // ELIMINAR
     public boolean eliminar(int idPago) {
-        String sql = "DELETE FROM metodo_pago WHERE id_pago = ?";
+        String sql = "DELETE FROM MetodoPago WHERE id_pago = ?";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {

@@ -5,6 +5,7 @@
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
     boolean esAdmin = (usuarioActual != null && usuarioActual.getIdRol() == 1);
+    request.setAttribute("_paginaActiva", "productos");
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -180,69 +181,7 @@
     </button>
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar__brand">
-            <div class="sidebar__brand-title">Tienda Don Pedro</div>
-            <div class="sidebar__brand-sub">Panel de gestión</div>
-        </div>
-
-        <div class="sidebar__section">
-            <span class="sidebar__label">Productos</span>
-            <a href="<%= ctx %>/ProductoControlador" class="sidebar__link sidebar__link--activo">
-                <i class="fas fa-box"></i> Ver productos
-            </a>
-            <% if (esAdmin) { %>
-            <a href="<%= ctx %>/ProductoControlador?accion=nuevo" class="sidebar__link">
-                <i class="fas fa-plus-circle"></i> Registrar producto
-            </a>
-            <% } %>
-            <a href="<%= ctx %>/ProductoControlador?accion=stock" class="sidebar__link">
-                <i class="fas fa-chart-bar"></i> Control de stock
-            </a>
-        </div>
-
-        <% if (esAdmin) { %>
-        <div class="sidebar__section">
-            <span class="sidebar__label">Ventas</span>
-            <a href="<%= ctx %>/PedidoControlador?accion=nuevo" class="sidebar__link">
-                <i class="fas fa-cart-plus"></i> Registrar venta
-            </a>
-            <a href="<%= ctx %>/PedidoControlador" class="sidebar__link">
-                <i class="fas fa-history"></i> Historial de venta
-            </a>
-            <a href="<%= ctx %>/ReporteControlador" class="sidebar__link">
-                <i class="fas fa-chart-line"></i> Reportes
-            </a>
-        </div>
-        <div class="sidebar__section">
-            <span class="sidebar__label">Clientes</span>
-            <a href="<%= ctx %>/ClienteControlador" class="sidebar__link">
-                <i class="fas fa-users"></i> Ver / Editar clientes
-            </a>
-            <a href="<%= ctx %>/DeudaControlador" class="sidebar__link">
-                <i class="fas fa-file-invoice-dollar"></i> Deudores
-            </a>
-        </div>
-        <% } %>
-        <div class="sidebar__section sidebar__section--cuenta">
-            <span class="sidebar__label">Mi cuenta</span>
-            <div class="sidebar__user-card">
-                <div class="sidebar__user-avatar">
-                    <%= usuarioActual != null ? String.valueOf(usuarioActual.getNombre().charAt(0)).toUpperCase() + String.valueOf(usuarioActual.getApellido().charAt(0)).toUpperCase() : "?" %>
-                </div>
-                <div>
-                    <div class="sidebar__user-name"><%= usuarioActual != null ? usuarioActual.getNombre() + " " + usuarioActual.getApellido() : "" %></div>
-                    <div class="sidebar__user-role"><%= usuarioActual != null && usuarioActual.getIdRol() == 1 ? "Administrador" : "Empleado" %></div>
-                </div>
-            </div>
-            <a href="<%= ctx %>/PerfilControlador" class="sidebar__link">
-                <i class="fas fa-user-circle"></i> Mi perfil
-            </a>
-            <a href="<%= ctx %>/LogoutControlador" class="sidebar__link sidebar__link--logout">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </a>
-        </div>
-    </aside>
+    <jsp:include page="sidebar.jsp" />
 
     <main class="main">
         <div class="page-header">

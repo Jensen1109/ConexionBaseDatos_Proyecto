@@ -72,7 +72,6 @@ public class PedidoControlador extends HttpServlet {
         if ("nuevo".equals(accion)) {
             if (!verificarPermiso(request, response, "REGISTRAR_VENTA", "/ProductoControlador")) return;
             request.setAttribute("productos",   productoDAO.listarTodos());
-            request.setAttribute("clientes",    clienteDAO.listar());
             request.setAttribute("metodosPago", metodoPagoDAO.listarTodos());
             request.getRequestDispatcher("/view/registrarventa.jsp").forward(request, response);
 
@@ -259,7 +258,6 @@ public class PedidoControlador extends HttpServlet {
 
     private void cargarFormulario(HttpServletRequest request) {
         request.setAttribute("productos",   productoDAO.listarTodos());
-        request.setAttribute("clientes",    clienteDAO.listar());
         request.setAttribute("metodosPago", metodoPagoDAO.listarTodos());
     }
 }
