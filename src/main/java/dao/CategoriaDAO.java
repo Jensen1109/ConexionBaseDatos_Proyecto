@@ -10,9 +10,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para la tabla Categoria.
+ * Gestiona el CRUD de las categorías de productos de la tienda.
+ */
 public class CategoriaDAO {
 
-    // LISTAR TODAS
+    /**
+     * Lista todas las categorías ordenadas alfabéticamente.
+     * @return lista de categorías; lista vacía si no hay ninguna
+     */
     public List<Categoria> listarTodas() {
         List<Categoria> lista = new ArrayList<>();
         String sql = "SELECT id_categoria, nombre FROM Categoria ORDER BY nombre";
@@ -34,7 +41,11 @@ public class CategoriaDAO {
         return lista;
     }
 
-    // BUSCAR POR ID
+    /**
+     * Busca una categoría por su identificador.
+     * @param id identificador de la categoría
+     * @return objeto Categoria si se encontró, null en caso contrario
+     */
     public Categoria buscarPorId(int id) {
         String sql = "SELECT id_categoria, nombre FROM Categoria WHERE id_categoria = ?";
 
@@ -55,7 +66,11 @@ public class CategoriaDAO {
         return null;
     }
 
-    // CREAR
+    /**
+     * Crea una nueva categoría en la base de datos.
+     * @param c objeto Categoria con el nombre a registrar
+     * @return true si se insertó correctamente, false si ocurrió un error
+     */
     public boolean crear(Categoria c) {
         String sql = "INSERT INTO Categoria (nombre) VALUES (?)";
 
@@ -71,7 +86,11 @@ public class CategoriaDAO {
         }
     }
 
-    // ACTUALIZAR
+    /**
+     * Actualiza el nombre de una categoría existente.
+     * @param c objeto Categoria con el id y nombre actualizado
+     * @return true si se actualizó correctamente, false si ocurrió un error
+     */
     public boolean actualizar(Categoria c) {
         String sql = "UPDATE Categoria SET nombre = ? WHERE id_categoria = ?";
 
@@ -88,7 +107,11 @@ public class CategoriaDAO {
         }
     }
 
-    // ELIMINAR
+    /**
+     * Elimina una categoría por su identificador.
+     * @param id identificador de la categoría a eliminar
+     * @return true si se eliminó correctamente, false si ocurrió un error
+     */
     public boolean eliminar(int id) {
         String sql = "DELETE FROM Categoria WHERE id_categoria = ?";
 

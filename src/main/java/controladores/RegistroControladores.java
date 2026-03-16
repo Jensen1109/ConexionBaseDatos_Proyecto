@@ -10,17 +10,34 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Controlador de registro de usuarios.
+ * Gestiona el formulario de creación de nuevas cuentas.
+ * Acceso público (sin sesión requerida) para registro inicial;
+ * cuando un admin está autenticado el formulario delega a UsuarioControlador.
+ */
 @WebServlet("/RegistroControlador")
 public class RegistroControladores extends HttpServlet {
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     
+    /**
+     * Muestra el formulario de registro.
+     * @param request  solicitud HTTP
+     * @param response respuesta HTTP
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("/view/registro.jsp").forward(request, response);
     }
 
+    /**
+     * Procesa el formulario de registro: valida campos, verifica unicidad
+     * de email y cédula, y crea el usuario con contraseña cifrada en BCrypt.
+     * @param request  solicitud HTTP con parámetros del formulario
+     * @param response respuesta HTTP
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

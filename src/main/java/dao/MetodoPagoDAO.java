@@ -10,9 +10,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para la tabla MetodoPago.
+ * Gestiona los métodos de pago disponibles en la tienda
+ * (Efectivo, Nequi, Tarjeta, etc.).
+ */
 public class MetodoPagoDAO {
 
-    // LISTAR TODOS
+    /**
+     * Lista todos los métodos de pago disponibles, ordenados alfabéticamente.
+     * @return lista de métodos de pago; lista vacía si no hay ninguno
+     */
     public List<MetodoPago> listarTodos() {
         List<MetodoPago> lista = new ArrayList<>();
         String sql = "SELECT id_pago, nombre FROM MetodoPago ORDER BY nombre";
@@ -31,7 +39,11 @@ public class MetodoPagoDAO {
         return lista;
     }
 
-    // CREAR
+    /**
+     * Crea un nuevo método de pago.
+     * @param mp objeto MetodoPago con el nombre a registrar
+     * @return true si se insertó correctamente, false si ocurrió un error
+     */
     public boolean crear(MetodoPago mp) {
         String sql = "INSERT INTO MetodoPago (nombre) VALUES (?)";
 
@@ -47,7 +59,11 @@ public class MetodoPagoDAO {
         }
     }
 
-    // ELIMINAR
+    /**
+     * Elimina un método de pago por su identificador.
+     * @param idPago identificador del método de pago a eliminar
+     * @return true si se eliminó correctamente, false si ocurrió un error
+     */
     public boolean eliminar(int idPago) {
         String sql = "DELETE FROM MetodoPago WHERE id_pago = ?";
 

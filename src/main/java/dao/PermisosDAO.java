@@ -11,9 +11,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para las tablas Permisos, Rol y rol_permiso.
+ * Gestiona la asignación y verificación de permisos por rol,
+ * implementando el control de acceso basado en roles (RBAC) del sistema.
+ */
 public class PermisosDAO {
 
-    // LISTAR TODOS LOS PERMISOS
+    /**
+     * Lista todos los permisos registrados en el sistema, ordenados por nombre.
+     * @return lista de permisos; lista vacía si no hay ninguno
+     */
     public List<Permisos> listarTodos() {
         List<Permisos> lista = new ArrayList<>();
         String sql = "SELECT id_permiso, nombre, descripcion FROM Permisos ORDER BY nombre";
@@ -36,7 +44,10 @@ public class PermisosDAO {
         return lista;
     }
 
-    // LISTAR TODOS LOS ROLES
+    /**
+     * Lista todos los roles del sistema ordenados por id.
+     * @return lista de roles; lista vacía si no hay ninguno
+     */
     public List<Rol> listarRoles() {
         List<Rol> lista = new ArrayList<>();
         String sql = "SELECT id_rol, nombre FROM Rol ORDER BY id_rol";
@@ -55,7 +66,11 @@ public class PermisosDAO {
         return lista;
     }
 
-    // LISTAR PERMISOS DE UN ROL
+    /**
+     * Retorna los IDs de permisos asignados a un rol específico.
+     * @param idRol identificador del rol
+     * @return lista de IDs de permisos del rol; lista vacía si no tiene ninguno
+     */
     public List<Integer> listarIdPermisosPorRol(int idRol) {
         List<Integer> ids = new ArrayList<>();
         String sql = "SELECT id_permiso FROM rol_permiso WHERE id_rol = ?";
@@ -74,7 +89,12 @@ public class PermisosDAO {
         return ids;
     }
 
-    // ASIGNAR PERMISO A ROL
+    /**
+     * Asigna un permiso a un rol. Usa INSERT IGNORE para evitar duplicados.
+     * @param idRol     identificador del rol
+     * @param idPermiso identificador del permiso a asignar
+     * @return true si se asignó correctamente, false si ocurrió un error
+     */
     public boolean asignarPermiso(int idRol, int idPermiso) {
         String sql = "INSERT IGNORE INTO rol_permiso (id_rol, id_permiso) VALUES (?, ?)";
 
@@ -91,9 +111,14 @@ public class PermisosDAO {
         }
     }
 
-    // VERIFICAR SI UN ROL TIENE UN PERMISO POR NOMBRE
-    // Admin (idRol=1) siempre tiene todos los permisos.
-    // Para otros roles se consulta la tabla rol_permiso.
+    /**
+     * Verifica si un rol tiene un permiso determinado.
+     * El rol admin (id=1) siempre retorna true sin consultar la BD.
+     * Para otros roles consulta la tabla rol_permiso.
+     * @param idRol         identificador del rol a verificar
+     * @param nombrePermiso nombre del permiso (ej: "REGISTRAR_VENTA")
+     * @return true si el rol tiene el permiso, false en caso contrario
+     */
     public boolean tienePermiso(int idRol, String nombrePermiso) {
         // Admin siempre tiene acceso completo — sin consultar la BD
         if (idRol == 1) return true;
@@ -135,7 +160,12 @@ public class PermisosDAO {
         }
     }
 
-    // QUITAR PERMISO DE ROL
+    /**
+     * Quita un permiso de un rol eliminando el registro de rol_permiso.
+     * @param idRol     identificador del rol
+     * @param idPermiso identificador del permiso a quitar
+     * @return true si se eliminó correctamente, false si ocurrió un error
+     */
     public boolean quitarPermiso(int idRol, int idPermiso) {
         String sql = "DELETE FROM rol_permiso WHERE id_rol = ? AND id_permiso = ?";
 

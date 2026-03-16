@@ -125,6 +125,12 @@
             .hamburger-btn { display: flex; align-items: center; }
             .main { margin-left: 0; padding: 1rem; padding-top: 4rem; }
         }
+
+        /* ── VALIDACIÓN ── */
+        .form-input.input-ok    { border-color: #22c55e; }
+        .form-input.input-error { border-color: #ef4444; background: #fff5f5; }
+        .field-error { display: none; color: #dc2626; font-size: 0.73rem; margin-top: 0.2rem; }
+        .field-error.visible    { display: flex; align-items: center; gap: 0.3rem; }
     </style>
 </head>
 <body>
@@ -169,7 +175,7 @@
                             <tr>
                                 <th>Nombre</th>
                                 <th>Cédula</th>
-                                <th>Teléfono</th>
+                                <th>Correo</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -185,18 +191,18 @@
                                 String nomC = c.getNombre() != null ? c.getNombre() : "";
                                 String apeC = c.getApellido() != null ? c.getApellido() : "";
                                 String cedC = c.getCedula() != null ? c.getCedula() : "";
-                                String telC = c.getTelefono() != null ? c.getTelefono() : "—";
+                                String emlC = c.getEmail() != null ? c.getEmail() : "—";
                             %>
                             <tr class="fila-cliente"
                                 data-nombre="<%= (nomC + " " + apeC).toLowerCase() %>"
                                 data-cedula="<%= cedC.toLowerCase() %>">
                                 <td class="td-nombre"><%= nomC %> <%= apeC %></td>
                                 <td class="td-ced"><%= cedC %></td>
-                                <td><%= telC %></td>
+                                <td><%= emlC %></td>
                                 <td style="white-space:nowrap;">
                                     <button type="button" class="btn-icon btn-edit"
                                             title="Editar"
-                                            onclick="abrirEditar(<%= c.getIdCliente() %>, '<%= nomC.replace("'","&#39;") %>', '<%= apeC.replace("'","&#39;") %>', '<%= cedC %>', '<%= telC.equals("—") ? "" : telC %>')">
+                                            onclick="abrirEditar(<%= c.getIdCliente() %>, '<%= nomC.replace("'","&#39;") %>', '<%= apeC.replace("'","&#39;") %>', '<%= cedC %>', '<%= emlC.equals("—") ? "" : emlC.replace("'","&#39;") %>')">
                                         <i class="fas fa-pen"></i>
                                     </button>
                                     <form method="post" action="<%= ctx %>/ClienteControlador" style="display:inline;"
@@ -218,23 +224,39 @@
             <!-- FORMULARIO NUEVO CLIENTE -->
             <div class="card">
                 <div class="card__title"><i class="fas fa-user-plus"></i> Registrar cliente</div>
-                <form method="post" action="<%= ctx %>/ClienteControlador">
+                <form method="post" action="<%= ctx %>/ClienteControlador" novalidate onsubmit="return validarFormCrear(this)">
                     <input type="hidden" name="accion" value="crear">
                     <div class="form-group">
                         <label class="form-label">Nombre *</label>
-                        <input type="text" name="nombre" class="form-input" placeholder="Nombre" required>
+                        <input type="text" name="nombre" id="crNombre" class="form-input" placeholder="Nombre"
+                               oninput="validarNombre(this, 'errCrNombre')">
+                        <span class="field-error" id="errCrNombre"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Apellido *</label>
-                        <input type="text" name="apellido" class="form-input" placeholder="Apellido" required>
+                        <input type="text" name="apellido" id="crApellido" class="form-input" placeholder="Apellido"
+                               oninput="validarNombre(this, 'errCrApellido')">
+                        <span class="field-error" id="errCrApellido"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Cédula *</label>
-                        <input type="text" name="cedula" class="form-input" placeholder="Número de cédula" required>
+                        <input type="text" name="cedula" id="crCedula" class="form-input" placeholder="Mínimo 8 dígitos"
+                               oninput="soloNumerosYValidar(this, 'errCrCedula', true)"
+                               onkeypress="return soloDigitos(event)">
+                        <span class="field-error" id="errCrCedula"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Teléfono</label>
-                        <input type="text" name="telefono" class="form-input" placeholder="Teléfono (opcional)">
+                        <input type="text" name="telefono" id="crTelefono" class="form-input" placeholder="Teléfono (opcional)"
+                               oninput="validarTelefono(this, 'errCrTelefono')"
+                               onkeypress="return soloDigitos(event)">
+                        <span class="field-error" id="errCrTelefono"><i class="fas fa-exclamation-circle"></i></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Correo electrónico</label>
+                        <input type="text" name="email" id="crEmail" class="form-input" placeholder="correo@ejemplo.com (opcional)"
+                               oninput="validarEmail(this, 'errCrEmail')">
+                        <span class="field-error" id="errCrEmail"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Registrar cliente
@@ -248,24 +270,40 @@
     <div class="modal-overlay" id="modalEditar">
         <div class="modal">
             <div class="modal__title"><i class="fas fa-pen"></i> Editar cliente</div>
-            <form method="post" action="<%= ctx %>/ClienteControlador">
+            <form method="post" action="<%= ctx %>/ClienteControlador" novalidate onsubmit="return validarFormEditar(this)">
                 <input type="hidden" name="accion"    value="actualizar">
                 <input type="hidden" name="idCliente" id="editId">
                 <div class="form-group">
                     <label class="form-label">Nombre *</label>
-                    <input type="text" name="nombre" id="editNombre" class="form-input" required>
+                    <input type="text" name="nombre" id="editNombre" class="form-input"
+                           oninput="validarNombre(this, 'errEdNombre')">
+                    <span class="field-error" id="errEdNombre"><i class="fas fa-exclamation-circle"></i></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Apellido *</label>
-                    <input type="text" name="apellido" id="editApellido" class="form-input" required>
+                    <input type="text" name="apellido" id="editApellido" class="form-input"
+                           oninput="validarNombre(this, 'errEdApellido')">
+                    <span class="field-error" id="errEdApellido"><i class="fas fa-exclamation-circle"></i></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Cédula *</label>
-                    <input type="text" name="cedula" id="editCedula" class="form-input" required>
+                    <input type="text" name="cedula" id="editCedula" class="form-input"
+                           oninput="soloNumerosYValidar(this, 'errEdCedula', true)"
+                           onkeypress="return soloDigitos(event)">
+                    <span class="field-error" id="errEdCedula"><i class="fas fa-exclamation-circle"></i></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Teléfono</label>
-                    <input type="text" name="telefono" id="editTelefono" class="form-input">
+                    <input type="text" name="telefono" id="editTelefono" class="form-input"
+                           oninput="validarTelefono(this, 'errEdTelefono')"
+                           onkeypress="return soloDigitos(event)">
+                    <span class="field-error" id="errEdTelefono"><i class="fas fa-exclamation-circle"></i></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="text" name="email" id="editEmail" class="form-input" placeholder="correo@ejemplo.com"
+                           oninput="validarEmail(this, 'errEdEmail')">
+                    <span class="field-error" id="errEdEmail"><i class="fas fa-exclamation-circle"></i></span>
                 </div>
                 <div class="modal__footer">
                     <button type="button" class="btn btn-secondary" onclick="cerrarEditar()">
@@ -280,6 +318,94 @@
     </div>
 
     <script>
+        /* ── UTILIDADES DE VALIDACIÓN ── */
+        function soloDigitos(e) {
+            return /\d/.test(String.fromCharCode(e.which || e.keyCode));
+        }
+
+        function setError(input, errId, msg) {
+            input.classList.remove('input-ok');
+            input.classList.add('input-error');
+            var span = document.getElementById(errId);
+            span.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+            span.classList.add('visible');
+        }
+
+        function setOk(input, errId) {
+            input.classList.remove('input-error');
+            input.classList.add('input-ok');
+            document.getElementById(errId).classList.remove('visible');
+        }
+
+        function clearState(input, errId) {
+            input.classList.remove('input-error', 'input-ok');
+            document.getElementById(errId).classList.remove('visible');
+        }
+
+        function validarNombre(input, errId) {
+            var v = input.value.trim();
+            if (v === '') { setError(input, errId, 'Este campo es obligatorio.'); return false; }
+            if (v.length < 2) { setError(input, errId, 'Debe tener al menos 2 caracteres.'); return false; }
+            if (!/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$/.test(v)) { setError(input, errId, 'Solo se permiten letras y espacios.'); return false; }
+            setOk(input, errId); return true;
+        }
+
+        function soloNumerosYValidar(input, errId, requerido) {
+            input.value = input.value.replace(/\D/g, '');
+            return validarCedula(input, errId, requerido);
+        }
+
+        function validarCedula(input, errId, requerido) {
+            var v = input.value.trim();
+            if (v === '' && !requerido) { clearState(input, errId); return true; }
+            if (v === '') { setError(input, errId, 'La cédula es obligatoria.'); return false; }
+            if (!/^\d+$/.test(v)) { setError(input, errId, 'La cédula solo debe contener números.'); return false; }
+            if (v.length < 8) { setError(input, errId, 'La cédula debe tener mínimo 8 dígitos.'); return false; }
+            if (v.length > 15) { setError(input, errId, 'La cédula no puede superar 15 dígitos.'); return false; }
+            setOk(input, errId); return true;
+        }
+
+        function validarTelefono(input, errId) {
+            input.value = input.value.replace(/\D/g, '');
+            var v = input.value.trim();
+            if (v === '') { clearState(input, errId); return true; }
+            if (v.length > 15) { setError(input, errId, 'El teléfono no puede superar 15 dígitos.'); return false; }
+            setOk(input, errId); return true;
+        }
+
+        function validarEmail(input, errId) {
+            var v = input.value.trim();
+            if (v === '') { clearState(input, errId); return true; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) {
+                setError(input, errId, 'Correo inválido. Ej: nombre@gmail.com'); return false;
+            }
+            setOk(input, errId); return true;
+        }
+
+        /* ── VALIDAR FORM CREAR ── */
+        function validarFormCrear(form) {
+            var ok = true;
+            ok = validarNombre(document.getElementById('crNombre'),   'errCrNombre')   && ok;
+            ok = validarNombre(document.getElementById('crApellido'), 'errCrApellido') && ok;
+            ok = validarCedula(document.getElementById('crCedula'),   'errCrCedula', true) && ok;
+            ok = validarTelefono(document.getElementById('crTelefono'), 'errCrTelefono') && ok;
+            ok = validarEmail(document.getElementById('crEmail'),     'errCrEmail')    && ok;
+            if (!ok) { form.querySelector('.field-error.visible').scrollIntoView({behavior:'smooth', block:'center'}); }
+            return ok;
+        }
+
+        /* ── VALIDAR FORM EDITAR ── */
+        function validarFormEditar(form) {
+            var ok = true;
+            ok = validarNombre(document.getElementById('editNombre'),   'errEdNombre')   && ok;
+            ok = validarNombre(document.getElementById('editApellido'), 'errEdApellido') && ok;
+            ok = validarCedula(document.getElementById('editCedula'),   'errEdCedula', true) && ok;
+            ok = validarTelefono(document.getElementById('editTelefono'), 'errEdTelefono') && ok;
+            ok = validarEmail(document.getElementById('editEmail'),     'errEdEmail')    && ok;
+            return ok;
+        }
+
+        /* ── BÚSQUEDA TABLA ── */
         function filtrar(q) {
             q = q.trim().toLowerCase();
             document.querySelectorAll('.fila-cliente').forEach(function(fila) {
@@ -289,12 +415,22 @@
             });
         }
 
-        function abrirEditar(id, nombre, apellido, cedula, telefono) {
+        /* ── MODAL EDITAR ── */
+        function abrirEditar(id, nombre, apellido, cedula, email) {
             document.getElementById('editId').value       = id;
             document.getElementById('editNombre').value   = nombre;
             document.getElementById('editApellido').value = apellido;
             document.getElementById('editCedula').value   = cedula;
-            document.getElementById('editTelefono').value = telefono;
+            document.getElementById('editTelefono').value = '';
+            document.getElementById('editEmail').value    = email || '';
+            // limpiar estados de validación al abrir
+            ['editNombre','editApellido','editCedula','editTelefono','editEmail'].forEach(function(id) {
+                var el = document.getElementById(id);
+                el.classList.remove('input-ok','input-error');
+            });
+            ['errEdNombre','errEdApellido','errEdCedula','errEdTelefono','errEdEmail'].forEach(function(id) {
+                document.getElementById(id).classList.remove('visible');
+            });
             document.getElementById('modalEditar').classList.add('open');
         }
 

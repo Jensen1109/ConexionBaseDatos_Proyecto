@@ -2,6 +2,7 @@ package controladores;
 
 import dao.ClienteDAO;
 import dao.PermisosDAO;
+import dao.TelefonoDAO;
 import modelos.Cliente;
 import modelos.Usuario;
 import jakarta.servlet.ServletException;
@@ -23,6 +24,7 @@ public class ClienteControlador extends HttpServlet {
 
     private final ClienteDAO  clienteDAO  = new ClienteDAO();
     private final PermisosDAO permisosDAO = new PermisosDAO();
+    private final TelefonoDAO telefonoDAO = new TelefonoDAO();
 
     private boolean verificarAdmin(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -84,6 +86,40 @@ public class ClienteControlador extends HttpServlet {
                 .replace("\n", "\\n").replace("\r", "\\r");
     }
 
+    /** Valida campos de cliente y retorna mensaje de error, o null si todo está bien. */
+    private String validarCamposCliente(String nombre, String apellido, String cedula,
+                                        String telefono, String email) {
+        if (nombre == null || nombre.isBlank())   return "El nombre es obligatorio.";
+        if (!nombre.trim().matches("[A-Za-záéíóúÁÉÍÓÚñÑ\\s]{2,60}"))
+            return "El nombre solo puede contener letras (mínimo 2 caracteres).";
+
+        if (apellido == null || apellido.isBlank()) return "El apellido es obligatorio.";
+        if (!apellido.trim().matches("[A-Za-záéíóúÁÉÍÓÚñÑ\\s]{2,60}"))
+            return "El apellido solo puede contener letras (mínimo 2 caracteres).";
+
+        if (cedula == null || cedula.isBlank())   return "La cédula es obligatoria.";
+        if (!cedula.trim().matches("\\d{8,15}"))
+            return "La cédula debe contener solo números (mínimo 8, máximo 15 dígitos).";
+
+        if (telefono != null && !telefono.isBlank() && !telefono.trim().matches("\\d{1,15}"))
+            return "El teléfono solo puede contener números (máximo 15 dígitos).";
+
+        if (email != null && !email.isBlank() &&
+            !email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+            return "El correo electrónico no es válido. Ejemplo: nombre@gmail.com";
+
+        return null;
+    }
+
+    /** Guarda o reemplaza el teléfono del cliente en la tabla Telefono. */
+    private void sincronizarTelefono(int idCliente, String telefono, boolean esNuevo) {
+        if (!esNuevo) telefonoDAO.eliminarPorCliente(idCliente);
+        if (telefono != null && !telefono.isBlank()) {
+            modelos.Telefono t = new modelos.Telefono(0, telefono.trim(), idCliente);
+            telefonoDAO.agregar(t);
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -98,16 +134,16 @@ public class ClienteControlador extends HttpServlet {
             String apellido = request.getParameter("apellido");
             String cedula   = request.getParameter("cedula");
             String telefono = request.getParameter("telefono");
+            String email    = request.getParameter("email");
 
-            if (nombre == null || nombre.isBlank() ||
-                apellido == null || apellido.isBlank() ||
-                cedula == null || cedula.isBlank()) {
+            String errMsg = validarCamposCliente(nombre, apellido, cedula, telefono, email);
+            if (errMsg != null) {
                 request.setAttribute("clientes", clienteDAO.listar());
-                request.setAttribute("error", "Nombre, apellido y cédula son obligatorios.");
+                request.setAttribute("error", errMsg);
                 request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
                 return;
             }
-            if (clienteDAO.cedulaExiste(cedula)) {
+            if (clienteDAO.cedulaExiste(cedula.trim())) {
                 request.setAttribute("clientes", clienteDAO.listar());
                 request.setAttribute("error", "Ya existe un cliente con esa cédula.");
                 request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
@@ -115,11 +151,14 @@ public class ClienteControlador extends HttpServlet {
             }
 
             Cliente c = new Cliente();
-            c.setNombre(nombre);
-            c.setApellido(apellido);
-            c.setCedula(cedula);
-            c.setTelefono(telefono);
-            clienteDAO.crear(c);
+            c.setNombre(nombre.trim());
+            c.setApellido(apellido.trim());
+            c.setCedula(cedula.trim());
+            c.setEmail(email != null ? email.trim() : null);
+            int idNuevo = clienteDAO.crearYObtenerIdCliente(c);
+
+            // Guardar teléfono en tabla Telefono
+            sincronizarTelefono(idNuevo, telefono, true);
 
         } else if ("actualizar".equals(accion)) {
             int    id       = Integer.parseInt(request.getParameter("idCliente"));
@@ -127,14 +166,27 @@ public class ClienteControlador extends HttpServlet {
             String apellido = request.getParameter("apellido");
             String cedula   = request.getParameter("cedula");
             String telefono = request.getParameter("telefono");
+            String email    = request.getParameter("email");
 
-            if (clienteDAO.cedulaExisteExcluyendo(cedula, id)) {
+            String errMsg = validarCamposCliente(nombre, apellido, cedula, telefono, email);
+            if (errMsg != null) {
+                request.setAttribute("clientes", clienteDAO.listar());
+                request.setAttribute("error", errMsg);
+                request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
+                return;
+            }
+            if (clienteDAO.cedulaExisteExcluyendo(cedula.trim(), id)) {
                 request.setAttribute("clientes", clienteDAO.listar());
                 request.setAttribute("error", "Ya existe otro cliente con esa cédula.");
                 request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
                 return;
             }
-            clienteDAO.actualizar(new Cliente(id, nombre, apellido, cedula, telefono));
+            Cliente c = new Cliente(id, nombre.trim(), apellido.trim(), cedula.trim());
+            c.setEmail(email != null ? email.trim() : null);
+            clienteDAO.actualizar(c);
+
+            // Reemplazar teléfono en tabla Telefono
+            sincronizarTelefono(id, telefono, false);
 
         } else if ("eliminar".equals(accion)) {
             int id = Integer.parseInt(request.getParameter("idCliente"));

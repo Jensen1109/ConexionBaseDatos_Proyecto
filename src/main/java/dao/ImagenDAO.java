@@ -10,9 +10,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para la tabla Imagen.
+ * Gestiona el almacenamiento y recuperación de URLs de imágenes
+ * asociadas a los productos de la tienda.
+ */
 public class ImagenDAO {
 
-    // LISTAR IMÁGENES POR PRODUCTO
+    /**
+     * Lista todas las imágenes asociadas a un producto.
+     * @param idProducto identificador del producto
+     * @return lista de imágenes del producto; lista vacía si no tiene
+     */
     public List<Imagen> listarPorProducto(int idProducto) {
         List<Imagen> lista = new ArrayList<>();
         String sql = "SELECT id_imagen, id_producto, url FROM Imagen WHERE id_producto = ?";
@@ -37,7 +46,11 @@ public class ImagenDAO {
         return lista;
     }
 
-    // GUARDAR URL DE IMAGEN
+    /**
+     * Guarda una imagen vinculada a un producto existente.
+     * @param img objeto Imagen con id_producto y url
+     * @return true si se insertó correctamente, false si ocurrió un error
+     */
     public boolean guardar(Imagen img) {
         String sql = "INSERT INTO Imagen (id_producto, url) VALUES (?, ?)";
 
@@ -54,8 +67,11 @@ public class ImagenDAO {
         }
     }
 
-    // INSERTAR URL SIN PRODUCTO (para crear imagen antes que el producto)
-    // Retorna el id_imagen generado, o 0 si falla
+    /**
+     * Inserta una imagen sin producto asociado (útil al crear producto con imagen simultáneamente).
+     * @param url URL o nombre de archivo de la imagen
+     * @return id_imagen generado por la base de datos, o 0 si ocurrió un error
+     */
     public int insertar(String url) {
         String sql = "INSERT INTO Imagen (url) VALUES (?)";
 
@@ -74,7 +90,12 @@ public class ImagenDAO {
         return 0;
     }
 
-    // ACTUALIZAR URL DE UNA IMAGEN EXISTENTE
+    /**
+     * Actualiza la URL de una imagen existente.
+     * @param idImagen identificador de la imagen a actualizar
+     * @param url nueva URL o nombre de archivo
+     * @return true si se actualizó correctamente, false si ocurrió un error
+     */
     public boolean actualizarUrl(int idImagen, String url) {
         String sql = "UPDATE Imagen SET url = ? WHERE id_imagen = ?";
 
@@ -91,7 +112,11 @@ public class ImagenDAO {
         }
     }
 
-    // ELIMINAR
+    /**
+     * Elimina una imagen por su identificador.
+     * @param idImagen identificador de la imagen a eliminar
+     * @return true si se eliminó correctamente, false si ocurrió un error
+     */
     public boolean eliminar(int idImagen) {
         String sql = "DELETE FROM Imagen WHERE id_imagen = ?";
 

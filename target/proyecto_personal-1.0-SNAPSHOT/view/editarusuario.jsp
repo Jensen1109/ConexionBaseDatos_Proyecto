@@ -182,7 +182,7 @@
                             <span class="avatar"><%= inicial %></span>
                             <%= c.getNombre() %> <%= c.getApellido() != null ? c.getApellido() : "" %>
                         </td>
-                        <td class="td-email"><%= c.getTelefono() != null ? c.getTelefono() : "—" %></td>
+                        <td class="td-email"><%= c.getEmail() != null ? c.getEmail() : "—" %></td>
                         <td class="td-cedula"><%= c.getCedula() != null ? c.getCedula() : "—" %></td>
                         <td>
                             <a href="#modal-editar-<%= c.getIdCliente() %>" class="btn-edit">
@@ -221,7 +221,7 @@
                 </div>
                 <div class="modal__group">
                     <label class="modal__label">Teléfono</label>
-                    <input type="text" name="telefono" class="modal__input" value="<%= c.getTelefono() != null ? c.getTelefono() : "" %>">
+                    <input type="text" name="telefono" class="modal__input" value="">
                 </div>
                 <div class="modal__actions">
                     <button type="submit" class="btn-save">Guardar cambios</button>

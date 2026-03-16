@@ -61,6 +61,10 @@
             transition: border-color 0.2s;
         }
         input:focus, select:focus { border-color: #3b82f6; }
+        input.input-ok    { border-color: #22c55e !important; }
+        input.input-error { border-color: #ef4444 !important; background: #fff5f5 !important; }
+        .field-error { display: none; color: #dc2626; font-size: 0.75rem; margin-top: 0.15rem; }
+        .field-error.visible { display: flex; align-items: center; gap: 0.25rem; }
         .btn-submit {
             width: 100%; padding: 0.7rem; background: #22c55e; color: #fff;
             border: none; border-radius: 8px; font-size: 0.95rem;
@@ -99,28 +103,41 @@
         <div class="alert-ok"><i class="fas fa-check-circle"></i> <%= exito %></div>
         <% } %>
 
-        <form action="<%= formAction %>" method="post">
+        <form action="<%= formAction %>" method="post" novalidate onsubmit="return validarRegistro()">
             <input type="hidden" name="accion" value="registrar">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="nombre">Nombre *</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
+                    <input type="text" id="nombre" name="nombre" placeholder="Nombre"
+                           oninput="rgValidarNombre(this,'rgErrNombre')" maxlength="60">
+                    <span class="field-error" id="rgErrNombre"></span>
                 </div>
                 <div class="form-group">
                     <label for="apellido">Apellido *</label>
-                    <input type="text" id="apellido" name="apellido" placeholder="Apellido" required>
+                    <input type="text" id="apellido" name="apellido" placeholder="Apellido"
+                           oninput="rgValidarNombre(this,'rgErrApellido')" maxlength="60">
+                    <span class="field-error" id="rgErrApellido"></span>
                 </div>
                 <div class="form-group form-group--full">
                     <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required>
+                    <input type="text" id="email" name="email" placeholder="correo@ejemplo.com"
+                           oninput="rgValidarEmail(this)" maxlength="150" autocomplete="email">
+                    <span class="field-error" id="rgErrEmail"></span>
                 </div>
                 <div class="form-group">
                     <label for="cedula">Cédula *</label>
-                    <input type="text" id="cedula" name="cedula" placeholder="Número de cédula" required>
+                    <input type="text" id="cedula" name="cedula" placeholder="Mín. 8 — máx. 15 dígitos"
+                           oninput="rgValidarCedula(this)"
+                           onkeypress="return /[0-9]/.test(event.key)"
+                           maxlength="15">
+                    <span class="field-error" id="rgErrCedula"></span>
                 </div>
                 <div class="form-group">
                     <label for="contrasena">Contraseña *</label>
-                    <input type="password" id="contrasena" name="contrasena" placeholder="Mínimo 6 caracteres" required>
+                    <input type="password" id="contrasena" name="contrasena"
+                           placeholder="Mínimo 6 caracteres"
+                           oninput="rgValidarPass(this)" autocomplete="new-password">
+                    <span class="field-error" id="rgErrPass"></span>
                 </div>
                 <% if (esAdmin) { %>
                 <div class="form-group form-group--full">
@@ -149,5 +166,88 @@
             <% } %>
         </div>
     </div>
+    <script>
+        function rgSetError(id, errId, msg) {
+            var inp = document.getElementById(id);
+            var err = document.getElementById(errId);
+            inp.classList.remove('input-ok'); inp.classList.add('input-error');
+            err.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+            err.classList.add('visible');
+        }
+        function rgSetOk(id, errId) {
+            var inp = document.getElementById(id);
+            var err = document.getElementById(errId);
+            inp.classList.remove('input-error'); inp.classList.add('input-ok');
+            err.textContent = ''; err.classList.remove('visible');
+        }
+        function rgClear(id, errId) {
+            var inp = document.getElementById(id);
+            var err = document.getElementById(errId);
+            inp.classList.remove('input-ok','input-error');
+            err.textContent = ''; err.classList.remove('visible');
+        }
+
+        function rgValidarNombre(inp, errId) {
+            var v = inp.value.trim();
+            if (v === '') { rgClear(inp.id, errId); return null; }
+            if (!/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(v))
+                { rgSetError(inp.id, errId, 'Solo se permiten letras, sin números ni símbolos.'); return false; }
+            if (v.length < 2)
+                { rgSetError(inp.id, errId, 'Debe tener al menos 2 caracteres.'); return false; }
+            rgSetOk(inp.id, errId); return true;
+        }
+        function rgValidarEmail(inp) {
+            var v = inp.value.trim();
+            if (v === '') { rgClear('email','rgErrEmail'); return null; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))
+                { rgSetError('email','rgErrEmail','Ingresa un correo válido, ej: nombre@gmail.com'); return false; }
+            rgSetOk('email','rgErrEmail'); return true;
+        }
+        function rgValidarCedula(inp) {
+            var v = inp.value.trim();
+            if (v === '') { rgClear('cedula','rgErrCedula'); return null; }
+            if (!/^\d+$/.test(v))
+                { rgSetError('cedula','rgErrCedula','La cédula solo puede contener números.'); return false; }
+            if (v.length < 8)
+                { rgSetError('cedula','rgErrCedula','La cédula debe tener mínimo 8 dígitos.'); return false; }
+            if (v.length > 15)
+                { rgSetError('cedula','rgErrCedula','La cédula no puede superar 15 dígitos.'); return false; }
+            rgSetOk('cedula','rgErrCedula'); return true;
+        }
+        function rgValidarPass(inp) {
+            var v = inp.value;
+            if (v === '') { rgClear('contrasena','rgErrPass'); return null; }
+            if (v.length < 6)
+                { rgSetError('contrasena','rgErrPass','La contraseña debe tener mínimo 6 caracteres.'); return false; }
+            rgSetOk('contrasena','rgErrPass'); return true;
+        }
+
+        function validarRegistro() {
+            var okNombre   = rgValidarNombre(document.getElementById('nombre'),   'rgErrNombre');
+            var okApellido = rgValidarNombre(document.getElementById('apellido'), 'rgErrApellido');
+            var okEmail    = rgValidarEmail(document.getElementById('email'));
+            var okCedula   = rgValidarCedula(document.getElementById('cedula'));
+            var okPass     = rgValidarPass(document.getElementById('contrasena'));
+
+            if (document.getElementById('nombre').value.trim() === '')
+                { rgSetError('nombre','rgErrNombre','El nombre es obligatorio.'); okNombre = false; }
+            if (document.getElementById('apellido').value.trim() === '')
+                { rgSetError('apellido','rgErrApellido','El apellido es obligatorio.'); okApellido = false; }
+            if (document.getElementById('email').value.trim() === '')
+                { rgSetError('email','rgErrEmail','El email es obligatorio.'); okEmail = false; }
+            if (document.getElementById('cedula').value.trim() === '')
+                { rgSetError('cedula','rgErrCedula','La cédula es obligatoria.'); okCedula = false; }
+            if (document.getElementById('contrasena').value === '')
+                { rgSetError('contrasena','rgErrPass','La contraseña es obligatoria.'); okPass = false; }
+
+            if (okNombre === false || okApellido === false || okEmail === false ||
+                okCedula === false || okPass === false) {
+                var primerError = document.querySelector('.input-error');
+                if (primerError) primerError.scrollIntoView({behavior:'smooth', block:'center'});
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>

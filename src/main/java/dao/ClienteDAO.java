@@ -13,25 +13,28 @@ import java.util.List;
 /**
  * DAO para la tabla Cliente.
  * Gestiona el CRUD de clientes de la tienda.
+ * Los teléfonos del cliente se gestionan por separado en TelefonoDAO.
  */
 public class ClienteDAO {
 
-    // ─────────────────────────────────────────────
-    // Mapear ResultSet → Cliente
-    // ─────────────────────────────────────────────
+    /**
+     * Mapea una fila del ResultSet a un objeto Cliente.
+     * @param rs ResultSet posicionado en la fila a mapear
+     * @return objeto Cliente con los datos de la fila
+     */
     private Cliente mapear(ResultSet rs) throws SQLException {
         Cliente c = new Cliente();
         c.setIdCliente(rs.getInt("id_cliente"));
         c.setNombre(rs.getString("nombre"));
         c.setApellido(rs.getString("apellido"));
         c.setCedula(rs.getString("cedula"));
-        c.setTelefono(rs.getString("telefono"));
+        c.setEmail(rs.getString("email"));
         return c;
     }
 
     /**
      * Lista todos los clientes ordenados por nombre.
-     * @return lista de clientes
+     * @return lista de clientes; lista vacía si no hay ninguno
      */
     public List<Cliente> listar() {
         List<Cliente> lista = new ArrayList<>();
@@ -77,7 +80,7 @@ public class ClienteDAO {
      * @return true si se insertó correctamente
      */
     public boolean crear(Cliente c) {
-        String sql = "INSERT INTO Cliente (nombre, apellido, cedula, telefono) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Cliente (nombre, apellido, cedula, email) VALUES (?, ?, ?, ?)";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -85,7 +88,7 @@ public class ClienteDAO {
             ps.setString(1, c.getNombre());
             ps.setString(2, c.getApellido());
             ps.setString(3, c.getCedula());
-            ps.setString(4, c.getTelefono());
+            ps.setString(4, c.getEmail());
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -96,10 +99,11 @@ public class ClienteDAO {
 
     /**
      * Crea un cliente y retorna el ID generado (útil al registrar ventas con cliente nuevo).
+     * @param c objeto Cliente con los datos
      * @return id_cliente generado, o 0 si falló
      */
     public int crearYObtenerIdCliente(Cliente c) {
-        String sql = "INSERT INTO Cliente (nombre, apellido, cedula, telefono) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Cliente (nombre, apellido, cedula, email) VALUES (?, ?, ?, ?)";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
@@ -107,7 +111,7 @@ public class ClienteDAO {
             ps.setString(1, c.getNombre());
             ps.setString(2, c.getApellido());
             ps.setString(3, c.getCedula());
-            ps.setString(4, c.getTelefono());
+            ps.setString(4, c.getEmail());
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) return rs.getInt(1);
@@ -125,7 +129,7 @@ public class ClienteDAO {
      * @return true si se actualizó
      */
     public boolean actualizar(Cliente c) {
-        String sql = "UPDATE Cliente SET nombre=?, apellido=?, cedula=?, telefono=? WHERE id_cliente=?";
+        String sql = "UPDATE Cliente SET nombre=?, apellido=?, cedula=?, email=? WHERE id_cliente=?";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -133,7 +137,7 @@ public class ClienteDAO {
             ps.setString(1, c.getNombre());
             ps.setString(2, c.getApellido());
             ps.setString(3, c.getCedula());
-            ps.setString(4, c.getTelefono());
+            ps.setString(4, c.getEmail());
             ps.setInt(5, c.getIdCliente());
             return ps.executeUpdate() > 0;
 
@@ -212,9 +216,8 @@ public class ClienteDAO {
     }
 
     /**
-     * Verifica si la cédula ya existe excluyendo un cliente específico
-     * (útil al editar para no bloquear la misma cédula del cliente en cuestión).
-     * @param cedula   cédula a verificar
+     * Verifica si la cédula ya existe excluyendo un cliente específico.
+     * @param cedula    cédula a verificar
      * @param idCliente cliente a excluir
      * @return true si ya existe en otro cliente
      */

@@ -123,6 +123,10 @@
         }
         .nuevo-cliente-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
         @media (max-width: 600px) { .nuevo-cliente-grid { grid-template-columns: 1fr; } }
+        .form-input.input-ok    { border-color: #22c55e; }
+        .form-input.input-error { border-color: #ef4444; background: #fff5f5; }
+        .field-error { display: none; color: #dc2626; font-size: 0.7rem; margin-top: 0.15rem; }
+        .field-error.visible    { display: flex; align-items: center; gap: 0.25rem; }
 
         /* ── AGREGAR PRODUCTO ── */
         .add-row { display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; }
@@ -276,23 +280,45 @@
                                 <div class="nuevo-cliente-grid">
                                     <div class="form-group" style="margin-bottom:0;">
                                         <label class="form-label">Nombre *</label>
-                                        <input type="text" name="nuevoClienteNombre" id="nuevoClienteNombre"
-                                               class="form-input" placeholder="Nombre">
+                                        <input type="text" name="nuevoClienteNombre" id="nvNombre"
+                                               class="form-input" placeholder="Nombre"
+                                               oninput="nvValidarNombre(this, 'nvErrNombre')"
+                                               maxlength="60">
+                                        <span class="field-error" id="nvErrNombre"></span>
                                     </div>
                                     <div class="form-group" style="margin-bottom:0;">
                                         <label class="form-label">Apellido *</label>
-                                        <input type="text" name="nuevoClienteApellido"
-                                               class="form-input" placeholder="Apellido">
+                                        <input type="text" name="nuevoClienteApellido" id="nvApellido"
+                                               class="form-input" placeholder="Apellido"
+                                               oninput="nvValidarNombre(this, 'nvErrApellido')"
+                                               maxlength="60">
+                                        <span class="field-error" id="nvErrApellido"></span>
                                     </div>
                                     <div class="form-group" style="margin-bottom:0;">
                                         <label class="form-label">Cédula *</label>
-                                        <input type="text" name="nuevoClienteCedula"
-                                               class="form-input" placeholder="Número de cédula">
+                                        <input type="text" name="nuevoClienteCedula" id="nvCedula"
+                                               class="form-input" placeholder="Mín. 8 — máx. 15 dígitos"
+                                               oninput="nvValidarCedula(this)"
+                                               onkeypress="return /[0-9]/.test(event.key)"
+                                               maxlength="15">
+                                        <span class="field-error" id="nvErrCedula"></span>
                                     </div>
                                     <div class="form-group" style="margin-bottom:0;">
                                         <label class="form-label">Teléfono</label>
-                                        <input type="text" name="nuevoClienteTelefono"
-                                               class="form-input" placeholder="Teléfono (opcional)">
+                                        <input type="text" name="nuevoClienteTelefono" id="nvTelefono"
+                                               class="form-input" placeholder="Teléfono (opcional)"
+                                               oninput="nvValidarTelefono(this)"
+                                               onkeypress="return /[0-9]/.test(event.key)"
+                                               maxlength="15">
+                                        <span class="field-error" id="nvErrTelefono"></span>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label class="form-label">Correo electrónico</label>
+                                        <input type="text" name="nuevoClienteEmail" id="nvEmail"
+                                               class="form-input" placeholder="correo@ejemplo.com (opcional)"
+                                               oninput="nvValidarEmail(this)"
+                                               maxlength="150">
+                                        <span class="field-error" id="nvErrEmail"></span>
                                     </div>
                                 </div>
                             </div>
@@ -470,11 +496,15 @@
                 document.getElementById('searchWrap').style.display = 'none';
             } else {
                 document.getElementById('searchWrap').style.display = 'block';
-                // Limpiar campos del panel
-                document.getElementById('nuevoClienteNombre').value = '';
-                document.querySelector('[name="nuevoClienteApellido"]').value = '';
-                document.querySelector('[name="nuevoClienteCedula"]').value = '';
-                document.querySelector('[name="nuevoClienteTelefono"]').value = '';
+                // Limpiar campos del panel y estados de validación
+                ['nvNombre','nvApellido','nvCedula','nvTelefono','nvEmail'].forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) { el.value = ''; el.className = 'form-input'; }
+                });
+                ['nvErrNombre','nvErrApellido','nvErrCedula','nvErrTelefono','nvErrEmail'].forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) { el.textContent = ''; el.className = 'field-error'; }
+                });
             }
         }
 
@@ -547,22 +577,108 @@
             document.getElementById('cantProductos').textContent = cantidades.length;
         }
 
-        /* ── VALIDACIÓN ── */
+        /* ── VALIDACIÓN NUEVO CLIENTE ── */
+        function nvSetError(inputId, errId, msg) {
+            var inp = document.getElementById(inputId);
+            var err = document.getElementById(errId);
+            if (inp) { inp.classList.remove('input-ok'); inp.classList.add('input-error'); }
+            if (err) { err.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg; err.classList.add('visible'); }
+        }
+        function nvSetOk(inputId, errId) {
+            var inp = document.getElementById(inputId);
+            var err = document.getElementById(errId);
+            if (inp) { inp.classList.remove('input-error'); inp.classList.add('input-ok'); }
+            if (err) { err.textContent = ''; err.classList.remove('visible'); }
+        }
+        function nvClear(inputId, errId) {
+            var inp = document.getElementById(inputId);
+            var err = document.getElementById(errId);
+            if (inp) { inp.classList.remove('input-ok','input-error'); }
+            if (err) { err.textContent = ''; err.classList.remove('visible'); }
+        }
+
+        function nvValidarNombre(inp, errId) {
+            var v = inp.value.trim();
+            if (v === '') { nvClear(inp.id, errId); return null; }
+            if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(v))
+                { nvSetError(inp.id, errId, 'Solo se permiten letras, sin números ni símbolos.'); return false; }
+            if (v.length < 2)
+                { nvSetError(inp.id, errId, 'Debe tener al menos 2 caracteres.'); return false; }
+            nvSetOk(inp.id, errId); return true;
+        }
+        function nvValidarCedula(inp) {
+            var v = inp.value.trim();
+            if (v === '') { nvClear('nvCedula','nvErrCedula'); return null; }
+            if (!/^\d+$/.test(v))
+                { nvSetError('nvCedula','nvErrCedula','La cédula solo puede contener números.'); return false; }
+            if (v.length < 8)
+                { nvSetError('nvCedula','nvErrCedula','La cédula debe tener mínimo 8 dígitos.'); return false; }
+            if (v.length > 15)
+                { nvSetError('nvCedula','nvErrCedula','La cédula no puede superar 15 dígitos.'); return false; }
+            nvSetOk('nvCedula','nvErrCedula'); return true;
+        }
+        function nvValidarTelefono(inp) {
+            var v = inp.value.trim();
+            if (v === '') { nvClear('nvTelefono','nvErrTelefono'); return null; }
+            if (!/^\d+$/.test(v))
+                { nvSetError('nvTelefono','nvErrTelefono','El teléfono solo puede contener números.'); return false; }
+            if (v.length > 15)
+                { nvSetError('nvTelefono','nvErrTelefono','El teléfono no puede superar 15 dígitos.'); return false; }
+            nvSetOk('nvTelefono','nvErrTelefono'); return true;
+        }
+        function nvValidarEmail(inp) {
+            var v = inp.value.trim();
+            if (v === '') { nvClear('nvEmail','nvErrEmail'); return null; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))
+                { nvSetError('nvEmail','nvErrEmail','Ingresa un correo válido, ej: nombre@gmail.com'); return false; }
+            nvSetOk('nvEmail','nvErrEmail'); return true;
+        }
+
+        /* ── VALIDACIÓN FORMULARIO PRINCIPAL ── */
         function validar() {
             if (document.querySelectorAll('input[name="idProducto"]').length === 0) {
                 alert('Agrega al menos un producto a la venta.');
                 return false;
             }
-            // Si el panel de nuevo cliente está abierto, validar campos obligatorios
+            // Si el panel de nuevo cliente está abierto, validar todos sus campos
             if (nuevoClientePanelAbierto) {
-                const nombre = document.getElementById('nuevoClienteNombre').value.trim();
-                const cedula = document.querySelector('[name="nuevoClienteCedula"]').value.trim();
-                if (!nombre) { alert('Ingresa el nombre del nuevo cliente.'); return false; }
-                if (!cedula) { alert('Ingresa la cédula del nuevo cliente.'); return false; }
+                var nombreInp = document.getElementById('nvNombre');
+                var apellidoInp = document.getElementById('nvApellido');
+                var cedulaInp = document.getElementById('nvCedula');
+                var telInp = document.getElementById('nvTelefono');
+                var emailInp = document.getElementById('nvEmail');
+
+                var okNombre   = nvValidarNombre(nombreInp,   'nvErrNombre');
+                var okApellido = nvValidarNombre(apellidoInp, 'nvErrApellido');
+                var okCedula   = nvValidarCedula(cedulaInp);
+                var okTel      = nvValidarTelefono(telInp);
+                var okEmail    = nvValidarEmail(emailInp);
+
+                // Nombre y cédula son obligatorios
+                if (nombreInp.value.trim() === '') {
+                    nvSetError('nvNombre','nvErrNombre','El nombre es obligatorio.');
+                    okNombre = false;
+                }
+                if (apellidoInp.value.trim() === '') {
+                    nvSetError('nvApellido','nvErrApellido','El apellido es obligatorio.');
+                    okApellido = false;
+                }
+                if (cedulaInp.value.trim() === '') {
+                    nvSetError('nvCedula','nvErrCedula','La cédula es obligatoria.');
+                    okCedula = false;
+                }
+
+                if (okNombre === false || okApellido === false || okCedula === false ||
+                    okTel === false || okEmail === false) {
+                    // Scroll al primer error
+                    var primerError = document.querySelector('#nuevoClientePanel .input-error');
+                    if (primerError) primerError.scrollIntoView({behavior:'smooth', block:'center'});
+                    return false;
+                }
             }
             // Fiado requiere cliente
-            const fiado = document.getElementById('chkFiado').checked;
-            const idCliente = document.getElementById('idClienteHidden').value;
+            var fiado = document.getElementById('chkFiado').checked;
+            var idCliente = document.getElementById('idClienteHidden').value;
             if (fiado && !idCliente && !nuevoClientePanelAbierto) {
                 alert('Para venta a fiado debes seleccionar o registrar un cliente.');
                 return false;

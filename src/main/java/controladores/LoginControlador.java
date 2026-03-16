@@ -20,6 +20,12 @@ public class LoginControlador extends HttpServlet {
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
+    /**
+     * Muestra el formulario de login. Si ya existe sesión activa,
+     * redirige directamente al dashboard según el rol del usuario.
+     * @param request  solicitud HTTP
+     * @param response respuesta HTTP
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -38,6 +44,12 @@ public class LoginControlador extends HttpServlet {
         request.getRequestDispatcher("/view/login.jsp").forward(request, response);
     }
 
+    /**
+     * Procesa las credenciales de login. Acepta email o cédula como identificador.
+     * Crea la sesión y redirige según rol si las credenciales son correctas.
+     * @param request  solicitud HTTP con parámetros "email" y "contrasena"
+     * @param response respuesta HTTP
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

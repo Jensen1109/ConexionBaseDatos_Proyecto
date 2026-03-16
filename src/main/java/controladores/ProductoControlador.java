@@ -41,6 +41,12 @@ public class ProductoControlador extends HttpServlet {
     // ─────────────────────────────────────────────
     // Verificaciones de sesión / rol
     // ─────────────────────────────────────────────
+    /**
+     * Verifica que exista una sesión activa; redirige al login si no hay.
+     * @param req solicitud HTTP
+     * @param res respuesta HTTP
+     * @return true si la sesión es válida, false si se redirigió al login
+     */
     private boolean verificarSesion(HttpServletRequest req, HttpServletResponse res)
             throws IOException {
         response(res);
@@ -52,6 +58,14 @@ public class ProductoControlador extends HttpServlet {
         return true;
     }
 
+    /**
+     * Verifica sesión activa y que el usuario tenga el permiso indicado.
+     * @param req      solicitud HTTP
+     * @param res      respuesta HTTP
+     * @param permiso  nombre del permiso requerido (ej: "GESTIONAR_PRODUCTOS")
+     * @param fallback ruta a la que redirigir si no tiene el permiso
+     * @return true si tiene sesión y permiso, false si se redirigió
+     */
     private boolean verificarPermiso(HttpServletRequest req, HttpServletResponse res,
                                       String permiso, String fallback) throws IOException {
         if (!verificarSesion(req, res)) return false;
@@ -218,6 +232,11 @@ public class ProductoControlador extends HttpServlet {
     // Helpers
     // ─────────────────────────────────────────────
 
+    /**
+     * Construye un objeto Producto con los campos del formulario HTTP.
+     * @param request solicitud HTTP con los parámetros del formulario
+     * @return objeto Producto con los datos ingresados
+     */
     private Producto construirCampos(HttpServletRequest request) {
         Producto p = new Producto();
         p.setNombre(request.getParameter("nombre"));
@@ -234,6 +253,12 @@ public class ProductoControlador extends HttpServlet {
         return p;
     }
 
+    /**
+     * Guarda el archivo de imagen subido en el directorio de uploads si existe.
+     * También copia el archivo a src/main/webapp para que sobreviva Clean and Build.
+     * @param request solicitud HTTP con la parte multipart "imagen"
+     * @return nombre único del archivo guardado, o null si no se subió ninguno
+     */
     private String guardarArchivoSiExiste(HttpServletRequest request)
             throws IOException, ServletException {
         Part filePart = request.getPart("imagen");
@@ -271,6 +296,11 @@ public class ProductoControlador extends HttpServlet {
         return uniqueName;
     }
 
+    /**
+     * Extrae el nombre del archivo del header content-disposition de una Part.
+     * @param part parte multipart del formulario
+     * @return nombre del archivo, o null si no se encontró
+     */
     private String getFileName(Part part) {
         if (part == null) return null;
         String header = part.getHeader("content-disposition");
@@ -284,6 +314,11 @@ public class ProductoControlador extends HttpServlet {
         return null;
     }
 
+    /**
+     * Convierte un String a BigDecimal de forma segura.
+     * @param value cadena a convertir
+     * @return BigDecimal parseado, o null si el valor es nulo, vacío o inválido
+     */
     private BigDecimal parseBigDecimal(String value) {
         try {
             if (value == null || value.isBlank()) return null;
@@ -293,6 +328,11 @@ public class ProductoControlador extends HttpServlet {
         }
     }
 
+    /**
+     * Convierte un String a int de forma segura.
+     * @param value cadena a convertir
+     * @return entero parseado, o 0 si el valor es nulo, vacío o inválido
+     */
     private int parseInt(String value) {
         try {
             if (value == null || value.isBlank()) return 0;

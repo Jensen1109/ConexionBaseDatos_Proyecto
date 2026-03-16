@@ -6,10 +6,12 @@ import dao.MetodoPagoDAO;
 import dao.PedidoDAO;
 import dao.PermisosDAO;
 import dao.ProductoDAO;
+import dao.TelefonoDAO;
 import modelos.Deuda;
 import modelos.DetallePedido;
 import modelos.Pedido;
 import modelos.Producto;
+import modelos.Telefono;
 import modelos.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -37,6 +39,7 @@ public class PedidoControlador extends HttpServlet {
     private final ClienteDAO    clienteDAO    = new ClienteDAO();
     private final DeudaDAO      deudaDAO      = new DeudaDAO();
     private final PermisosDAO   permisosDAO   = new PermisosDAO();
+    private final TelefonoDAO   telefonoDAO   = new TelefonoDAO();
 
     private boolean verificarSesion(HttpServletRequest req, HttpServletResponse res)
             throws IOException {
@@ -188,8 +191,20 @@ public class PedidoControlador extends HttpServlet {
         // Si se envió un cliente nuevo, crearlo primero y usar su ID
         String nuevoNombre = request.getParameter("nuevoClienteNombre");
         if (nuevoNombre != null && !nuevoNombre.isBlank()) {
-            String nuevoCedula = request.getParameter("nuevoClienteCedula");
-            if (clienteDAO.cedulaExiste(nuevoCedula)) {
+            String nuevoApellido = request.getParameter("nuevoClienteApellido");
+            String nuevoCedula   = request.getParameter("nuevoClienteCedula");
+            String nuevoTelefono = request.getParameter("nuevoClienteTelefono");
+            String nuevoEmail    = request.getParameter("nuevoClienteEmail");
+
+            // Validaciones backend
+            String nvErr = validarNuevoCliente(nuevoNombre, nuevoApellido, nuevoCedula, nuevoTelefono, nuevoEmail);
+            if (nvErr != null) {
+                cargarFormulario(request);
+                request.setAttribute("error", nvErr);
+                request.getRequestDispatcher("/view/registrarventa.jsp").forward(request, response);
+                return;
+            }
+            if (clienteDAO.cedulaExiste(nuevoCedula.trim())) {
                 cargarFormulario(request);
                 request.setAttribute("error", "Ya existe un cliente con esa cédula. Búscalo en la lista.");
                 request.getRequestDispatcher("/view/registrarventa.jsp").forward(request, response);
@@ -197,12 +212,17 @@ public class PedidoControlador extends HttpServlet {
             }
             modelos.Cliente nc = new modelos.Cliente();
             nc.setNombre(nuevoNombre.trim());
-            nc.setApellido(request.getParameter("nuevoClienteApellido"));
-            nc.setCedula(nuevoCedula);
-            nc.setTelefono(request.getParameter("nuevoClienteTelefono"));
+            nc.setApellido(nuevoApellido != null ? nuevoApellido.trim() : "");
+            nc.setCedula(nuevoCedula.trim());
+            nc.setEmail(nuevoEmail != null ? nuevoEmail.trim() : null);
             int idNuevo = clienteDAO.crearYObtenerIdCliente(nc);
             if (idNuevo > 0) {
                 idClienteStr = String.valueOf(idNuevo);
+                // Guardar teléfono en tabla Telefono
+                if (nuevoTelefono != null && !nuevoTelefono.isBlank()) {
+                    Telefono t = new Telefono(0, nuevoTelefono.trim(), idNuevo);
+                    telefonoDAO.agregar(t);
+                }
             } else {
                 cargarFormulario(request);
                 request.setAttribute("error", "No se pudo registrar el cliente nuevo. Intenta de nuevo.");
@@ -259,5 +279,32 @@ public class PedidoControlador extends HttpServlet {
     private void cargarFormulario(HttpServletRequest request) {
         request.setAttribute("productos",   productoDAO.listarTodos());
         request.setAttribute("metodosPago", metodoPagoDAO.listarTodos());
+    }
+
+    private String validarNuevoCliente(String nombre, String apellido, String cedula,
+                                       String telefono, String email) {
+        if (nombre == null || nombre.isBlank())
+            return "El nombre del cliente es obligatorio.";
+        if (!nombre.trim().matches("[A-Za-záéíóúÁÉÍÓÚñÑ\\s]{2,60}"))
+            return "El nombre del cliente solo puede contener letras (mínimo 2 caracteres).";
+
+        if (apellido == null || apellido.isBlank())
+            return "El apellido del cliente es obligatorio.";
+        if (!apellido.trim().matches("[A-Za-záéíóúÁÉÍÓÚñÑ\\s]{2,60}"))
+            return "El apellido del cliente solo puede contener letras (mínimo 2 caracteres).";
+
+        if (cedula == null || cedula.isBlank())
+            return "La cédula del cliente es obligatoria.";
+        if (!cedula.trim().matches("\\d{8,15}"))
+            return "La cédula debe contener solo números (mínimo 8, máximo 15 dígitos).";
+
+        if (telefono != null && !telefono.isBlank() && !telefono.trim().matches("\\d{1,15}"))
+            return "El teléfono solo puede contener números (máximo 15 dígitos).";
+
+        if (email != null && !email.isBlank() &&
+            !email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+            return "El correo electrónico no es válido. Ejemplo: nombre@gmail.com";
+
+        return null;
     }
 }

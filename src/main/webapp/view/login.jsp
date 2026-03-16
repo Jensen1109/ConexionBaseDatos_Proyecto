@@ -41,6 +41,10 @@
             transition: border-color 0.2s; background: #f8fafc;
         }
         input:focus { border-color: #3b82f6; background: #fff; }
+        input.input-ok    { border-color: #22c55e !important; }
+        input.input-error { border-color: #ef4444 !important; background: #fff5f5 !important; }
+        .field-error { display: none; color: #dc2626; font-size: 0.75rem; margin-top: 0.15rem; }
+        .field-error.visible { display: flex; align-items: center; gap: 0.25rem; }
         .btn-submit {
             width: 100%; padding: 0.7rem; background: #3b82f6; color: #fff;
             border: none; border-radius: 8px; font-size: 0.95rem;
@@ -75,16 +79,20 @@
         </div>
         <% } %>
 
-        <form action="<%= ctx %>/LoginControlador" method="post">
+        <form action="<%= ctx %>/LoginControlador" method="post" novalidate onsubmit="return validarLogin()">
             <div class="form-group">
                 <label for="email">Email o cédula</label>
                 <input type="text" id="email" name="email"
-                       placeholder="correo@ejemplo.com o número de cédula" required>
+                       placeholder="correo@ejemplo.com o número de cédula"
+                       oninput="lnValidarEmail(this)" autocomplete="username">
+                <span class="field-error" id="lnErrEmail"></span>
             </div>
             <div class="form-group">
                 <label for="contrasena">Contraseña</label>
                 <input type="password" id="contrasena" name="contrasena"
-                       placeholder="Tu contraseña" required>
+                       placeholder="Tu contraseña"
+                       oninput="lnValidarPass(this)" autocomplete="current-password">
+                <span class="field-error" id="lnErrPass"></span>
             </div>
             <button type="submit" class="btn-submit">
                 <i class="fas fa-sign-in-alt"></i> Iniciar sesión
@@ -100,5 +108,40 @@
             </a>
         </div>
     </div>
+    <script>
+        function lnSetError(id, errId, msg) {
+            var inp = document.getElementById(id);
+            var err = document.getElementById(errId);
+            inp.classList.remove('input-ok'); inp.classList.add('input-error');
+            err.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+            err.classList.add('visible');
+        }
+        function lnSetOk(id, errId) {
+            var inp = document.getElementById(id);
+            var err = document.getElementById(errId);
+            inp.classList.remove('input-error'); inp.classList.add('input-ok');
+            err.textContent = ''; err.classList.remove('visible');
+        }
+        function lnValidarEmail(inp) {
+            var v = inp.value.trim();
+            if (v === '') { inp.classList.remove('input-ok','input-error'); document.getElementById('lnErrEmail').classList.remove('visible'); return false; }
+            if (v.length < 3) { lnSetError('email','lnErrEmail','Ingresa tu email o cédula.'); return false; }
+            lnSetOk('email','lnErrEmail'); return true;
+        }
+        function lnValidarPass(inp) {
+            var v = inp.value;
+            if (v === '') { inp.classList.remove('input-ok','input-error'); document.getElementById('lnErrPass').classList.remove('visible'); return false; }
+            if (v.length < 1) { lnSetError('contrasena','lnErrPass','Ingresa tu contraseña.'); return false; }
+            lnSetOk('contrasena','lnErrPass'); return true;
+        }
+        function validarLogin() {
+            var email = document.getElementById('email').value.trim();
+            var pass  = document.getElementById('contrasena').value;
+            var ok = true;
+            if (!email) { lnSetError('email','lnErrEmail','El email o cédula es obligatorio.'); ok = false; }
+            if (!pass)  { lnSetError('contrasena','lnErrPass','La contraseña es obligatoria.'); ok = false; }
+            return ok;
+        }
+    </script>
 </body>
 </html>

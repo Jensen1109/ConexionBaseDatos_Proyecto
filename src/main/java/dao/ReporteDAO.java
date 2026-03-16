@@ -11,9 +11,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para reportes y estadísticas del sistema.
+ * Provee consultas de resumen sobre ventas, stock, deudas y usuarios
+ * para el módulo de reportes del panel administrativo.
+ */
 public class ReporteDAO {
 
-    // TOTAL VENTAS DEL MES ACTUAL
+    /**
+     * Calcula el total de ventas del mes en curso.
+     * @return suma total de ventas del mes actual; BigDecimal.ZERO si no hay ventas
+     */
     public BigDecimal totalVentasMes() {
         String sql = "SELECT COALESCE(SUM(total), 0) FROM Pedido " +
                      "WHERE MONTH(fecha_venta) = MONTH(CURDATE()) " +
@@ -31,7 +39,11 @@ public class ReporteDAO {
         return BigDecimal.ZERO;
     }
 
-    // PRODUCTOS CON STOCK BAJO O IGUAL AL MÍNIMO
+    /**
+     * Retorna los productos cuyo stock actual es menor o igual al stock mínimo.
+     * Ordenados de menor a mayor stock para priorizar los más críticos.
+     * @return lista de productos con stock bajo o crítico
+     */
     public List<Producto> productosStockBajo() {
         List<Producto> lista = new ArrayList<>();
         String sql = "SELECT id_producto, id_categoria, id_imagen, nombre, precio, " +
@@ -64,7 +76,10 @@ public class ReporteDAO {
         return lista;
     }
 
-    // TOTAL DEUDAS PENDIENTES
+    /**
+     * Calcula la suma total de montos pendientes en deudas activas.
+     * @return total de deudas pendientes; BigDecimal.ZERO si no hay deudas
+     */
     public BigDecimal totalDeudasPendientes() {
         String sql = "SELECT COALESCE(SUM(monto_pendiente), 0) FROM Deuda WHERE estado = 'pendiente'";
 
@@ -80,7 +95,10 @@ public class ReporteDAO {
         return BigDecimal.ZERO;
     }
 
-    // NÚMERO DE CLIENTES REGISTRADOS
+    /**
+     * Cuenta el número total de empleados registrados en el sistema (id_rol = 2).
+     * @return cantidad de empleados registrados; 0 si no hay ninguno
+     */
     public int contarClientes() {
         String sql = "SELECT COUNT(*) FROM Usuario WHERE id_rol = 2";
 
