@@ -148,22 +148,61 @@ public class ClienteDAO {
     }
 
     /**
-     * Elimina un cliente por su ID.
-     * @param id id_cliente a eliminar
-     * @return true si se eliminó
+     * Verifica si un cliente tiene pedidos registrados.
+     * @param id id_cliente
+     * @return true si tiene al menos un pedido
      */
-    public boolean eliminar(int id) {
-        String sql = "DELETE FROM Cliente WHERE id_cliente = ?";
-
+    public boolean tienePedidos(int id) {
+        String sql = "SELECT COUNT(*) FROM Pedido WHERE id_cliente = ?";
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar pedidos del cliente: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Elimina un cliente por su ID en una transacción atómica.
+     * Solo elimina si el cliente no tiene pedidos registrados.
+     * Borra sus teléfonos antes de eliminar el cliente.
+     * @param id id_cliente a eliminar
+     * @return true si se eliminó, false si tiene pedidos o falló
+     */
+    public boolean eliminar(int id) {
+        if (tienePedidos(id)) return false;
+
+        Connection con = null;
+        try {
+            con = conexion.getConnection();
+            con.setAutoCommit(false);
+
+            try (PreparedStatement psTel = con.prepareStatement(
+                    "DELETE FROM Telefono WHERE cliente_id = ?")) {
+                psTel.setInt(1, id);
+                psTel.executeUpdate();
+            }
+
+            int filas;
+            try (PreparedStatement psCli = con.prepareStatement(
+                    "DELETE FROM Cliente WHERE id_cliente = ?")) {
+                psCli.setInt(1, id);
+                filas = psCli.executeUpdate();
+            }
+
+            con.commit();
+            return filas > 0;
 
         } catch (SQLException e) {
             System.err.println("Error al eliminar cliente: " + e.getMessage());
+            if (con != null) try { con.rollback(); } catch (SQLException ex) { /* ignorar */ }
             return false;
+        } finally {
+            if (con != null) try { con.setAutoCommit(true); con.close(); } catch (SQLException ex) { /* ignorar */ }
         }
     }
 

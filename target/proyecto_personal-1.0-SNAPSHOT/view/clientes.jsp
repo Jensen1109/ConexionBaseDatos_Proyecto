@@ -200,6 +200,10 @@
                                 <td class="td-ced"><%= cedC %></td>
                                 <td><%= emlC %></td>
                                 <td style="white-space:nowrap;">
+                                    <a href="<%= ctx %>/TelefonoControlador?idCliente=<%= c.getIdCliente() %>"
+                                       class="btn-icon" title="Ver teléfonos" style="color:#10b981;text-decoration:none;">
+                                        <i class="fas fa-phone"></i>
+                                    </a>
                                     <button type="button" class="btn-icon btn-edit"
                                             title="Editar"
                                             onclick="abrirEditar(<%= c.getIdCliente() %>, '<%= nomC.replace("'","&#39;") %>', '<%= apeC.replace("'","&#39;") %>', '<%= cedC %>', '<%= emlC.equals("—") ? "" : emlC.replace("'","&#39;") %>')">
@@ -369,7 +373,8 @@
             input.value = input.value.replace(/\D/g, '');
             var v = input.value.trim();
             if (v === '') { clearState(input, errId); return true; }
-            if (v.length > 15) { setError(input, errId, 'El teléfono no puede superar 15 dígitos.'); return false; }
+            if (v.length < 7)  { setError(input, errId, 'El teléfono debe tener mínimo 7 dígitos.'); return false; }
+            if (v.length > 10) { setError(input, errId, 'El teléfono no puede superar 10 dígitos.'); return false; }
             setOk(input, errId); return true;
         }
 

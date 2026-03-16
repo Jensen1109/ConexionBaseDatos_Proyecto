@@ -298,8 +298,8 @@ public class PedidoControlador extends HttpServlet {
         if (!cedula.trim().matches("\\d{8,15}"))
             return "La cédula debe contener solo números (mínimo 8, máximo 15 dígitos).";
 
-        if (telefono != null && !telefono.isBlank() && !telefono.trim().matches("\\d{1,15}"))
-            return "El teléfono solo puede contener números (máximo 15 dígitos).";
+        if (telefono != null && !telefono.isBlank() && !telefono.trim().matches("\\d{7,10}"))
+            return "El teléfono debe contener solo números (mínimo 7, máximo 10 dígitos).";
 
         if (email != null && !email.isBlank() &&
             !email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))

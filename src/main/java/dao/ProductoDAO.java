@@ -202,19 +202,35 @@ public class ProductoDAO {
         return false;
     }
 
-    // ELIMINAR
+    // ELIMINAR (borra primero detalle_pedido asociados para no violar FK)
     public boolean eliminar(int id) {
-        String sql = "DELETE FROM Producto WHERE id_producto = ?";
+        Connection con = null;
+        try {
+            con = conexion.getConnection();
+            con.setAutoCommit(false);
 
-        try (Connection con = conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            try (PreparedStatement psD = con.prepareStatement(
+                    "DELETE FROM detalle_pedido WHERE id_producto = ?")) {
+                psD.setInt(1, id);
+                psD.executeUpdate();
+            }
 
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+            int filas;
+            try (PreparedStatement psP = con.prepareStatement(
+                    "DELETE FROM Producto WHERE id_producto = ?")) {
+                psP.setInt(1, id);
+                filas = psP.executeUpdate();
+            }
+
+            con.commit();
+            return filas > 0;
 
         } catch (SQLException e) {
             System.err.println("Error al eliminar producto: " + e.getMessage());
+            if (con != null) try { con.rollback(); } catch (SQLException ex) { /* ignorar */ }
             return false;
+        } finally {
+            if (con != null) try { con.setAutoCommit(true); con.close(); } catch (SQLException ex) { /* ignorar */ }
         }
     }
 }

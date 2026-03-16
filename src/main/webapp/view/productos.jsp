@@ -2,6 +2,7 @@
 <%@ page import="java.util.List, modelos.Producto, modelos.Usuario" %>
 <%
     List<Producto> productos = (List<Producto>) request.getAttribute("productos");
+    String error = (String) request.getAttribute("error");
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
     boolean esAdmin = (usuarioActual != null && usuarioActual.getIdRol() == 1);
@@ -49,6 +50,7 @@
         .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
         .page-header__title { font-size: 1.65rem; font-weight: 700; color: #1e293b; }
         .page-header__sub { color: #64748b; font-size: 0.85rem; margin-top: 0.2rem; }
+        .alert-error { border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem; background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; }
 
         /* ── GRID ── */
         .grid {
@@ -190,6 +192,10 @@
                 <p class="page-header__sub"><%= productos != null ? productos.size() : 0 %> producto(s) en catálogo</p>
             </div>
         </div>
+
+        <% if (error != null) { %>
+        <div class="alert-error"><i class="fas fa-exclamation-circle"></i> <%= error %></div>
+        <% } %>
 
         <div class="grid">
             <% if (productos == null || productos.isEmpty()) { %>

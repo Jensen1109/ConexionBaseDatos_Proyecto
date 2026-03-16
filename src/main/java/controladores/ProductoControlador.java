@@ -135,7 +135,12 @@ public class ProductoControlador extends HttpServlet {
 
         if ("eliminar".equals(accion)) {
             int id = Integer.parseInt(request.getParameter("id"));
-            productoDAO.eliminar(id);
+            if (!productoDAO.eliminar(id)) {
+                request.setAttribute("productos", productoDAO.listarTodos());
+                request.setAttribute("error", "No se pudo eliminar el producto. Intenta de nuevo.");
+                request.getRequestDispatcher("/view/productos.jsp").forward(request, response);
+                return;
+            }
 
         } else if ("actualizar".equals(accion)) {
             int id = Integer.parseInt(request.getParameter("id"));

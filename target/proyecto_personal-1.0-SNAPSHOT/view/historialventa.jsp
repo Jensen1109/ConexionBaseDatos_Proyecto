@@ -238,8 +238,9 @@
                         for (Pedido p : pedidos) {
                             String fechaStr = p.getFechaVenta() != null
                                 ? p.getFechaVenta().toLocalDate().toString() : "-";
-                            String cliente = p.getNombreCliente() != null
-                                ? p.getNombreCliente() : "Cliente #" + p.getIdCliente();
+                            String cliente = (p.getNombreCliente() != null && !p.getNombreCliente().isBlank())
+                                ? p.getNombreCliente()
+                                : (p.getIdCliente() > 0 ? "Cliente #" + p.getIdCliente() : "Sin cliente");
                             String estado = p.getEstado() != null ? p.getEstado() : "credito";
                             String badgeClass = "pagado".equalsIgnoreCase(estado)
                                 ? "badge--pagado" : "badge--credito";

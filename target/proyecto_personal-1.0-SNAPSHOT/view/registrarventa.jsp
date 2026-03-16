@@ -618,12 +618,13 @@
             nvSetOk('nvCedula','nvErrCedula'); return true;
         }
         function nvValidarTelefono(inp) {
+            inp.value = inp.value.replace(/\D/g, '');
             var v = inp.value.trim();
             if (v === '') { nvClear('nvTelefono','nvErrTelefono'); return null; }
-            if (!/^\d+$/.test(v))
-                { nvSetError('nvTelefono','nvErrTelefono','El teléfono solo puede contener números.'); return false; }
-            if (v.length > 15)
-                { nvSetError('nvTelefono','nvErrTelefono','El teléfono no puede superar 15 dígitos.'); return false; }
+            if (v.length < 7)
+                { nvSetError('nvTelefono','nvErrTelefono','El teléfono debe tener mínimo 7 dígitos.'); return false; }
+            if (v.length > 10)
+                { nvSetError('nvTelefono','nvErrTelefono','El teléfono no puede superar 10 dígitos.'); return false; }
             nvSetOk('nvTelefono','nvErrTelefono'); return true;
         }
         function nvValidarEmail(inp) {

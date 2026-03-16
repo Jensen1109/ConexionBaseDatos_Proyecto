@@ -104,6 +104,14 @@
         }
         .form__textarea { resize: vertical; min-height: 90px; }
 
+        /* ── VALIDACIÓN ── */
+        .form__input.input-ok,
+        .form__select.input-ok  { border-color: #22c55e; }
+        .form__input.input-error,
+        .form__select.input-error { border-color: #ef4444; background: #fff5f5; }
+        .field-error { display: none; color: #dc2626; font-size: 0.73rem; margin-top: 0.2rem; }
+        .field-error.visible { display: flex; align-items: center; gap: 0.3rem; }
+
         /* ── IMAGE UPLOAD ── */
         .img-upload-box {
             border: 2px dashed #e2e8f0; border-radius: 10px;
@@ -201,7 +209,8 @@
             <% } %>
 
             <form class="form" action="${pageContext.request.contextPath}/ProductoControlador"
-                  method="post" enctype="multipart/form-data">
+                  method="post" enctype="multipart/form-data"
+                  novalidate onsubmit="return validarFormProducto()">
                 <input type="hidden" name="accion" value="actualizar">
                 <input type="hidden" name="id"     value="<%= producto.getIdProducto() %>">
 
@@ -227,19 +236,31 @@
                 <div class="form__group">
                     <label class="form__label" for="nombre">Nombre del producto *</label>
                     <input type="text" id="nombre" name="nombre" class="form__input"
-                           value="<%= producto.getNombre() %>" required>
+                           value="<%= producto.getNombre() %>" maxlength="80"
+                           oninput="prValidarNombre(this)">
+                    <span class="field-error" id="errNombre"><i class="fas fa-exclamation-circle"></i></span>
                 </div>
 
                 <div class="form__group">
-                    <label class="form__label" for="descripcion">Descripción</label>
-                    <textarea id="descripcion" name="descripcion" class="form__textarea"><%= producto.getDescripcion() != null ? producto.getDescripcion() : "" %></textarea>
+                    <%
+                        String descActual = producto.getDescripcion() != null ? producto.getDescripcion() : "";
+                        int descLen = descActual.length();
+                    %>
+                    <label class="form__label" for="descripcion">Descripción
+                        <span id="cntDesc" style="font-weight:400;color:#94a3b8;font-size:0.72rem;margin-left:0.4rem;"><%= descLen %> / 150</span>
+                    </label>
+                    <textarea id="descripcion" name="descripcion" class="form__textarea"
+                              maxlength="150" oninput="prContarDesc(this)"><%= descActual %></textarea>
+                    <span class="field-error" id="errDesc"><i class="fas fa-exclamation-circle"></i></span>
                 </div>
 
                 <div class="form__row">
                     <div class="form__group">
                         <label class="form__label" for="precio">Precio ($) *</label>
                         <input type="number" id="precio" name="precio" class="form__input"
-                               value="<%= producto.getPrecio() %>" step="0.01" min="0" required>
+                               value="<%= producto.getPrecio() %>" step="0.01" min="0.01"
+                               oninput="prValidarNumPos(this, 'errPrecio', true)">
+                        <span class="field-error" id="errPrecio"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                     <div class="form__group">
                         <label class="form__label" for="unidadMedida">Unidad de medida</label>
@@ -252,12 +273,16 @@
                     <div class="form__group">
                         <label class="form__label" for="stock">Stock actual *</label>
                         <input type="number" id="stock" name="stock" class="form__input"
-                               value="<%= producto.getStock() %>" min="0" required>
+                               value="<%= producto.getStock() %>" min="0"
+                               oninput="prValidarNumPos(this, 'errStock', false)">
+                        <span class="field-error" id="errStock"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                     <div class="form__group">
                         <label class="form__label" for="stockMinimo">Stock mínimo *</label>
                         <input type="number" id="stockMinimo" name="stockMinimo" class="form__input"
-                               value="<%= producto.getStockMinimo() %>" min="0" required>
+                               value="<%= producto.getStockMinimo() %>" min="0"
+                               oninput="prValidarNumPos(this, 'errStockMin', false)">
+                        <span class="field-error" id="errStockMin"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                 </div>
 
@@ -269,7 +294,8 @@
                     </div>
                     <div class="form__group">
                         <label class="form__label" for="idCategoria">Categoría *</label>
-                        <select id="idCategoria" name="idCategoria" class="form__select" required>
+                        <select id="idCategoria" name="idCategoria" class="form__select"
+                                onchange="prValidarCategoria(this)">
                             <option value="">-- Seleccione --</option>
                             <% if (categorias != null) {
                                 for (Categoria c : categorias) {
@@ -278,6 +304,7 @@
                             <option value="<%= c.getIdCategoria() %>" <%= sel ? "selected" : "" %>><%= c.getNombre() %></option>
                             <% } } %>
                         </select>
+                        <span class="field-error" id="errCategoria"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                 </div>
 
@@ -295,6 +322,58 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('open');
+        }
+
+        /* ── VALIDACIÓN PRODUCTO ── */
+        function prSetError(el, errId, msg) {
+            el.classList.remove('input-ok'); el.classList.add('input-error');
+            var s = document.getElementById(errId);
+            s.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+            s.classList.add('visible');
+        }
+        function prSetOk(el, errId) {
+            el.classList.remove('input-error'); el.classList.add('input-ok');
+            document.getElementById(errId).classList.remove('visible');
+        }
+        function prValidarNombre(el) {
+            var v = el.value.trim();
+            if (!v) { prSetError(el, 'errNombre', 'El nombre del producto es obligatorio.'); return false; }
+            if (v.length < 2) { prSetError(el, 'errNombre', 'El nombre debe tener al menos 2 caracteres.'); return false; }
+            if (v.length > 80) { prSetError(el, 'errNombre', 'El nombre no puede superar 80 caracteres.'); return false; }
+            if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(v)) { prSetError(el, 'errNombre', 'El nombre solo puede contener letras y espacios, sin números ni símbolos.'); return false; }
+            prSetOk(el, 'errNombre'); return true;
+        }
+        function prContarDesc(el) {
+            var len = el.value.length;
+            var cnt = document.getElementById('cntDesc');
+            cnt.textContent = len + ' / 150';
+            cnt.style.color = len >= 130 ? (len >= 150 ? '#ef4444' : '#f59e0b') : '#94a3b8';
+        }
+        function prValidarNumPos(el, errId, mayor0) {
+            var raw = el.value.trim();
+            var v   = parseFloat(raw);
+            if (raw === '' || isNaN(v)) { prSetError(el, errId, 'Este campo es obligatorio.'); return false; }
+            if (v < 0)                  { prSetError(el, errId, 'No puede ser negativo.'); return false; }
+            if (mayor0 && v <= 0)       { prSetError(el, errId, 'Debe ser mayor a 0.'); return false; }
+            prSetOk(el, errId); return true;
+        }
+        function prValidarCategoria(el) {
+            if (!el.value) { prSetError(el, 'errCategoria', 'Selecciona una categoría.'); return false; }
+            prSetOk(el, 'errCategoria'); return true;
+        }
+        function prValidarDesc(el) {
+            if (el.value.length > 150) { prSetError(el, 'errDesc', 'La descripción no puede superar 150 caracteres.'); return false; }
+            document.getElementById('errDesc').classList.remove('visible');
+            return true;
+        }
+        function validarFormProducto() {
+            var r1 = prValidarNombre(document.getElementById('nombre'));
+            var r2 = prValidarDesc(document.getElementById('descripcion'));
+            var r3 = prValidarNumPos(document.getElementById('precio'), 'errPrecio', true);
+            var r4 = prValidarNumPos(document.getElementById('stock'), 'errStock', false);
+            var r5 = prValidarNumPos(document.getElementById('stockMinimo'), 'errStockMin', false);
+            var r6 = prValidarCategoria(document.getElementById('idCategoria'));
+            return r1 && r2 && r3 && r4 && r5 && r6;
         }
 
         function previewImage(input) {

@@ -101,8 +101,8 @@ public class ClienteControlador extends HttpServlet {
         if (!cedula.trim().matches("\\d{8,15}"))
             return "La cédula debe contener solo números (mínimo 8, máximo 15 dígitos).";
 
-        if (telefono != null && !telefono.isBlank() && !telefono.trim().matches("\\d{1,15}"))
-            return "El teléfono solo puede contener números (máximo 15 dígitos).";
+        if (telefono != null && !telefono.isBlank() && !telefono.trim().matches("\\d{7,10}"))
+            return "El teléfono debe contener solo números (mínimo 7, máximo 10 dígitos).";
 
         if (email != null && !email.isBlank() &&
             !email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
@@ -190,7 +190,18 @@ public class ClienteControlador extends HttpServlet {
 
         } else if ("eliminar".equals(accion)) {
             int id = Integer.parseInt(request.getParameter("idCliente"));
-            clienteDAO.eliminar(id);
+            if (clienteDAO.tienePedidos(id)) {
+                request.setAttribute("clientes", clienteDAO.listar());
+                request.setAttribute("error", "No se puede eliminar este cliente porque tiene ventas registradas en el historial.");
+                request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
+                return;
+            }
+            if (!clienteDAO.eliminar(id)) {
+                request.setAttribute("clientes", clienteDAO.listar());
+                request.setAttribute("error", "No se pudo eliminar el cliente. Intenta de nuevo.");
+                request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
+                return;
+            }
         }
 
         response.sendRedirect(request.getContextPath() + "/ClienteControlador");
