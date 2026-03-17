@@ -109,6 +109,41 @@
         .form__select.input-ok  { border-color: #22c55e; }
         .form__input.input-error,
         .form__select.input-error { border-color: #ef4444; background: #fff5f5; }
+
+        /* ── NUEVA CATEGORÍA INLINE ── */
+        .cat-row { display: flex; align-items: flex-end; gap: 0.5rem; }
+        .cat-row .form__select { flex: 1; }
+        .btn-new-cat {
+            padding: 0.65rem 0.75rem; background: #3b82f6; color: #fff;
+            border: none; border-radius: 8px; font-size: 0.85rem;
+            cursor: pointer; transition: background 0.18s; flex-shrink: 0;
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+        .btn-new-cat:hover { background: #2563eb; }
+        .new-cat-box {
+            display: none; background: #f0f7ff; border: 1.5px solid #bfdbfe;
+            border-radius: 8px; padding: 0.75rem; margin-top: 0.5rem;
+        }
+        .new-cat-box.visible { display: block; }
+        .new-cat-inner { display: flex; gap: 0.5rem; align-items: center; }
+        .new-cat-inner input {
+            flex: 1; padding: 0.5rem 0.7rem; border: 1.5px solid #e2e8f0;
+            border-radius: 6px; font-size: 0.82rem; font-family: inherit;
+        }
+        .new-cat-inner input:focus { outline: none; border-color: #3b82f6; }
+        .btn-cat-save {
+            padding: 0.5rem 0.8rem; background: #22c55e; color: #fff;
+            border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; transition: background 0.18s;
+        }
+        .btn-cat-save:hover { background: #16a34a; }
+        .btn-cat-cancel {
+            padding: 0.5rem 0.6rem; background: #e2e8f0; color: #64748b;
+            border: none; border-radius: 6px; font-size: 0.8rem;
+            cursor: pointer; transition: background 0.18s;
+        }
+        .btn-cat-cancel:hover { background: #cbd5e1; }
+        .new-cat-msg { font-size: 0.75rem; margin-top: 0.4rem; }
         .field-error { display: none; color: #dc2626; font-size: 0.73rem; margin-top: 0.2rem; }
         .field-error.visible { display: flex; align-items: center; gap: 0.3rem; }
 
@@ -294,16 +329,33 @@
                     </div>
                     <div class="form__group">
                         <label class="form__label" for="idCategoria">Categoría *</label>
-                        <select id="idCategoria" name="idCategoria" class="form__select"
-                                onchange="prValidarCategoria(this)">
-                            <option value="">-- Seleccione --</option>
-                            <% if (categorias != null) {
-                                for (Categoria c : categorias) {
-                                    boolean sel = c.getIdCategoria() == producto.getIdCategoria();
-                            %>
-                            <option value="<%= c.getIdCategoria() %>" <%= sel ? "selected" : "" %>><%= c.getNombre() %></option>
-                            <% } } %>
-                        </select>
+                        <div class="cat-row">
+                            <select id="idCategoria" name="idCategoria" class="form__select"
+                                    onchange="prValidarCategoria(this)">
+                                <option value="">-- Seleccione --</option>
+                                <% if (categorias != null) {
+                                    for (Categoria c : categorias) {
+                                        boolean sel = c.getIdCategoria() == producto.getIdCategoria();
+                                %>
+                                <option value="<%= c.getIdCategoria() %>" <%= sel ? "selected" : "" %>><%= c.getNombre() %></option>
+                                <% } } %>
+                            </select>
+                            <button type="button" class="btn-new-cat" onclick="toggleNuevaCat()" title="Crear nueva categoría">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="new-cat-box" id="newCatBox">
+                            <div class="new-cat-inner">
+                                <input type="text" id="newCatNombre" placeholder="Nombre de la categoría" maxlength="60">
+                                <button type="button" class="btn-cat-save" onclick="crearCategoriaAjax()">
+                                    <i class="fas fa-check"></i> Crear
+                                </button>
+                                <button type="button" class="btn-cat-cancel" onclick="toggleNuevaCat()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="new-cat-msg" id="newCatMsg"></div>
+                        </div>
                         <span class="field-error" id="errCategoria"><i class="fas fa-exclamation-circle"></i></span>
                     </div>
                 </div>
@@ -374,6 +426,54 @@
             var r5 = prValidarNumPos(document.getElementById('stockMinimo'), 'errStockMin', false);
             var r6 = prValidarCategoria(document.getElementById('idCategoria'));
             return r1 && r2 && r3 && r4 && r5 && r6;
+        }
+
+        /* ── NUEVA CATEGORÍA AJAX ── */
+        function toggleNuevaCat() {
+            var box = document.getElementById('newCatBox');
+            box.classList.toggle('visible');
+            if (!box.classList.contains('visible')) {
+                document.getElementById('newCatNombre').value = '';
+                document.getElementById('newCatMsg').textContent = '';
+            } else {
+                document.getElementById('newCatNombre').focus();
+            }
+        }
+        function crearCategoriaAjax() {
+            var nombre = document.getElementById('newCatNombre').value.trim();
+            var msg    = document.getElementById('newCatMsg');
+            if (!nombre) { msg.style.color = '#dc2626'; msg.textContent = 'Escribe un nombre.'; return; }
+            if (nombre.length < 2) { msg.style.color = '#dc2626'; msg.textContent = 'Mínimo 2 caracteres.'; return; }
+            msg.style.color = '#3b82f6'; msg.textContent = 'Creando...';
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '<%= ctx %>/CategoriaControlador', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var r = JSON.parse(xhr.responseText);
+                            if (r.ok) {
+                                var sel = document.getElementById('idCategoria');
+                                var opt = document.createElement('option');
+                                opt.value = r.id;
+                                opt.textContent = r.nombre;
+                                sel.appendChild(opt);
+                                sel.value = r.id;
+                                prValidarCategoria(sel);
+                                toggleNuevaCat();
+                                msg.style.color = '#22c55e'; msg.textContent = '';
+                            } else {
+                                msg.style.color = '#dc2626'; msg.textContent = r.msg || 'Error al crear.';
+                            }
+                        } catch(e) { msg.style.color = '#dc2626'; msg.textContent = 'Error inesperado.'; }
+                    } else {
+                        msg.style.color = '#dc2626'; msg.textContent = 'Error de conexión.';
+                    }
+                }
+            };
+            xhr.send('accion=crearAjax&nombre=' + encodeURIComponent(nombre));
         }
 
         function previewImage(input) {
