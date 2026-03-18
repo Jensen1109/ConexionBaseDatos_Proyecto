@@ -453,9 +453,52 @@
                     preview.style.display = 'block';
                 };
                 reader.readAsDataURL(input.files[0]);
-                // Actualizar texto del box
                 document.querySelector('#uploadBox .upload-text').textContent = input.files[0].name;
             }
+        }
+
+        /* ── PERSISTENCIA DEL FORMULARIO ── */
+        var _camposProducto = ['nombre','descripcion','precio','unidadMedida','stock','stockMinimo','fechaVencimiento','idCategoria'];
+        function guardarFormProducto() {
+            var datos = {};
+            _camposProducto.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) datos[id] = el.value;
+            });
+            sessionStorage.setItem('formProducto', JSON.stringify(datos));
+        }
+        function restaurarFormProducto() {
+            var datos = sessionStorage.getItem('formProducto');
+            if (!datos) return;
+            var obj = JSON.parse(datos);
+            _camposProducto.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el && obj[id]) el.value = obj[id];
+            });
+            var desc = document.getElementById('descripcion');
+            if (desc && desc.value) prContarDesc(desc);
+        }
+        function limpiarFormProducto() { sessionStorage.removeItem('formProducto'); }
+
+        // Guardar en cada cambio
+        _camposProducto.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', guardarFormProducto);
+            if (el) el.addEventListener('change', guardarFormProducto);
+        });
+
+        // Restaurar al cargar
+        restaurarFormProducto();
+
+        // Limpiar al enviar exitosamente
+        var _formProd = document.querySelector('form[enctype]') || document.querySelector('form');
+        if (_formProd) {
+            var _origValidar = validarFormProducto;
+            validarFormProducto = function() {
+                var ok = _origValidar();
+                if (ok) limpiarFormProducto();
+                return ok;
+            };
         }
     </script>
 </body>

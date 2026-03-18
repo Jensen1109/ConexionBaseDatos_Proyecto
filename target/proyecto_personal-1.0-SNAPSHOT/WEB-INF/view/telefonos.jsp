@@ -32,6 +32,28 @@
         .btn-add:hover { background: #2563eb; }
         .btn-del { background: none; color: #ef4444; border: none; cursor: pointer; font-size: 0.85rem; padding: 0.3rem 0.5rem; border-radius: 6px; }
         .btn-del:hover { background: #fef2f2; }
+
+        /* ── MODAL CONFIRMACIÓN ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #fff; border-radius: 14px; padding: 1.8rem; max-width: 380px; width: 90%;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2); text-align: center;
+        }
+        .modal-box i.fa-triangle-exclamation { font-size: 2rem; color: #f59e0b; margin-bottom: 0.8rem; }
+        .modal-box p { font-size: 0.95rem; color: #1e293b; margin-bottom: 1.4rem; }
+        .modal-btns { display: flex; gap: 0.6rem; justify-content: center; }
+        .modal-btns button {
+            padding: 0.5rem 1.2rem; border: none; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
+        }
+        .btn-cancelar { background: #e2e8f0; color: #475569; }
+        .btn-cancelar:hover { background: #cbd5e1; }
+        .btn-confirmar { background: #ef4444; color: #fff; }
+        .btn-confirmar:hover { background: #dc2626; }
     </style>
 </head>
 <body>
@@ -55,8 +77,8 @@
                             <input type="hidden" name="idCliente"  value="<%= idCliente %>">
                             <input type="hidden" name="idTelefono" value="<%= t.getIdTelefono() %>">
                             <input type="hidden" name="accion"     value="eliminar">
-                            <button type="submit" class="btn-del"
-                                    onclick="return confirm('¿Eliminar este teléfono?')">
+                            <button type="button" class="btn-del"
+                                    onclick="confirmarEliminar(this.closest('form'), '¿Eliminar este teléfono?')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
@@ -79,5 +101,33 @@
             </div>
         </form>
     </div>
+
+    <!-- Modal de confirmación -->
+    <div class="modal-overlay" id="modalConfirm">
+        <div class="modal-box">
+            <i class="fas fa-triangle-exclamation"></i>
+            <p id="modalMsg"></p>
+            <div class="modal-btns">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-confirmar" id="btnConfirmar">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var formPendiente = null;
+        function confirmarEliminar(form, mensaje) {
+            formPendiente = form;
+            document.getElementById('modalMsg').textContent = mensaje;
+            document.getElementById('modalConfirm').classList.add('active');
+        }
+        function cerrarModal() {
+            document.getElementById('modalConfirm').classList.remove('active');
+            formPendiente = null;
+        }
+        document.getElementById('btnConfirmar').addEventListener('click', function() {
+            if (formPendiente) formPendiente.submit();
+        });
+    </script>
 </body>
 </html>

@@ -20,6 +20,28 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body { display: flex; min-height: 100vh; font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; }
 
+        /* ── MODAL CONFIRMACIÓN ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #fff; border-radius: 14px; padding: 1.8rem; max-width: 380px; width: 90%;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2); text-align: center;
+        }
+        .modal-box i.fa-triangle-exclamation { font-size: 2rem; color: #f59e0b; margin-bottom: 0.8rem; }
+        .modal-box p { font-size: 0.95rem; color: #1e293b; margin-bottom: 1.4rem; }
+        .modal-btns { display: flex; gap: 0.6rem; justify-content: center; }
+        .modal-btns button {
+            padding: 0.5rem 1.2rem; border: none; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
+        }
+        .btn-cancelar { background: #e2e8f0; color: #475569; }
+        .btn-cancelar:hover { background: #cbd5e1; }
+        .btn-confirmar { background: #ef4444; color: #fff; }
+        .btn-confirmar:hover { background: #dc2626; }
+
         /* ── SIDEBAR ── */
         .sidebar {
             width: 230px; background: #1e293b; min-height: 100vh;
@@ -192,14 +214,21 @@
                                 String apeC = c.getApellido() != null ? c.getApellido() : "";
                                 String cedC = c.getCedula() != null ? c.getCedula() : "";
                                 String emlC = c.getEmail() != null ? c.getEmail() : "—";
+                                boolean esAdminTienda = "00000000".equals(cedC);
                             %>
                             <tr class="fila-cliente"
                                 data-nombre="<%= (nomC + " " + apeC).toLowerCase() %>"
                                 data-cedula="<%= cedC.toLowerCase() %>">
-                                <td class="td-nombre"><%= nomC %> <%= apeC %></td>
+                                <td class="td-nombre">
+                                    <%= nomC %> <%= apeC %>
+                                    <% if (esAdminTienda) { %>
+                                    <span style="background:#dbeafe;color:#2563eb;font-size:0.65rem;font-weight:700;padding:0.15rem 0.45rem;border-radius:4px;margin-left:0.4rem;">SISTEMA</span>
+                                    <% } %>
+                                </td>
                                 <td class="td-ced"><%= cedC %></td>
                                 <td><%= emlC %></td>
                                 <td style="white-space:nowrap;">
+                                    <% if (!esAdminTienda) { %>
                                     <a href="<%= ctx %>/TelefonoControlador?idCliente=<%= c.getIdCliente() %>"
                                        class="btn-icon" title="Ver teléfonos" style="color:#10b981;text-decoration:none;">
                                         <i class="fas fa-phone"></i>
@@ -209,14 +238,17 @@
                                             onclick="abrirEditar(<%= c.getIdCliente() %>, '<%= nomC.replace("'","&#39;") %>', '<%= apeC.replace("'","&#39;") %>', '<%= cedC %>', '<%= emlC.equals("—") ? "" : emlC.replace("'","&#39;") %>')">
                                         <i class="fas fa-pen"></i>
                                     </button>
-                                    <form method="post" action="<%= ctx %>/ClienteControlador" style="display:inline;"
-                                          onsubmit="return confirm('¿Eliminar a <%= nomC %> <%= apeC %>?')">
+                                    <form method="post" action="<%= ctx %>/ClienteControlador" style="display:inline;">
                                         <input type="hidden" name="accion"    value="eliminar">
                                         <input type="hidden" name="idCliente" value="<%= c.getIdCliente() %>">
-                                        <button type="submit" class="btn-icon btn-delete" title="Eliminar">
+                                        <button type="button" class="btn-icon btn-delete" title="Eliminar"
+                                                onclick="confirmarEliminar(this.closest('form'), '¿Eliminar a <%= nomC %> <%= apeC %>?')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    <% } else { %>
+                                    <span style="color:#94a3b8;font-size:0.75rem;"><i class="fas fa-lock"></i> Protegido</span>
+                                    <% } %>
                                 </td>
                             </tr>
                             <% } } %>
@@ -451,6 +483,74 @@
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('open');
         }
+
+        /* ── PERSISTENCIA DE FORMULARIO Y BÚSQUEDA ── */
+        var _camposCliente = ['crNombre','crApellido','crCedula','crTelefono','crEmail'];
+        function guardarFormCliente() {
+            var datos = { busqueda: document.getElementById('buscar').value };
+            _camposCliente.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) datos[id] = el.value;
+            });
+            sessionStorage.setItem('formCliente', JSON.stringify(datos));
+        }
+        function restaurarFormCliente() {
+            var datos = sessionStorage.getItem('formCliente');
+            if (!datos) return;
+            var obj = JSON.parse(datos);
+            if (obj.busqueda) {
+                document.getElementById('buscar').value = obj.busqueda;
+                filtrar(obj.busqueda);
+            }
+            _camposCliente.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el && obj[id]) el.value = obj[id];
+            });
+        }
+        function limpiarFormCliente() { sessionStorage.removeItem('formCliente'); }
+
+        _camposCliente.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', guardarFormCliente);
+        });
+        document.getElementById('buscar').addEventListener('input', guardarFormCliente);
+        restaurarFormCliente();
+
+        // Limpiar al enviar formulario de crear
+        var _origValidarCrear = validarFormCrear;
+        validarFormCrear = function(form) {
+            var ok = _origValidarCrear(form);
+            if (ok) limpiarFormCliente();
+            return ok;
+        };
+    </script>
+
+    <!-- Modal de confirmación -->
+    <div class="modal-overlay" id="modalConfirm">
+        <div class="modal-box">
+            <i class="fas fa-triangle-exclamation"></i>
+            <p id="modalMsg"></p>
+            <div class="modal-btns">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-confirmar" id="btnConfirmar">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var formPendiente = null;
+        function confirmarEliminar(form, mensaje) {
+            formPendiente = form;
+            document.getElementById('modalMsg').textContent = mensaje;
+            document.getElementById('modalConfirm').classList.add('active');
+        }
+        function cerrarModal() {
+            document.getElementById('modalConfirm').classList.remove('active');
+            formPendiente = null;
+        }
+        document.getElementById('btnConfirmar').addEventListener('click', function() {
+            if (formPendiente) formPendiente.submit();
+        });
     </script>
 </body>
 </html>

@@ -99,6 +99,8 @@ public class PedidoControlador extends HttpServlet {
             request.setAttribute("productos",   productoDAO.listarTodos());
             // Cargar métodos de pago para el select (Efectivo, Nequi, Tarjeta)
             request.setAttribute("metodosPago", metodoPagoDAO.listarTodos());
+            // Pasar el ID del cliente "Admin Tienda" al formulario para control de fiado
+            request.setAttribute("idAdminTienda", clienteDAO.obtenerIdAdminTienda());
             // Mostrar el formulario de venta
             request.getRequestDispatcher("/view/registrarventa.jsp").forward(request, response);
 
@@ -291,10 +293,29 @@ public class PedidoControlador extends HttpServlet {
             }
         }
 
+        // Obtener el ID del cliente "Admin Tienda" para validaciones
+        int idAdminTienda = clienteDAO.obtenerIdAdminTienda();
+
+        // Si NO se seleccionó cliente y NO es fiado, asignar "Admin Tienda" automáticamente
+        if (!credito && (idClienteStr == null || idClienteStr.isBlank() || "0".equals(idClienteStr))) {
+            if (idAdminTienda > 0) {
+                idClienteStr = String.valueOf(idAdminTienda);
+            }
+        }
+
         // Si es venta a crédito, DEBE tener cliente (para saber quién debe)
         if (credito && (idClienteStr == null || idClienteStr.isBlank() || "0".equals(idClienteStr))) {
             cargarFormulario(request);
             request.setAttribute("error", "Para ventas a crédito debes seleccionar o registrar un cliente.");
+            request.getRequestDispatcher("/view/registrarventa.jsp").forward(request, response);
+            return;
+        }
+
+        // Bloquear fiado si el cliente seleccionado es "Admin Tienda"
+        if (credito && idClienteStr != null && idAdminTienda > 0
+                && String.valueOf(idAdminTienda).equals(idClienteStr)) {
+            cargarFormulario(request);
+            request.setAttribute("error", "No se puede fiar al cliente 'Admin Tienda'. Selecciona o registra un cliente con sus datos.");
             request.getRequestDispatcher("/view/registrarventa.jsp").forward(request, response);
             return;
         }
@@ -354,6 +375,7 @@ public class PedidoControlador extends HttpServlet {
     private void cargarFormulario(HttpServletRequest request) {
         request.setAttribute("productos",   productoDAO.listarTodos());
         request.setAttribute("metodosPago", metodoPagoDAO.listarTodos());
+        request.setAttribute("idAdminTienda", clienteDAO.obtenerIdAdminTienda());
     }
 
     /**

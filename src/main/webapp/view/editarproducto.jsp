@@ -488,6 +488,46 @@
                 document.querySelector('#uploadBox .upload-text').textContent = input.files[0].name;
             }
         }
+
+        /* ── PERSISTENCIA DEL FORMULARIO EDITAR ── */
+        var _idProducto = document.querySelector('input[name="id"]').value;
+        var _camposEditar = ['nombre','descripcion','precio','unidadMedida','stock','stockMinimo','fechaVencimiento','idCategoria'];
+        var _keyEditar = 'formEditarProducto_' + _idProducto;
+
+        function guardarFormEditar() {
+            var datos = {};
+            _camposEditar.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) datos[id] = el.value;
+            });
+            sessionStorage.setItem(_keyEditar, JSON.stringify(datos));
+        }
+        function restaurarFormEditar() {
+            var datos = sessionStorage.getItem(_keyEditar);
+            if (!datos) return;
+            var obj = JSON.parse(datos);
+            _camposEditar.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el && obj[id] !== undefined) el.value = obj[id];
+            });
+            var desc = document.getElementById('descripcion');
+            if (desc && desc.value) prContarDesc(desc);
+        }
+        function limpiarFormEditar() { sessionStorage.removeItem(_keyEditar); }
+
+        _camposEditar.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', guardarFormEditar);
+            if (el) el.addEventListener('change', guardarFormEditar);
+        });
+        restaurarFormEditar();
+
+        var _origValidarEditar = validarFormProducto;
+        validarFormProducto = function() {
+            var ok = _origValidarEditar();
+            if (ok) limpiarFormEditar();
+            return ok;
+        };
     </script>
 </body>
 </html>

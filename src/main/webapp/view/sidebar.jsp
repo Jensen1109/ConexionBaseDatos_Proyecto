@@ -49,20 +49,22 @@
         </a>
     </div>
 
-    <!-- ── CLIENTES (solo admin) ── -->
-    <% if (_admin) { %>
+    <!-- ── CLIENTES ── -->
     <div class="sidebar__section">
         <span class="sidebar__label">Clientes</span>
+        <% if (_admin) { %>
         <a href="<%= _ctx %>/ClienteControlador"
            class="sidebar__link <%= "clientes".equals(_act) ? "sidebar__link--activo" : "" %>">
             <i class="fas fa-users"></i> Ver / Editar clientes
         </a>
+        <% } %>
         <a href="<%= _ctx %>/DeudaControlador"
            class="sidebar__link <%= "deudores".equals(_act) ? "sidebar__link--activo" : "" %>">
             <i class="fas fa-file-invoice-dollar"></i> Deudores
         </a>
     </div>
 
+    <% if (_admin) { %>
     <!-- ── SISTEMA (solo admin) ── -->
     <div class="sidebar__section">
         <span class="sidebar__label">Sistema</span>

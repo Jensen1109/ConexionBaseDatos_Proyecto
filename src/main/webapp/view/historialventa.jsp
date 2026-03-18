@@ -269,6 +269,20 @@
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('open');
         }
+
+        /* ── PERSISTENCIA DE BÚSQUEDA ── */
+        function guardarBusquedaHistorial() {
+            sessionStorage.setItem('historialBusqueda', document.getElementById('buscador').value);
+        }
+        function restaurarBusquedaHistorial() {
+            var texto = sessionStorage.getItem('historialBusqueda');
+            if (texto) {
+                document.getElementById('buscador').value = texto;
+                filtrar();
+            }
+        }
+        document.getElementById('buscador').addEventListener('input', guardarBusquedaHistorial);
+        restaurarBusquedaHistorial();
     </script>
 </body>
 </html>

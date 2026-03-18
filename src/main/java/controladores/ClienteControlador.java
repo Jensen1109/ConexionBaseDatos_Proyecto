@@ -269,6 +269,14 @@ public class ClienteControlador extends HttpServlet {
         } else if ("actualizar".equals(accion)) {
             // Leer el ID del cliente que se va a actualizar y convertirlo a número entero
             int    id       = Integer.parseInt(request.getParameter("idCliente"));
+            // Proteger al cliente "Admin Tienda" de ser editado
+            int idAdminTienda = clienteDAO.obtenerIdAdminTienda();
+            if (idAdminTienda > 0 && id == idAdminTienda) {
+                request.setAttribute("clientes", clienteDAO.listar());
+                request.setAttribute("error", "El cliente 'Admin Tienda' no se puede modificar. Es un cliente del sistema.");
+                request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
+                return;
+            }
             // Leer el nuevo nombre del cliente desde el formulario
             String nombre   = request.getParameter("nombre");
             // Leer el nuevo apellido del cliente desde el formulario
@@ -318,6 +326,14 @@ public class ClienteControlador extends HttpServlet {
         } else if ("eliminar".equals(accion)) {
             // Leer el ID del cliente que se quiere eliminar y convertirlo a entero
             int id = Integer.parseInt(request.getParameter("idCliente"));
+            // Proteger al cliente "Admin Tienda" de ser eliminado
+            int idAdminTienda = clienteDAO.obtenerIdAdminTienda();
+            if (idAdminTienda > 0 && id == idAdminTienda) {
+                request.setAttribute("clientes", clienteDAO.listar());
+                request.setAttribute("error", "El cliente 'Admin Tienda' no se puede eliminar. Es un cliente del sistema.");
+                request.getRequestDispatcher("/view/clientes.jsp").forward(request, response);
+                return;
+            }
             // Verificar si el cliente tiene pedidos/ventas registradas (no se puede eliminar)
             if (clienteDAO.tienePedidos(id)) {
                 // Cargar la lista de clientes para la vista

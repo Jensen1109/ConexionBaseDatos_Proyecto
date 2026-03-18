@@ -292,6 +292,26 @@
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('open');
         }
+
+        /* ── PERSISTENCIA DE FILTROS ── */
+        function guardarFiltrosStock() {
+            sessionStorage.setItem('stockFiltros', JSON.stringify({
+                texto: document.getElementById('buscador').value,
+                filtro: filtroActivo
+            }));
+        }
+        function restaurarFiltrosStock() {
+            var datos = sessionStorage.getItem('stockFiltros');
+            if (!datos) return;
+            var obj = JSON.parse(datos);
+            if (obj.texto) document.getElementById('buscador').value = obj.texto;
+            if (obj.filtro) toggleFiltro(obj.filtro);
+            else filtrar();
+        }
+        document.getElementById('buscador').addEventListener('input', guardarFiltrosStock);
+        var _origToggleFiltro = toggleFiltro;
+        toggleFiltro = function(tipo) { _origToggleFiltro(tipo); guardarFiltrosStock(); };
+        restaurarFiltrosStock();
     </script>
 </body>
 </html>

@@ -7,6 +7,9 @@
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
     boolean esAdmin = (usuarioActual != null && usuarioActual.getIdRol() == 1);
+    // ID del cliente "Admin Tienda" para control de fiado en JavaScript
+    Integer idAdminTienda = (Integer) request.getAttribute("idAdminTienda");
+    if (idAdminTienda == null) idAdminTienda = 0;
     request.setAttribute("_paginaActiva", "registrarVenta");
 %>
 <!DOCTYPE html>
@@ -19,6 +22,24 @@
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body { display: flex; min-height: 100vh; font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; }
+
+        /* ── TOAST NOTIFICACIÓN ── */
+        .toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            background: #fff; border-left: 4px solid #ef4444; border-radius: 8px;
+            padding: 14px 20px; min-width: 300px; max-width: 420px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex; align-items: center; gap: 10px;
+            animation: toastIn 0.3s ease, toastOut 0.4s ease 3.6s forwards;
+            font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.92rem;
+        }
+        .toast i { color: #ef4444; font-size: 1.2rem; }
+        .toast span { flex: 1; color: #1e293b; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
 
         /* ── SIDEBAR ── */
         .sidebar {
@@ -240,7 +261,7 @@
                         <div class="form-group">
                             <label class="form-label">
                                 Cliente
-                                <span id="clienteHint" style="color:#94a3b8;font-weight:400;">(opcional — requerido en fiado)</span>
+                                <span id="clienteHint" style="color:#94a3b8;font-weight:400;">(opcional — si no se selecciona, se asigna a "Admin Tienda")</span>
                             </label>
 
                             <!-- Búsqueda -->
@@ -417,14 +438,28 @@
         </form>
     </main>
 
+    <div class="toast-container" id="toastContainer"></div>
     <script>
+        /* ── TOAST NOTIFICACIÓN ── */
+        function mostrarToast(mensaje) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>' + mensaje + '</span>';
+            container.appendChild(toast);
+            setTimeout(function() { toast.remove(); }, 4000);
+        }
+
         /* ── DATOS DE PRODUCTOS (cargados desde servidor) ── */
         const productosData = [<%
             if (productos != null) { for (Producto p : productos) {
                 if (p.getPrecio() == null || p.getNombre() == null) continue;
                 String nomJS = p.getNombre().replace("\\", "\\\\").replace("'", "\\'");
-        %>{ id: <%= p.getIdProducto() %>, nombre: '<%= nomJS %>', precio: <%= p.getPrecio().toPlainString() %>, stock: <%= p.getStock() %> },<% } } %>
+        %>{ id: <%= p.getIdProducto() %>, nombre: '<%= nomJS %>', precio: <%= p.getPrecio().toPlainString() %>, stock: <%= p.getStock() %>, unidad: '<%= p.getUnidadMedida() != null ? p.getUnidadMedida().replace("'", "\\'") : "" %>' },<% } } %>
         ];
+
+        /* ── CLIENTE ADMIN TIENDA (ventas anónimas) ── */
+        const ID_ADMIN_TIENDA = <%= idAdminTienda %>;
 
         /* ── BÚSQUEDA DE CLIENTES (AJAX en tiempo real) ── */
         const _ctx = '<%= ctx %>';
@@ -468,6 +503,9 @@
             document.getElementById('btnNuevoCliente').style.display = 'none';
             // Cerrar panel nuevo cliente si estaba abierto
             if (nuevoClientePanelAbierto) toggleNuevoCliente();
+            // Si es Admin Tienda, deshabilitar fiado
+            controlarFiado(id);
+            guardarCarrito();
         }
 
         function limpiarCliente() {
@@ -476,6 +514,25 @@
             document.getElementById('clienteSeleccionado').style.display = 'none';
             document.getElementById('searchWrap').style.display = 'block';
             document.getElementById('btnNuevoCliente').style.display = 'inline-flex';
+            // Re-habilitar fiado al limpiar cliente
+            controlarFiado(0);
+            guardarCarrito();
+        }
+
+        /** Deshabilita/habilita el checkbox de fiado según si el cliente es Admin Tienda */
+        function controlarFiado(idCliente) {
+            var chk = document.getElementById('chkFiado');
+            var fiadoRow = chk.closest('.fiado-row');
+            if (ID_ADMIN_TIENDA > 0 && parseInt(idCliente) === ID_ADMIN_TIENDA) {
+                chk.checked = false;
+                chk.disabled = true;
+                fiadoRow.style.opacity = '0.5';
+                fiadoRow.title = 'No se puede fiar al cliente Admin Tienda';
+            } else {
+                chk.disabled = false;
+                fiadoRow.style.opacity = '1';
+                fiadoRow.title = '';
+            }
         }
 
         function toggleNuevoCliente() {
@@ -506,6 +563,7 @@
                     if (el) { el.textContent = ''; el.className = 'field-error'; }
                 });
             }
+            guardarCarrito();
         }
 
         // Cerrar dropdown al hacer clic fuera
@@ -517,33 +575,19 @@
         /* ── PRODUCTOS ── */
         let filaId = 0;
 
-        function agregarProducto() {
-            const sel  = document.getElementById('selectProducto');
-            const id   = sel.value;
-            const cant = parseInt(document.getElementById('inputCantidad').value) || 1;
-            if (!id) { alert('Selecciona un producto.'); return; }
-
-            const prod = productosData.find(function(p) { return p.id == id; });
-            if (!prod) { alert('Producto no encontrado.'); return; }
-
-            const precio = prod.precio;
-            const stock  = prod.stock;
-            const nombre = prod.nombre;
-
-            if (!precio || precio <= 0) { alert('Este producto tiene precio inválido.'); return; }
-            if (cant <= 0) { alert('La cantidad debe ser mayor a 0.'); return; }
-            if (cant > stock) { alert('Stock insuficiente. Disponible: ' + stock); return; }
-
+        /** Agrega una fila al carrito (visual + hidden inputs) */
+        function insertarFila(id, nombre, precio, cant, unidad) {
             document.getElementById('filaVacia').style.display = 'none';
             filaId++;
-            const subtotal = precio * cant;
-            const tbody = document.getElementById('tablaProductos');
-            const tr = document.createElement('tr');
+            var subtotal = precio * cant;
+            var tbody = document.getElementById('tablaProductos');
+            var tr = document.createElement('tr');
             tr.id = 'fila-' + filaId;
-            const fid = filaId;
+            var fid = filaId;
+            var unidadTexto = unidad ? ' <span style="color:#64748b;font-size:0.78rem;">(' + unidad + ')</span>' : '';
             tr.innerHTML =
                 '<td class="td-prod">' + nombre + '</td>' +
-                '<td>' + cant + '</td>' +
+                '<td>' + cant + unidadTexto + '</td>' +
                 '<td class="td-price">$' + precio.toLocaleString('es-CO') + '</td>' +
                 '<td style="font-weight:600;">$' + subtotal.toLocaleString('es-CO') + '</td>' +
                 '<td>' +
@@ -555,14 +599,36 @@
                     '<input type="hidden" name="precioUnitario" value="' + precio + '">' +
                 '</td>';
             tbody.appendChild(tr);
+        }
+
+        function agregarProducto() {
+            const sel  = document.getElementById('selectProducto');
+            const id   = sel.value;
+            const cant = parseInt(document.getElementById('inputCantidad').value) || 1;
+            if (!id) { mostrarToast('Selecciona un producto.'); return; }
+
+            const prod = productosData.find(function(p) { return p.id == id; });
+            if (!prod) { mostrarToast('Producto no encontrado.'); return; }
+
+            const precio = prod.precio;
+            const stock  = prod.stock;
+            const nombre = prod.nombre;
+            const unidad = prod.unidad || '';
+
+            if (!precio || precio <= 0) { mostrarToast('Este producto tiene precio inválido.'); return; }
+            if (cant <= 0) { mostrarToast('La cantidad debe ser mayor a 0.'); return; }
+            if (cant > stock) { mostrarToast('Stock insuficiente. Disponible: ' + stock); return; }
+
+            insertarFila(id, nombre, precio, cant, unidad);
             sel.value = '';
             document.getElementById('inputCantidad').value = 1;
             actualizarResumen();
+            guardarCarrito();
         }
 
         function eliminarFila(id) {
             const fila = document.getElementById(id);
-            if (fila) { fila.remove(); actualizarResumen(); }
+            if (fila) { fila.remove(); actualizarResumen(); guardarCarrito(); }
             if (document.querySelectorAll('input[name="idProducto"]').length === 0)
                 document.getElementById('filaVacia').style.display = '';
         }
@@ -576,6 +642,121 @@
             document.getElementById('totalDisplay').textContent = '$' + total.toLocaleString('es-CO');
             document.getElementById('cantProductos').textContent = cantidades.length;
         }
+
+        /* ── PERSISTENCIA DEL CARRITO (sessionStorage) ── */
+
+        /** Guarda TODO el estado de la venta en sessionStorage */
+        function guardarCarrito() {
+            var estado = {};
+
+            // Guardar productos del carrito
+            var items = [];
+            var ids       = document.querySelectorAll('input[name="idProducto"]');
+            var cantidades = document.querySelectorAll('input[name="cantidad"]');
+            var precios    = document.querySelectorAll('input[name="precioUnitario"]');
+            for (var i = 0; i < ids.length; i++) {
+                var prod = productosData.find(function(p) { return p.id == ids[i].value; });
+                items.push({
+                    id: ids[i].value,
+                    nombre: prod ? prod.nombre : 'Producto',
+                    precio: parseFloat(precios[i].value),
+                    cantidad: parseInt(cantidades[i].value),
+                    unidad: prod ? (prod.unidad || '') : ''
+                });
+            }
+            estado.carrito = items;
+
+            // Guardar cliente seleccionado
+            var idCliente = document.getElementById('idClienteHidden').value;
+            var nombreCliente = document.getElementById('nombreClienteSeleccionado').textContent;
+            if (idCliente) {
+                estado.cliente = { id: idCliente, nombre: nombreCliente };
+            }
+
+            // Guardar método de pago
+            var selectPago = document.querySelector('select[name="idPago"]');
+            if (selectPago && selectPago.value) {
+                estado.idPago = selectPago.value;
+            }
+
+            // Guardar fiado
+            estado.fiado = document.getElementById('chkFiado').checked;
+
+            // Guardar panel nuevo cliente si está abierto
+            if (nuevoClientePanelAbierto) {
+                estado.nuevoCliente = {
+                    abierto: true,
+                    nombre: document.getElementById('nvNombre').value,
+                    apellido: document.getElementById('nvApellido').value,
+                    cedula: document.getElementById('nvCedula').value,
+                    telefono: document.getElementById('nvTelefono').value,
+                    email: document.getElementById('nvEmail').value
+                };
+            }
+
+            sessionStorage.setItem('carritoVenta', JSON.stringify(estado));
+        }
+
+        /** Restaura TODO el estado de la venta desde sessionStorage */
+        function restaurarCarrito() {
+            var datos = sessionStorage.getItem('carritoVenta');
+            if (!datos) return;
+            var estado = JSON.parse(datos);
+
+            // Restaurar productos del carrito
+            if (estado.carrito && estado.carrito.length > 0) {
+                for (var i = 0; i < estado.carrito.length; i++) {
+                    insertarFila(estado.carrito[i].id, estado.carrito[i].nombre, estado.carrito[i].precio, estado.carrito[i].cantidad, estado.carrito[i].unidad);
+                }
+                actualizarResumen();
+            }
+
+            // Restaurar cliente seleccionado
+            if (estado.cliente && estado.cliente.id) {
+                seleccionarCliente(parseInt(estado.cliente.id), estado.cliente.nombre);
+            }
+
+            // Restaurar método de pago
+            if (estado.idPago) {
+                var selectPago = document.querySelector('select[name="idPago"]');
+                if (selectPago) selectPago.value = estado.idPago;
+            }
+
+            // Restaurar fiado
+            if (estado.fiado) {
+                var chk = document.getElementById('chkFiado');
+                if (!chk.disabled) chk.checked = true;
+            }
+
+            // Restaurar panel nuevo cliente
+            if (estado.nuevoCliente && estado.nuevoCliente.abierto) {
+                toggleNuevoCliente();
+                document.getElementById('nvNombre').value = estado.nuevoCliente.nombre || '';
+                document.getElementById('nvApellido').value = estado.nuevoCliente.apellido || '';
+                document.getElementById('nvCedula').value = estado.nuevoCliente.cedula || '';
+                document.getElementById('nvTelefono').value = estado.nuevoCliente.telefono || '';
+                document.getElementById('nvEmail').value = estado.nuevoCliente.email || '';
+            }
+        }
+
+        /** Limpia todo el estado guardado */
+        function limpiarCarrito() {
+            sessionStorage.removeItem('carritoVenta');
+        }
+
+        // Restaurar al cargar la página
+        restaurarCarrito();
+
+        // Guardar cuando cambie el método de pago o el fiado
+        var _selectPago = document.querySelector('select[name="idPago"]');
+        if (_selectPago) _selectPago.addEventListener('change', guardarCarrito);
+        document.getElementById('chkFiado').addEventListener('change', guardarCarrito);
+
+        // Guardar cuando se escriba en los campos de nuevo cliente
+        ['nvNombre','nvApellido','nvCedula','nvTelefono','nvEmail'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', guardarCarrito);
+        });
 
         /* ── VALIDACIÓN NUEVO CLIENTE ── */
         function nvSetError(inputId, errId, msg) {
@@ -638,7 +819,7 @@
         /* ── VALIDACIÓN FORMULARIO PRINCIPAL ── */
         function validar() {
             if (document.querySelectorAll('input[name="idProducto"]').length === 0) {
-                alert('Agrega al menos un producto a la venta.');
+                mostrarToast('Agrega al menos un producto a la venta.');
                 return false;
             }
             // Si el panel de nuevo cliente está abierto, validar todos sus campos
@@ -681,9 +862,11 @@
             var fiado = document.getElementById('chkFiado').checked;
             var idCliente = document.getElementById('idClienteHidden').value;
             if (fiado && !idCliente && !nuevoClientePanelAbierto) {
-                alert('Para venta a fiado debes seleccionar o registrar un cliente.');
+                mostrarToast('Para venta a fiado debes seleccionar o registrar un cliente.');
                 return false;
             }
+            // Limpiar carrito guardado porque la venta se va a enviar
+            limpiarCarrito();
             return true;
         }
 

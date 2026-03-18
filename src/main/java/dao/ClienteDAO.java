@@ -336,6 +336,23 @@ public class ClienteDAO {
      */
     // Método que verifica si la cédula pertenece a OTRO cliente (excluyendo al que se está editando)
     // Así no marca como duplicado si el cliente mantiene su propia cédula al editar
+    /**
+     * Obtiene el ID del cliente "Admin Tienda" (cédula 00000000).
+     * Este cliente se usa para ventas anónimas (cuando el comprador no da sus datos).
+     * @return id_cliente de Admin Tienda, o 0 si no existe
+     */
+    public int obtenerIdAdminTienda() {
+        String sql = "SELECT id_cliente FROM Cliente WHERE cedula = '00000000'";
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.err.println("Error al obtener Admin Tienda: " + e.getMessage());
+        }
+        return 0;
+    }
+
     public boolean cedulaExisteExcluyendo(String cedula, int idCliente) {
         // Busca cédulas iguales pero que NO pertenezcan al cliente actual
         String sql = "SELECT COUNT(*) FROM Cliente WHERE cedula = ? AND id_cliente != ?";
