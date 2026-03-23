@@ -157,11 +157,18 @@ public class ProductoControlador extends HttpServlet {
 
         } else {
             // ─── CATÁLOGO (sin acción) ───
-            // Cualquier usuario autenticado puede ver el catálogo
+            // Verificamos que el usuario esté logueado antes de mostrar el catálogo
             if (!verificarSesion(request, response)) return;
-            // Cargar todos los productos
+
+            // Cargamos solo los productos con activo = true para mostrarlos en el catálogo
+            // Los productos desactivados NO aparecen aquí gracias al WHERE p.activo = true del DAO
             request.setAttribute("productos", productoDAO.listarTodos());
-            // Mostrar las tarjetas de productos
+
+            // Cargamos los productos desactivados (activo = false) en una lista aparte
+            // El JSP solo muestra esta sección si el usuario es admin y la lista no está vacía
+            request.setAttribute("productosInactivos", productoDAO.listarInactivos());
+
+            // Enviamos ambas listas al JSP del catálogo para que las muestre
             request.getRequestDispatcher("/view/productos.jsp").forward(request, response);
         }
     }
@@ -186,14 +193,33 @@ public class ProductoControlador extends HttpServlet {
         // Leer qué acción se está ejecutando: "eliminar", "actualizar" o crear (sin acción)
         String accion = request.getParameter("accion");
 
-        if ("eliminar".equals(accion)) {
-            // ─── ELIMINAR PRODUCTO ───
+        if ("restaurar".equals(accion)) {
+            // ─── RESTAURAR PRODUCTO DESACTIVADO ───
+            // Leemos el ID del producto que se quiere restaurar desde el formulario oculto del JSP
             int id = Integer.parseInt(request.getParameter("id"));
-            // Intentar eliminar (primero borra detalles de pedido asociados)
+
+            // Llamamos al método activar() del DAO que hace UPDATE Producto SET activo = true
+            // El producto vuelve a aparecer en el catálogo inmediatamente
+            productoDAO.activar(id);
+
+            // Redirigimos al catálogo para que se recargue y muestre el producto restaurado
+            // sendRedirect hace que el navegador haga una nueva petición GET al catálogo
+            response.sendRedirect(request.getContextPath() + "/ProductoControlador");
+            return; // Salimos del método para no ejecutar el código siguiente
+
+        } else if ("eliminar".equals(accion)) {
+            // ─── DESACTIVAR PRODUCTO (borrado lógico) ───
+            // Leemos el ID del producto que se quiere desactivar desde el formulario del modal
+            int id = Integer.parseInt(request.getParameter("id"));
+
+            // Llamamos al método eliminar() del DAO que hace UPDATE Producto SET activo = false
+            // Si retorna false (hubo error), mostramos mensaje de error al admin
             if (!productoDAO.eliminar(id)) {
-                // Si no se pudo eliminar, mostrar error
+                // Recargamos las listas para mostrar el catálogo con el mensaje de error
                 request.setAttribute("productos", productoDAO.listarTodos());
-                request.setAttribute("error", "No se pudo eliminar el producto. Intenta de nuevo.");
+                request.setAttribute("productosInactivos", productoDAO.listarInactivos());
+                request.setAttribute("error", "No se pudo desactivar el producto. Intenta de nuevo.");
+                // Reenviamos al JSP del catálogo mostrando el error (sin cambiar la URL)
                 request.getRequestDispatcher("/view/productos.jsp").forward(request, response);
                 return;
             }

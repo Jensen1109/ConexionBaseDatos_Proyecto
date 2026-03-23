@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.math.BigDecimal;    // Para manejar totales y precios con decimales exactos
 import java.time.LocalDate;     // Para manejar fechas de filtro
 import java.util.ArrayList;     // Lista dinámica para los detalles del pedido
+import java.util.HashMap;       // Mapa para asociar detalles a cada pedido por su ID
 import java.util.List;
+import java.util.Map;           // Interfaz Map para pasar los detalles al JSP
 
 /**
  * Controlador de ventas (Pedidos) e historial.
@@ -131,6 +133,16 @@ public class PedidoControlador extends HttpServlet {
 
             // Pasar la lista de pedidos al JSP
             request.setAttribute("pedidos", pedidos);
+
+            // Cargar los detalles (productos) de cada pedido y guardarlos en un Map
+            // La clave es el id_pedido y el valor es la lista de productos comprados en esa venta
+            Map<Integer, List<DetallePedido>> detallesPorPedido = new HashMap<>();
+            for (Pedido p : pedidos) {
+                detallesPorPedido.put(p.getIdPedido(), pedidoDAO.listarDetalles(p.getIdPedido()));
+            }
+            // Pasar el mapa al JSP para que pueda mostrar los detalles de cada venta
+            request.setAttribute("detallesPorPedido", detallesPorPedido);
+
             // Mostrar el historial de ventas
             request.getRequestDispatcher("/view/historialventa.jsp").forward(request, response);
         }

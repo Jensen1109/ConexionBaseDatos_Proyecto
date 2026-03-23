@@ -434,6 +434,7 @@ public class PedidoDAO {
                     d.setIdProducto(rs.getInt("id_producto"));        // ID del producto vendido
                     d.setCantidadVendida(rs.getInt("cantidad_vendida")); // Cantidad vendida
                     d.setPrecioUnitario(rs.getBigDecimal("precio_unitario")); // Precio al momento de la venta
+                    d.setNombreProducto(rs.getString("nombre_producto")); // Nombre del producto (viene del JOIN con Producto)
                     // Agregamos el detalle a la lista
                     lista.add(d);
                 }

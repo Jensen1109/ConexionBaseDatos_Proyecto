@@ -1,7 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List, modelos.Producto, modelos.Usuario" %>
 <%
+    // Recibimos la lista de productos activos que el controlador puso en el request
     List<Producto> productos = (List<Producto>) request.getAttribute("productos");
+    // Recibimos la lista de productos desactivados (activo = false) para mostrarla al admin
+    List<Producto> productosInactivos = (List<Producto>) request.getAttribute("productosInactivos");
     String error = (String) request.getAttribute("error");
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
@@ -144,6 +147,19 @@
         .modal__msg { color: #64748b; font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem; }
         .modal__actions { display: flex; gap: 0.75rem; justify-content: center; }
 
+        /* ── SECCIÓN INACTIVOS ── */
+        .section-inactivos {
+            margin-top: 2.5rem;
+        }
+        .section-inactivos__title {
+            font-size: 1rem; font-weight: 700; color: #64748b;
+            margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .card--inactivo { opacity: 0.6; }
+        .card--inactivo:hover { opacity: 1; }
+        .btn--restore { background: #f0fdf4; color: #16a34a; }
+        .btn--restore:hover { background: #16a34a; color: #fff; }
+
         /* ── HAMBURGER BUTTON ── */
         .hamburger-btn {
             display: none; position: fixed; top: 0.8rem; left: 0.8rem;
@@ -234,6 +250,40 @@
             </article>
             <% } } %>
         </div>
+        <% if (esAdmin && productosInactivos != null && !productosInactivos.isEmpty()) { %>
+        <div class="section-inactivos">
+            <p class="section-inactivos__title">
+                <i class="fas fa-box"></i> Productos desactivados (<%= productosInactivos.size() %>)
+            </p>
+            <div class="grid">
+                <% for (Producto p : productosInactivos) { %>
+                <article class="card card--inactivo">
+                    <img class="card__img"
+                         src="<%= (p.getImagenUrl() != null && !p.getImagenUrl().isEmpty())
+                                  ? ctx + "/uploads/productos/" + p.getImagenUrl()
+                                  : "https://placehold.co/400x200/e2e8f0/94a3b8?text=Producto" %>"
+                         alt="<%= p.getNombre() %>"
+                         onerror="this.src='https://placehold.co/400x200/e2e8f0/94a3b8?text=Producto'">
+                    <div class="card__body">
+                        <h2 class="card__name" title="<%= p.getNombre() %>"><%= p.getNombre() %></h2>
+                        <p class="card__desc"><%= p.getDescripcion() != null && !p.getDescripcion().isEmpty() ? p.getDescripcion() : "Sin descripción" %></p>
+                        <div class="card__footer">
+                            <span class="card__price">$&nbsp;<%= String.format("%,.0f", p.getPrecio()) %></span>
+                            <form action="<%= ctx %>/ProductoControlador" method="post" style="display:inline">
+                                <input type="hidden" name="accion" value="restaurar">
+                                <input type="hidden" name="id" value="<%= p.getIdProducto() %>">
+                                <button type="submit" class="btn btn--restore">
+                                    <i class="fas fa-rotate-left"></i> Restaurar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+                <% } %>
+            </div>
+        </div>
+        <% } %>
+
     </main>
 
     <% if (esAdmin) { %>
@@ -250,8 +300,8 @@
             <div class="modal__icon"><i class="fas fa-trash"></i></div>
             <h3 class="modal__title">¿Eliminar producto?</h3>
             <p class="modal__msg">
-                Se eliminará <strong>"<%= p.getNombre() %>"</strong> de forma permanente.
-                Esta acción no se puede deshacer.
+                Se desactivará <strong>"<%= p.getNombre() %>"</strong> y dejará de aparecer en el catálogo.
+                Puedes restaurarlo desde la sección de productos desactivados.
             </p>
             <div class="modal__actions">
                 <form action="<%= ctx %>/ProductoControlador" method="post" style="display:inline">

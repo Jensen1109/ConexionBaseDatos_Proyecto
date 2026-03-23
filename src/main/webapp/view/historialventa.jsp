@@ -1,7 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List, modelos.Pedido, modelos.Usuario" %>
+<%@ page import="java.util.List, java.util.Map, modelos.Pedido, modelos.DetallePedido, modelos.Usuario" %>
 <%
     List<Pedido> pedidos = (List<Pedido>) request.getAttribute("pedidos");
+    Map<Integer, List<DetallePedido>> detallesPorPedido =
+        (Map<Integer, List<DetallePedido>>) request.getAttribute("detallesPorPedido");
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
     boolean esAdmin = (usuarioActual != null && usuarioActual.getIdRol() == 1);
@@ -151,6 +153,59 @@
         .sidebar__user-role { color: #64748b; font-size: 0.7rem; }
         .sidebar__link--logout { color: #f87171 !important; }
         .sidebar__link--logout:hover { color: #fff !important; background: rgba(239,68,68,0.12) !important; border-left-color: #ef4444 !important; }
+
+        /* ── BOTÓN OJO ── */
+        .btn-ver {
+            background: none; border: none; cursor: pointer;
+            color: #3b82f6; font-size: 1rem; padding: 0.2rem 0.4rem;
+            border-radius: 6px; transition: background 0.15s;
+        }
+        .btn-ver:hover { background: #eff6ff; color: #2563eb; }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: 500;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #fff; border-radius: 14px;
+            width: 90%; max-width: 560px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            overflow: hidden;
+        }
+        .modal__header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 1.4rem; border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+        .modal__title { font-size: 1rem; font-weight: 700; color: #1e293b; }
+        .modal__close {
+            background: none; border: none; font-size: 1.2rem;
+            color: #94a3b8; cursor: pointer; line-height: 1;
+        }
+        .modal__close:hover { color: #1e293b; }
+        .modal__body { padding: 1.2rem 1.4rem; }
+        .modal__table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .modal__table th {
+            text-align: left; padding: 0.5rem 0.7rem;
+            background: #f8fafc; color: #475569;
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .modal__table td {
+            padding: 0.6rem 0.7rem; border-bottom: 1px solid #f1f5f9; color: #334155;
+        }
+        .modal__table tbody tr:last-child td { border-bottom: none; }
+        .modal__table .td-num { font-weight: 700; color: #22c55e; }
+        .modal__footer {
+            padding: 0.8rem 1.4rem; border-top: 1px solid #f1f5f9;
+            text-align: right; font-size: 0.875rem;
+            background: #f8fafc;
+        }
+        .modal__total { font-weight: 700; color: #1e293b; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -227,12 +282,13 @@
                         <th>Cliente</th>
                         <th>Total</th>
                         <th>Estado</th>
+                        <th>Detalle</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if (pedidos == null || pedidos.isEmpty()) { %>
                     <tr class="empty-row">
-                        <td colspan="4"><i class="fas fa-receipt"></i>No hay ventas registradas aún.</td>
+                        <td colspan="5"><i class="fas fa-receipt"></i>No hay ventas registradas aún.</td>
                     </tr>
                     <% } else {
                         for (Pedido p : pedidos) {
@@ -251,6 +307,15 @@
                         <td class="td-cliente"><%= cliente %></td>
                         <td class="td-total">$<%= String.format("%,.0f", p.getTotal()) %></td>
                         <td><span class="badge <%= badgeClass %>"><%= estadoLabel %></span></td>
+                        <td>
+                            <%-- Botón ojo: al hacer click llama a verDetalle() en JavaScript --%>
+                            <%-- Le pasa el ID del pedido, la fecha y el nombre del cliente --%>
+                            <%-- cliente.replace("'", "\\'") escapa las comillas simples para no romper el JavaScript --%>
+                            <button class="btn-ver" title="Ver productos de esta venta"
+                                    onclick="verDetalle(<%= p.getIdPedido() %>, '<%= fechaStr %>', '<%= cliente.replace("'", "\\'") %>')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
                     </tr>
                     <% } } %>
                 </tbody>
@@ -258,7 +323,121 @@
         </div>
     </main>
 
+    <!-- ── MODAL DETALLE DE VENTA ── -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal__header">
+                <span class="modal__title" id="modalTitulo">Detalle de la venta</span>
+                <button class="modal__close" onclick="cerrarModal()">&#x2715;</button>
+            </div>
+            <div class="modal__body">
+                <table class="modal__table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio unitario</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalCuerpo"></tbody>
+                </table>
+            </div>
+            <div class="modal__footer">
+                Total: <span class="modal__total" id="modalTotal"></span>
+            </div>
+        </div>
+    </div>
+
+    <%-- Declaramos el objeto _detalles ANTES del loop para que exista cuando los scripts lo llenen --%>
+    <%-- Si se declarara después, los scripts del loop intentarían escribir en una variable que no existe --%>
+    <script>var _detalles = {};</script>  <%-- _detalles es un objeto JavaScript: cada llave es el ID del pedido --%>
+
+    <%-- LOOP JAVA: recorremos el mapa detallesPorPedido que viene del controlador --%>
+    <%-- El controlador cargó los detalles de TODOS los pedidos y los guardó en este mapa --%>
+    <%-- Clave del mapa: id_pedido | Valor: lista de DetallePedido de ese pedido --%>
+    <% if (detallesPorPedido != null) {
+        for (Map.Entry<Integer, List<DetallePedido>> entry : detallesPorPedido.entrySet()) {
+            int idP = entry.getKey();       // ID del pedido (ej: 5)
+            List<DetallePedido> dets = entry.getValue(); // Lista de productos de ese pedido
+    %>
+    <%-- Por cada pedido generamos un bloque <script> que agrega sus detalles al objeto _detalles --%>
     <script>
+        <%-- _detalles[5] = [...] guarda el array de productos del pedido 5 en JavaScript --%>
+        _detalles[<%= idP %>] = [
+            <% for (int i = 0; i < dets.size(); i++) {
+                DetallePedido d = dets.get(i);
+                // Calculamos el subtotal en Java: precio unitario × cantidad vendida
+                java.math.BigDecimal subtotal = d.getPrecioUnitario() != null
+                    ? d.getPrecioUnitario().multiply(java.math.BigDecimal.valueOf(d.getCantidadVendida()))
+                    : java.math.BigDecimal.ZERO; // Si no hay precio, el subtotal es 0
+            %>
+            <%-- Cada producto del pedido se guarda como un objeto JS con 4 campos --%>
+            <%-- replace("\"","\\\"") escapa las comillas del nombre para no romper el JSON --%>
+            {nombre:"<%= d.getNombreProducto() != null ? d.getNombreProducto().replace("\"","\\\"") : "Producto" %>",
+             cantidad:<%= d.getCantidadVendida() %>,      <%-- Cantidad vendida de ese producto --%>
+             precio:<%= d.getPrecioUnitario() != null ? d.getPrecioUnitario() : 0 %>,  <%-- Precio unitario al momento de la venta --%>
+             subtotal:<%= subtotal %>}<%= i < dets.size()-1 ? "," : "" %> <%-- Subtotal; la coma separa objetos del array excepto el último --%>
+            <% } %>
+        ];
+    </script>
+    <% } } %>
+
+    <script>
+        // verDetalle: se llama cuando el usuario hace click en el ícono de ojo de una fila
+        // idPedido: ID del pedido cuyos productos queremos ver
+        // fecha: fecha de la venta para mostrar en el título del modal
+        // cliente: nombre del cliente para mostrar en el título del modal
+        function verDetalle(idPedido, fecha, cliente) {
+            // Buscamos en _detalles el array de productos que corresponde a este pedido
+            var datos = _detalles[idPedido];
+
+            // Actualizamos el título del modal con la fecha y el nombre del cliente
+            document.getElementById('modalTitulo').textContent =
+                'Venta del ' + fecha + ' — ' + cliente;
+
+            // Obtenemos el cuerpo de la tabla del modal y lo limpiamos para llenarlo de nuevo
+            var cuerpo = document.getElementById('modalCuerpo');
+            cuerpo.innerHTML = ''; // Vaciamos las filas anteriores
+
+            // Si no hay datos o el array está vacío, mostramos un mensaje informativo
+            if (!datos || datos.length === 0) {
+                cuerpo.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:1.5rem">Sin productos registrados</td></tr>';
+            } else {
+                var totalModal = 0; // Variable acumuladora para el total de la venta
+                // Recorremos cada producto del pedido y creamos una fila en la tabla
+                datos.forEach(function(d) {
+                    totalModal += d.subtotal; // Sumamos el subtotal de cada producto al total
+                    var tr = document.createElement('tr'); // Creamos una fila HTML
+                    // Llenamos la fila con nombre, cantidad, precio y subtotal del producto
+                    // toLocaleString('es-CO') formatea los números con separador de miles colombiano
+                    tr.innerHTML =
+                        '<td>' + d.nombre + '</td>' +                        // Nombre del producto
+                        '<td class="td-num">' + d.cantidad + '</td>' +       // Cantidad vendida
+                        '<td>$' + Number(d.precio).toLocaleString('es-CO', {minimumFractionDigits:0}) + '</td>' +   // Precio unitario
+                        '<td class="td-num">$' + Number(d.subtotal).toLocaleString('es-CO', {minimumFractionDigits:0}) + '</td>'; // Subtotal
+                    cuerpo.appendChild(tr); // Agregamos la fila a la tabla del modal
+                });
+                // Mostramos el total acumulado de toda la venta en el pie del modal
+                document.getElementById('modalTotal').textContent =
+                    '$' + totalModal.toLocaleString('es-CO', {minimumFractionDigits:0});
+            }
+
+            // Abrimos el modal agregando la clase 'open' que lo hace visible (display: flex)
+            document.getElementById('modalOverlay').classList.add('open');
+        }
+
+        // cerrarModal: oculta el modal quitando la clase 'open'
+        function cerrarModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+        }
+
+        // Permite cerrar el modal haciendo click en el fondo oscuro (fuera del recuadro blanco)
+        // e.target === this: verifica que el click fue en el overlay y no dentro del modal
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModal();
+        });
+
         function filtrar() {
             const texto = document.getElementById('buscador').value.toLowerCase();
             document.querySelectorAll('#tablaHistorial tbody tr[data-cliente]').forEach(tr => {

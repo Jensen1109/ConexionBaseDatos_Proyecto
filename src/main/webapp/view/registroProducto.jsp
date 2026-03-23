@@ -295,7 +295,8 @@
                 <div class="form__row">
                     <div class="form__group">
                         <label class="form__label" for="fechaVencimiento">Fecha de vencimiento</label>
-                        <input type="date" id="fechaVencimiento" name="fechaVencimiento" class="form__input">
+                        <input type="date" id="fechaVencimiento" name="fechaVencimiento" class="form__input"
+                               min="<%= java.time.LocalDate.now().toString() %>">
                     </div>
                     <div class="form__group">
                         <label class="form__label" for="idCategoria">Categoría *</label>

@@ -69,4 +69,12 @@ public class DetallePedido {
     public BigDecimal getPrecioUnitario() { return precioUnitario; }
     // Setter: permite asignar el precio unitario del producto en este detalle
     public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
+
+    // Nombre del producto obtenido con JOIN desde la tabla Producto (no es columna directa de detalle_pedido)
+    // Se llena en el DAO cuando se consultan los detalles de un pedido para mostrarlos en la vista
+    private String nombreProducto;
+    // Getter: devuelve el nombre del producto para mostrarlo en el historial de ventas
+    public String getNombreProducto() { return nombreProducto; }
+    // Setter: permite asignar el nombre del producto tras el JOIN en el DAO
+    public void setNombreProducto(String nombreProducto) { this.nombreProducto = nombreProducto; }
 }

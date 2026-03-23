@@ -22,10 +22,12 @@ public class ProductoDAO {
 
     // Constante con la parte base del SELECT que se reutiliza en varias consultas
     // LEFT JOIN con Imagen trae la URL de la imagen del producto (puede ser NULL si no tiene imagen)
+    // WHERE p.activo = true filtra solo productos activos (los eliminados tienen activo = false)
     private static final String SELECT_BASE =
         "SELECT p.*, i.url AS imagen_url " +   // p.* trae todas las columnas de Producto; i.url la URL de la imagen
         "FROM Producto p " +                     // "p" es un alias corto para la tabla Producto
-        "LEFT JOIN Imagen i ON p.id_imagen = i.id_imagen ";  // LEFT JOIN: trae el producto aunque no tenga imagen
+        "LEFT JOIN Imagen i ON p.id_imagen = i.id_imagen " + // LEFT JOIN: trae el producto aunque no tenga imagen
+        "WHERE p.activo = true ";  // Solo productos activos; los desactivados no aparecen en el sistema
 
     // ─────────────────────────────────────────────
     // Mapear ResultSet → Producto
@@ -83,7 +85,7 @@ public class ProductoDAO {
     // Método que busca un producto específico por su identificador único
     public Producto buscarPorId(int id) {
         // Usamos la consulta base con un filtro WHERE por id_producto
-        String sql = SELECT_BASE + "WHERE p.id_producto = ?";
+        String sql = SELECT_BASE + "AND p.id_producto = ?";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -109,7 +111,7 @@ public class ProductoDAO {
         // Lista vacía para almacenar los productos de esa categoría
         List<Producto> lista = new ArrayList<>();
         // Filtramos por id_categoria y ordenamos por nombre
-        String sql = SELECT_BASE + "WHERE p.id_categoria = ? ORDER BY p.nombre";
+        String sql = SELECT_BASE + "AND p.id_categoria = ? ORDER BY p.nombre";
 
         try (Connection con = conexion.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -266,51 +268,92 @@ public class ProductoDAO {
         return false;
     }
 
-    // ELIMINAR (borra primero detalle_pedido asociados para no violar FK)
-    // Método que elimina un producto de la BD, incluyendo sus detalles de pedido asociados
-    // Usa una transacción para asegurar que ambas eliminaciones ocurran juntas o ninguna
-    public boolean eliminar(int id) {
-        // No usamos try-with-resources aquí porque necesitamos controlar el commit/rollback manualmente
-        Connection con = null;
-        try {
-            // Abrimos la conexión a la BD
-            con = conexion.getConnection();
-            // Desactivamos el autocommit para iniciar una transacción manual
-            // Esto significa que los cambios no se guardan hasta que llamemos commit()
-            con.setAutoCommit(false);
+    // ─────────────────────────────────────────────
+    // LISTAR INACTIVOS
+    // ─────────────────────────────────────────────
+    // Método que retorna todos los productos donde activo = false (los "eliminados")
+    // Solo el administrador lo usa para mostrar la sección de productos desactivados en el catálogo
+    public List<Producto> listarInactivos() {
+        // Lista vacía donde guardaremos los productos desactivados encontrados
+        List<Producto> lista = new ArrayList<>();
 
-            // PASO 1: Eliminamos los detalles de pedido que referencian este producto
-            // Esto es necesario porque detalle_pedido tiene una clave foránea (FK) hacia Producto
-            // Si no eliminamos primero los detalles, la BD rechazaría eliminar el producto
-            try (PreparedStatement psD = con.prepareStatement(
-                    "DELETE FROM detalle_pedido WHERE id_producto = ?")) {
-                psD.setInt(1, id);  // Asignamos el ID del producto a eliminar
-                psD.executeUpdate(); // Ejecutamos la eliminación de detalles
-            }
+        // Consulta SQL igual a listarTodos() pero con WHERE p.activo = false en vez de true
+        // LEFT JOIN con Imagen para traer la URL de la imagen aunque no tenga (para mostrar en la card)
+        String sql = "SELECT p.*, i.url AS imagen_url " +
+                     "FROM Producto p " +
+                     "LEFT JOIN Imagen i ON p.id_imagen = i.id_imagen " +
+                     // WHERE p.activo = false: solo trae los productos desactivados
+                     "WHERE p.activo = false ORDER BY p.nombre"; // ORDER BY nombre: orden alfabético
 
-            // PASO 2: Ahora sí eliminamos el producto de la tabla Producto
-            int filas;
-            try (PreparedStatement psP = con.prepareStatement(
-                    "DELETE FROM Producto WHERE id_producto = ?")) {
-                psP.setInt(1, id);  // Asignamos el ID del producto
-                filas = psP.executeUpdate(); // Guardamos el número de filas eliminadas
-            }
+        // try-with-resources: abre conexión, prepara y ejecuta el SELECT en un solo bloque
+        // Todo se cierra automáticamente al terminar aunque haya un error
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-            // Si todo salió bien, confirmamos la transacción (ambas eliminaciones se guardan)
-            con.commit();
-            // Retornamos true si se eliminó al menos una fila de la tabla Producto
-            return filas > 0;
+            // Recorremos cada fila del resultado y la convertimos en un objeto Producto
+            while (rs.next()) lista.add(mapear(rs));
 
         } catch (SQLException e) {
-            System.err.println("Error al eliminar producto: " + e.getMessage());
-            // Si hubo error, hacemos rollback para deshacer los cambios parciales
-            // Esto garantiza que no quede la BD en un estado inconsistente
-            if (con != null) try { con.rollback(); } catch (SQLException ex) { /* ignorar */ }
+            // Si la consulta falla, imprimimos el error en la consola del servidor
+            System.err.println("Error al listar inactivos: " + e.getMessage());
+        }
+        // Retornamos la lista de productos desactivados (puede estar vacía si no hay ninguno)
+        return lista;
+    }
+
+    // ─────────────────────────────────────────────
+    // ACTIVAR (restaurar producto desactivado)
+    // ─────────────────────────────────────────────
+    // Método que cambia activo = true para que el producto vuelva a aparecer en el catálogo
+    // El admin lo usa cuando quiere restaurar un producto que había desactivado antes
+    public boolean activar(int id) {
+        // Consulta UPDATE que solo cambia el campo activo a true
+        // No toca ningún otro campo del producto (precio, stock, etc. quedan igual)
+        String sql = "UPDATE Producto SET activo = true WHERE id_producto = ?";
+
+        // try-with-resources: abre conexión y prepara el UPDATE
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            // Asignamos el ID del producto que queremos restaurar al parámetro "?"
+            ps.setInt(1, id);
+            // Ejecutamos el UPDATE y retornamos true si se modificó al menos una fila
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            // Si hay error de BD, lo registramos y retornamos false
+            System.err.println("Error al activar producto: " + e.getMessage());
             return false;
-        } finally {
-            // El bloque finally siempre se ejecuta, haya error o no
-            // Restauramos el autocommit a true y cerramos la conexión
-            if (con != null) try { con.setAutoCommit(true); con.close(); } catch (SQLException ex) { /* ignorar */ }
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // DESACTIVAR (borrado lógico)
+    // ─────────────────────────────────────────────
+    // En vez de hacer DELETE (que borraría el producto para siempre), hacemos un UPDATE
+    // Cambiamos activo = false: el producto desaparece del catálogo pero SÍ sigue en la BD
+    // Esto protege el historial de ventas: detalle_pedido sigue apuntando al producto sin error
+    // Si se hubiera hecho DELETE, el historial perdería los registros de ese producto
+    public boolean eliminar(int id) {
+        // UPDATE simple: no necesitamos transacción porque solo tocamos una tabla
+        // Antes se hacía DELETE en detalle_pedido + DELETE en Producto (dos operaciones)
+        // Ahora con borrado lógico es solo un UPDATE en una tabla
+        String sql = "UPDATE Producto SET activo = false WHERE id_producto = ?";
+
+        // try-with-resources: abre conexión y prepara el UPDATE
+        try (Connection con = conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            // Asignamos el ID del producto que queremos desactivar al parámetro "?"
+            ps.setInt(1, id);
+            // Ejecutamos el UPDATE; retorna true si se modificó al menos una fila (el producto existía)
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            // Si hay error de BD, lo registramos en la consola y retornamos false
+            System.err.println("Error al desactivar producto: " + e.getMessage());
+            return false;
         }
     }
 }

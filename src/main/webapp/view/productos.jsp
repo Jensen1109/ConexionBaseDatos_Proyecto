@@ -1,7 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List, modelos.Producto, modelos.Usuario" %>
 <%
+    // Recibimos la lista de productos activos que el controlador puso en el request
     List<Producto> productos = (List<Producto>) request.getAttribute("productos");
+    // Recibimos la lista de productos desactivados (activo = false) para mostrarla al admin
+    List<Producto> productosInactivos = (List<Producto>) request.getAttribute("productosInactivos");
     String error = (String) request.getAttribute("error");
     String ctx = request.getContextPath();
     Usuario usuarioActual = (Usuario) session.getAttribute("usuarioLogueado");
@@ -144,6 +147,19 @@
         .modal__msg { color: #64748b; font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem; }
         .modal__actions { display: flex; gap: 0.75rem; justify-content: center; }
 
+        /* ── SECCIÓN INACTIVOS ── */
+        .section-inactivos {
+            margin-top: 2.5rem;
+        }
+        .section-inactivos__title {
+            font-size: 1rem; font-weight: 700; color: #64748b;
+            margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .card--inactivo { opacity: 0.6; }
+        .card--inactivo:hover { opacity: 1; }
+        .btn--restore { background: #f0fdf4; color: #16a34a; }
+        .btn--restore:hover { background: #16a34a; color: #fff; }
+
         /* ── HAMBURGER BUTTON ── */
         .hamburger-btn {
             display: none; position: fixed; top: 0.8rem; left: 0.8rem;
@@ -234,6 +250,56 @@
             </article>
             <% } } %>
         </div>
+        <%-- SECCIÓN PRODUCTOS DESACTIVADOS: solo visible si el usuario es admin Y hay productos inactivos --%>
+        <%-- esAdmin: verifica que el rol sea 1 (administrador) --%>
+        <%-- productosInactivos != null && !productosInactivos.isEmpty(): evita mostrar la sección si no hay ninguno --%>
+        <% if (esAdmin && productosInactivos != null && !productosInactivos.isEmpty()) { %>
+        <div class="section-inactivos">
+            <%-- Título de la sección con el conteo de productos desactivados --%>
+            <p class="section-inactivos__title">
+                <i class="fas fa-box"></i> Productos desactivados (<%= productosInactivos.size() %>)
+            </p>
+            <%-- Usamos el mismo grid de tarjetas del catálogo activo para mantener el diseño uniforme --%>
+            <div class="grid">
+                <%-- Recorremos cada producto desactivado para mostrar su tarjeta --%>
+                <% for (Producto p : productosInactivos) { %>
+                <%-- card--inactivo aplica opacidad reducida para que visualmente se note que está desactivado --%>
+                <article class="card card--inactivo">
+                    <%-- Mostramos la imagen del producto; si no tiene imagen, mostramos un placeholder --%>
+                    <img class="card__img"
+                         src="<%= (p.getImagenUrl() != null && !p.getImagenUrl().isEmpty())
+                                  ? ctx + "/uploads/productos/" + p.getImagenUrl()
+                                  : "https://placehold.co/400x200/e2e8f0/94a3b8?text=Producto" %>"
+                         alt="<%= p.getNombre() %>"
+                         <%-- onerror: si la imagen no carga (archivo eliminado), muestra el placeholder automáticamente --%>
+                         onerror="this.src='https://placehold.co/400x200/e2e8f0/94a3b8?text=Producto'">
+                    <div class="card__body">
+                        <%-- Nombre del producto desactivado --%>
+                        <h2 class="card__name" title="<%= p.getNombre() %>"><%= p.getNombre() %></h2>
+                        <%-- Descripción del producto; si no tiene, muestra "Sin descripción" --%>
+                        <p class="card__desc"><%= p.getDescripcion() != null && !p.getDescripcion().isEmpty() ? p.getDescripcion() : "Sin descripción" %></p>
+                        <div class="card__footer">
+                            <%-- Precio del producto (se guarda aunque esté desactivado) --%>
+                            <span class="card__price">$&nbsp;<%= String.format("%,.0f", p.getPrecio()) %></span>
+                            <%-- Formulario de restaurar: envía POST al controlador con accion=restaurar e id del producto --%>
+                            <form action="<%= ctx %>/ProductoControlador" method="post" style="display:inline">
+                                <%-- Campo oculto que le dice al controlador qué acción ejecutar --%>
+                                <input type="hidden" name="accion" value="restaurar">
+                                <%-- Campo oculto con el ID del producto a restaurar --%>
+                                <input type="hidden" name="id" value="<%= p.getIdProducto() %>">
+                                <%-- Botón que envía el formulario: llama a productoDAO.activar(id) en el controlador --%>
+                                <button type="submit" class="btn btn--restore">
+                                    <i class="fas fa-rotate-left"></i> Restaurar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+                <% } %>
+            </div>
+        </div>
+        <% } %>
+
     </main>
 
     <% if (esAdmin) { %>
@@ -250,8 +316,8 @@
             <div class="modal__icon"><i class="fas fa-trash"></i></div>
             <h3 class="modal__title">¿Eliminar producto?</h3>
             <p class="modal__msg">
-                Se eliminará <strong>"<%= p.getNombre() %>"</strong> de forma permanente.
-                Esta acción no se puede deshacer.
+                Se desactivará <strong>"<%= p.getNombre() %>"</strong> y dejará de aparecer en el catálogo.
+                Puedes restaurarlo desde la sección de productos desactivados.
             </p>
             <div class="modal__actions">
                 <form action="<%= ctx %>/ProductoControlador" method="post" style="display:inline">
